@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { NewsArticle } from "@/types/news";
+import { formatEtTimeShort } from "@/lib/date-utils";
 
 const CATEGORIES = ["economics", "markets", "consumers", "companies", "policy"] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -70,10 +71,7 @@ export function NewsBriefing({
         {dataFetchedAt ? (
           <p className="mt-1 text-xs text-[var(--faint)]">
             Updated{" "}
-            {new Date(dataFetchedAt).toLocaleTimeString(undefined, {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {formatEtTimeShort(new Date(dataFetchedAt))}
           </p>
         ) : null}
       </div>

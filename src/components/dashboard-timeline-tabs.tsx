@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { MarketEvent, WatchlistItem } from "@/types/database";
 import { filterUpcomingMarketEvents } from "@/lib/timeline-upcoming";
+import { formatEtTimeShort } from "@/lib/date-utils";
 import { TimelinePager } from "@/components/timeline-pager";
 
 type Tab = "macro" | "tickers";
@@ -60,10 +61,7 @@ export function DashboardTimelineTabs({
         {dataFetchedAt ? (
           <p className="mt-2 text-xs text-[var(--faint)]">
             Updated{" "}
-            {new Date(dataFetchedAt).toLocaleTimeString(undefined, {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {formatEtTimeShort(new Date(dataFetchedAt))}
           </p>
         ) : null}
       </div>

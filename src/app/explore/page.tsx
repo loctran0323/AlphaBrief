@@ -4,6 +4,7 @@ import { DashboardTimelineTabs } from "@/components/dashboard-timeline-tabs";
 import { NewsBriefing } from "@/components/news-briefing";
 import { getGuestTimelineEvents } from "@/lib/events";
 import { getNewsBriefing } from "@/lib/news";
+import { formatEtTimeShort } from "@/lib/date-utils";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import type { WatchlistItem } from "@/types/database";
@@ -67,11 +68,7 @@ export default async function ExplorePage() {
           <p className="mt-2 text-xs text-[var(--faint)]">
             Last fetch{" "}
             <span className="font-mono text-[var(--muted)]">
-              {new Date(fetchedAt).toLocaleTimeString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-              })}
+              {formatEtTimeShort(new Date(fetchedAt), { seconds: true })}
             </span>
             {" · "}
             guest · refreshes about every 5 min
