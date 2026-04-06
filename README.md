@@ -2,7 +2,7 @@
 
 A Next.js dashboard for retail investors: **watchlist**, **upcoming macro and ticker timeline**, **RSS news briefing** (with optional AI summaries), and a **sector → industry market map**. Auth and data live in **Supabase**; optional digests via **Resend**.
 
-**Example deployment:** [catalyst-markets.vercel.app](https://alpha-brief.vercel.app/) 
+**Example deployment:** [alpha-brief.vercel.app](https://alpha-brief.vercel.app/) 
 
 ## Features
 
