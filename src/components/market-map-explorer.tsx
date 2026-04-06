@@ -1,13 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   ResponsiveContainer,
   Tooltip,
   Treemap,
   type TreemapNode,
 } from "recharts";
-import type { MarketMapLeaf, MarketMapRoot, MarketMapSector } from "@/lib/market-map-data";
+import {
+  type MarketMapLeaf,
+  type MarketMapRoot,
+  type MarketMapSector,
+  treemapIndustryLabel,
+  treemapSectorLabel,
+} from "@/lib/market-map-data";
 import type { NewsArticle } from "@/types/news";
 import { AutoRefresh } from "@/components/auto-refresh";
 
@@ -101,6 +107,21 @@ function fitSvgLine(text: string, maxWidth: number, charPx = 7): string {
   return `${text.slice(0, Math.max(2, budget - 1))}…`;
 }
 
+/** Shrink font until label fits (no ellipsis on sector/industry names). */
+function fontSizeToFitLabel(
+  text: string,
+  maxInnerW: number,
+  maxInnerH: number,
+  maxFs: number,
+  minFs: number,
+): number {
+  for (let fs = Math.floor(maxFs * 2) / 2; fs >= minFs; fs -= 0.5) {
+    const estW = text.length * fs * 0.52 + 14;
+    if (estW <= maxInnerW && fs + 8 <= maxInnerH) return fs;
+  }
+  return minFs;
+}
+
 function IndustryLabelChip({
   x,
   y,
@@ -116,14 +137,17 @@ function IndustryLabelChip({
   text: string;
   fontSize: number;
 }) {
-  const padX = 7;
-  const padY = 5;
-  const chipH = Math.min(height - padY * 2, fontSize + 8);
-  const chipW = Math.max(24, Math.min(width - padX * 2, text.length * fontSize * 0.58 + padX * 2));
+  const padX = 6;
+  const padY = 4;
+  const innerW = Math.max(0, width - padX * 2);
+  const innerH = Math.max(0, height - padY * 2);
+  const fs = fontSizeToFitLabel(text, innerW - 14, innerH - 4, fontSize, 7);
+  const chipH = Math.min(innerH, Math.max(fs + 8, 18));
+  const estChipW = Math.min(innerW, Math.max(28, text.length * fs * 0.52 + 14));
+  const chipW = estChipW;
   const chipX = x + padX;
   const chipY = y + padY;
   const ty = chipY + chipH / 2;
-  const fs = Math.min(fontSize, chipH - 6);
   return (
     <g>
       <rect
@@ -137,7 +161,7 @@ function IndustryLabelChip({
         strokeWidth={1}
       />
       <text
-        x={chipX + 6}
+        x={chipX + 7}
         y={ty}
         textAnchor="start"
         dominantBaseline="middle"
@@ -154,28 +178,52 @@ function IndustryLabelChip({
 }
 
 function MapRect(props: TreemapNode & LeafPayload) {
+  const clipId = useId().replace(/:/g, "");
   const { x, y, width, height, name, depth } = props;
   const node = props;
   const pct = typeof node.changePct === "number" ? node.changePct : 0;
   const isLeaf = typeof node.symbol === "string" && node.symbol.length > 0;
   const { fill, stroke, strokeWidth } = rectAttrs(depth, isLeaf, pct);
 
-  const showLeaf = width > 40 && height > 22;
+  const innerPad = 2;
+  const clipW = Math.max(0, width - innerPad * 2);
+  const clipH = Math.max(0, height - innerPad * 2);
+
+  const showLeaf = width > 32 && height > 17;
   const cx = x + width / 2;
   const cy = y + height / 2;
-  const symFont = Math.min(20, Math.max(12, width / 4.2));
-  const pctFont = Math.max(11, symFont - 3);
+  const symFont = Math.min(17, Math.max(9, Math.min(width / 5, height / 2.9)));
+  const pctFont = Math.max(9, Math.min(symFont - 2, height * 0.24));
   const pctText = `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
+  const twoLineOk =
+    width >= 46 &&
+    height >= 52 &&
+    symFont * 0.9 + pctFont * 0.9 + 10 < height &&
+    width / symFont > 2.2;
 
-  const sectorBannerFs = Math.min(17, Math.max(11, width / 9));
-  const industryBannerFs = Math.min(14, Math.max(10, width / 11));
-  const rootBannerFs = Math.min(13, Math.max(10, width / 18));
+  const sectorShort = name && depth === 2 ? treemapSectorLabel(name).toUpperCase() : "";
+  const industryShort = name && depth === 3 ? treemapIndustryLabel(name) : "";
 
-  const sectorLine = name ? fitSvgLine(name.toUpperCase(), width, 6.2) : "";
-  const industryLine = name ? fitSvgLine(name, width, 6.8) : "";
+  const sectorBannerFs =
+    sectorShort.length > 0
+      ? Math.min(15, Math.max(7.5, Math.min(width / Math.max(sectorShort.length * 0.52, 2.5), height / 4.8)))
+      : Math.min(15, Math.max(9, Math.min(width / 10, height / 5)));
+  const industryBannerFs = Math.min(13, Math.max(8, Math.min(width / 8, height / 4.5)));
+  const rootBannerFs = Math.min(12, Math.max(9, width / 22));
+
+  const sectorLine = sectorShort;
+  const industryLine = industryShort;
+  const compactLeafLine = name
+    ? fitSvgLine(`${name} ${pctText}`, width - 10, Math.max(5.2, Math.min(6.8, width / 14)))
+    : "";
 
   return (
     <g>
+      <defs>
+        <clipPath id={clipId}>
+          <rect x={x + innerPad} y={y + innerPad} width={clipW} height={clipH} />
+        </clipPath>
+      </defs>
       <rect
         x={x}
         y={y}
@@ -186,98 +234,98 @@ function MapRect(props: TreemapNode & LeafPayload) {
         strokeWidth={strokeWidth}
         style={{ cursor: isLeaf ? "pointer" : "default" }}
       />
-      {showLeaf && isLeaf && (
-        <>
-          {height > 54 ? (
-            <>
+      <g clipPath={`url(#${clipId})`}>
+        {showLeaf && isLeaf && (
+          <>
+            {twoLineOk ? (
+              <>
+                <text
+                  x={cx}
+                  y={cy - symFont * 0.42}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#fafafa"
+                  fontSize={symFont}
+                  fontWeight={700}
+                  style={{ fontFamily: LABEL_FONT }}
+                  {...labelStrokeProps}
+                >
+                  {fitSvgLine(name, width - 10, Math.max(5.5, symFont * 0.42))}
+                </text>
+                <text
+                  x={cx}
+                  y={cy + symFont * 0.52}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="#f1f5f9"
+                  fontSize={pctFont}
+                  fontWeight={700}
+                  style={{ fontFamily: LABEL_FONT }}
+                  {...labelStrokeProps}
+                >
+                  {pctText}
+                </text>
+              </>
+            ) : (
               <text
                 x={cx}
-                y={cy - symFont * 0.45}
+                y={cy}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill="#fafafa"
-                fontSize={symFont}
+                fontSize={Math.min(symFont, 12)}
                 fontWeight={700}
                 style={{ fontFamily: LABEL_FONT }}
                 {...labelStrokeProps}
               >
-                {name}
+                {compactLeafLine}
               </text>
-              <text
-                x={cx}
-                y={cy + symFont * 0.55}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill="#f1f5f9"
-                fontSize={pctFont}
-                fontWeight={700}
-                style={{ fontFamily: LABEL_FONT }}
-                {...labelStrokeProps}
-              >
-                {pctText}
-              </text>
-            </>
-          ) : (
-            <text
-              x={cx}
-              y={cy}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="#fafafa"
-              fontSize={Math.min(symFont, 13)}
-              fontWeight={700}
-              style={{ fontFamily: LABEL_FONT }}
-              {...labelStrokeProps}
-            >
-              {`${name} ${pctText}`}
-            </text>
-          )}
-        </>
-      )}
-      {/* Finviz-style sector ribbon (depth 2): TECHNOLOGY, FINANCIALS, ENERGY, … */}
-      {!isLeaf && depth === 2 && sectorLine && width > 30 && height > 12 && (
-        <text
-          x={x + 7}
-          y={y + Math.min(15, height * 0.38)}
-          textAnchor="start"
-          dominantBaseline="middle"
-          fill="#e8edf5"
-          fontSize={sectorBannerFs}
-          fontWeight={800}
-          letterSpacing="0.06em"
-          style={{ fontFamily: LABEL_FONT }}
-          {...sectorLabelStroke}
-        >
-          {sectorLine}
-        </text>
-      )}
-      {!isLeaf && depth === 3 && industryLine && width > 28 && height > 11 && (
-        <IndustryLabelChip
-          x={x}
-          y={y}
-          width={width}
-          height={height}
-          text={industryLine}
-          fontSize={industryBannerFs}
-        />
-      )}
-      {/* Aggregate root label (depth 1) */}
-      {!isLeaf && depth === 1 && name && width > 100 && height > 24 && (
-        <text
-          x={x + 8}
-          y={y + 14}
-          textAnchor="start"
-          dominantBaseline="middle"
-          fill="rgba(248, 250, 252, 0.4)"
-          fontSize={rootBannerFs}
-          fontWeight={600}
-          letterSpacing="0.04em"
-          style={{ fontFamily: LABEL_FONT }}
-          {...labelStrokeProps}
-        >
-          {fitSvgLine(name.toUpperCase(), width, 5.5)}
-        </text>
-      )}
+            )}
+          </>
+        )}
+        {!isLeaf && depth === 2 && sectorLine && width > 28 && height > 11 && (
+          <text
+            x={x + 6}
+            y={y + Math.min(Math.max(sectorBannerFs * 0.55, 11), height * 0.42)}
+            textAnchor="start"
+            dominantBaseline="middle"
+            fill="#e8edf5"
+            fontSize={sectorBannerFs}
+            fontWeight={800}
+            letterSpacing="0.05em"
+            style={{ fontFamily: LABEL_FONT }}
+            {...sectorLabelStroke}
+          >
+            {sectorLine}
+          </text>
+        )}
+        {!isLeaf && depth === 3 && industryLine && width > 26 && height > 10 && (
+          <IndustryLabelChip
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            text={industryLine}
+            fontSize={industryBannerFs}
+          />
+        )}
+        {!isLeaf && depth === 1 && name && width > 88 && height > 22 && (
+          <text
+            x={x + 8}
+            y={y + 13}
+            textAnchor="start"
+            dominantBaseline="middle"
+            fill="rgba(248, 250, 252, 0.4)"
+            fontSize={rootBannerFs}
+            fontWeight={600}
+            letterSpacing="0.04em"
+            style={{ fontFamily: LABEL_FONT }}
+            {...labelStrokeProps}
+          >
+            LARGE CAPS
+          </text>
+        )}
+      </g>
     </g>
   );
 }
@@ -321,10 +369,11 @@ function MapTooltip({
   );
 }
 
-const ZOOM_MIN = 0.65;
-const ZOOM_MAX = 2.35;
-const ZOOM_STEP = 0.12;
-const BASE_CHART_PX = 560;
+/** Zoom range on top of a taller default canvas (~ old “235%” feel at 100%). */
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 3.6;
+const ZOOM_STEP = 0.1;
+const BASE_CHART_PX = Math.round(560 * 2.35);
 
 function MapViewToolbar({
   zoom,
@@ -498,7 +547,7 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
         : "text-rose-300"
       : "text-[var(--muted)]";
 
-  const embedScrollMax = "min(88vh, 960px)";
+  const embedScrollMax = "min(92vh, 1680px)";
 
   return (
     <div className="space-y-6">
@@ -507,9 +556,6 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--faint)]">Map</p>
         <h1 className="mt-1 text-2xl font-semibold text-white">Market map</h1>
-        <p className="mt-2 max-w-xl text-sm text-[var(--muted)]">
-          Quotes are delayed; not financial advice.
-        </p>
       </header>
 
       <div className="space-y-3">

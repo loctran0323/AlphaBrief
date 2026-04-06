@@ -4,29 +4,34 @@ import { createClient } from "@/lib/supabase/server";
 
 const features = [
   {
-    title: "Home market view (need account)",
+    title: "Home market snapshot (need account)",
     body:
-      "Live ETFs and indices, top gainers/losers and screeners, plus optional tickers to watch. Save your list to your account after you sign up.",
+      "ETFs, indices, top movers and screeners. Sign in to save a watchlist and wire tickers into the rest of the app.",
   },
   {
-    title: "Explore",
+    title: "Explore (guest)",
     body:
-      "Browse macro timeline and a news briefing as a guest. Heavier personalization and ticker-specific views unlock once you’re signed in.",
+      "Macro timeline and news briefing without an account. Sign in for watchlist tagging and the full dashboard.",
   },
   {
-    title: "Dashboard workspace",
+    title: "Dashboard",
     body:
-      "Full watchlist, upcoming catalysts (macro + your tickers), and richer news tabs — the main hub after you log in.",
+      "Watchlist, upcoming catalysts (macro + your tickers), news tabs, and ET-based “today” — main workspace after login.",
   },
   {
-    title: "Market map & drill-down",
+    title: "Market map",
     body:
-      "Sector → industry treemap sized by activity; hover for quotes, click a stock for headlines and a short read on why it might be moving.",
+      "Sector → industry treemap; click a name for headlines and a short “why it’s moving” read.",
   },
   {
-    title: "News with a take",
+    title: "News briefing",
     body:
-      "Headlines from RSS with summaries and a bullish, bearish, or neutral angle so you get context fast.",
+      "RSS headlines with summaries and bullish / bearish / neutral tags (plus rationale) for faster context.",
+  },
+  {
+    title: "Archive & settings",
+    body:
+      "Past timeline and headlines older than three days (no overlap with the live briefing). Settings for digest email when Resend is on.",
   },
 ] as const;
 
@@ -170,7 +175,7 @@ export default async function HomePage() {
                 </span>
               </>
             ) : (
-              <>What you can do with Catalyst — short overview.</>
+              <>Six things Catalyst does — quick tour below.</>
             )}
           </p>
         </div>

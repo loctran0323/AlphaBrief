@@ -195,7 +195,10 @@ export async function getArchivedNewsBriefing(params: {
     summarizeCap,
   );
 
-  return mapped.sort((a, b) => toTime(b.publishedAt) - toTime(a.publishedAt)).slice(0, limit);
+  return mapped
+    .filter((a) => isPublishedBeforeArchiveCutoff(a.publishedAt))
+    .sort((a, b) => toTime(b.publishedAt) - toTime(a.publishedAt))
+    .slice(0, limit);
 }
 
 /**
@@ -386,12 +389,12 @@ async function summarizeArticles(
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.2,
+        temperature: 0.12,
         messages: [
           {
             role: "system",
             content:
-              "For each headline, return one-sentence summary plus market impact recommendation. Return strict JSON object with key briefs: [{summary, marketImpact, rationale}] in same order. marketImpact must be bullish, bearish, or neutral.",
+              "For each headline, return JSON { briefs: [{summary, marketImpact, rationale}] } in the same order. marketImpact = how US large-cap / broad risk appetite likely reacts: bullish (tailwind for equities or easier financial conditions), bearish (headwind, risk-off), neutral only if truly balanced or idiosyncratic with no clear S&P read. Avoid labeling everything neutral—use headline tone (beats, surges, routs, layoffs, downgrades, probes). One sentence each for summary and rationale.",
           },
           { role: "user", content: input },
         ],
@@ -407,7 +410,7 @@ async function summarizeArticles(
     if (!raw) return items.map((item) => fallbackBrief(item));
     const parsed = JSON.parse(raw) as { briefs?: NewsBrief[] };
     if (!Array.isArray(parsed.briefs)) return items.map((item) => fallbackBrief(item));
-    return parsed.briefs.map((brief, idx) => normalizeBrief(brief, items[idx]));
+    return parsed.briefs.map((brief, idx) => normalizeBrief(brief, items[idx]!));
   } catch {
     return items.map((item) => fallbackBrief(item));
   }
@@ -419,11 +422,76 @@ function fallbackSummary(item: Pick<RssItem, "description" | "title">): string {
 
 function fallbackBrief(item: Pick<RssItem, "description" | "title">): NewsBrief {
   const impact = inferImpact(item);
-  return {
-    summary: fallbackSummary(item),
-    marketImpact: impact.marketImpact,
-    rationale: impact.rationale,
-  };
+  return reconcileLexicon(
+    {
+      summary: fallbackSummary(item),
+      marketImpact: impact.marketImpact,
+      rationale: impact.rationale,
+    },
+    item,
+  );
+}
+
+function headlinePricePressureBearish(blob: string): boolean {
+  const commodityOrCrypto =
+    /\b(gold|silver|oil|crude|wti|brent|bitcoin|btc|ethereum|natgas|natural\s+gas|copper)\b[\s\S]{0,140}\b(falls?|fell|drop(s|ped|ping)?|declin|slump(s|ed)?|tumble[sd]?|plunge[sd]?|weakens?)\b/i.test(
+      blob,
+    ) ||
+    /\b(falls?|fell|drop(s|ped|ping)?|declin|slump(s|ed)?|tumble[sd]?|plunge[sd]?)\b[\s\S]{0,100}\b(gold|silver|oil|crude|bitcoin|btc|ethereum)\b/i.test(
+      blob,
+    );
+  const equities =
+    /\b(stocks?|shares|equities|s\s*&\s*p|s&p|nasdaq|dow(\s+jones)?)\b[\s\S]{0,120}\b(fall|falls|fell|drop|plunge|selloff|rout|tumble[sd]?)\b/i.test(
+      blob,
+    );
+  return commodityOrCrypto || equities;
+}
+
+function reconcileLexicon(brief: NewsBrief, item: Pick<RssItem, "description" | "title">): NewsBrief {
+  const lex = inferImpact(item);
+  const blob = `${item.title} ${item.description}`;
+
+  if (headlinePricePressureBearish(blob)) {
+    return {
+      ...brief,
+      marketImpact: "bearish",
+      rationale:
+        "Headline centers on falling prices (commodity/equity), not a clean risk-on signal for broad markets.",
+    };
+  }
+
+  const strongBear =
+    /\b(rout|plunge|crash|layoff|layoffs|fraud|default|selloff|warning|probe|investigation|scandal|slump|recession|bankrupt|downgrade|cuts?\s+jobs|job\s+cuts)\b/i.test(
+      blob,
+    );
+  const strongBull =
+    /\b(beat(s)?\s+estimates|soar(s|ed)?|surge[sd]?|rall(y|ies)|record\s+high|upgrade(d)?|strong\s+growth|profit\s+jump|raises?\s+guidance)\b/i.test(
+      blob,
+    );
+  if (brief.marketImpact === "neutral" && lex.marketImpact !== "neutral") {
+    return { ...brief, marketImpact: lex.marketImpact, rationale: lex.rationale };
+  }
+  if (brief.marketImpact === "neutral" && strongBear) {
+    return {
+      ...brief,
+      marketImpact: "bearish",
+      rationale: "Headline skews negative for risk appetite or corporate fundamentals.",
+    };
+  }
+  if (brief.marketImpact === "neutral" && strongBull) {
+    return {
+      ...brief,
+      marketImpact: "bullish",
+      rationale: "Headline skews positive for risk assets or financial conditions.",
+    };
+  }
+  if (strongBear && brief.marketImpact === "bullish") {
+    return { ...brief, marketImpact: "bearish", rationale: lex.rationale };
+  }
+  if (strongBull && brief.marketImpact === "bearish") {
+    return { ...brief, marketImpact: "bullish", rationale: lex.rationale };
+  }
+  return brief;
 }
 
 function normalizeBrief(
@@ -437,11 +505,12 @@ function normalizeBrief(
     brief.marketImpact === "neutral"
       ? brief.marketImpact
       : fallback.marketImpact;
-  return {
+  const merged: NewsBrief = {
     summary: sanitizePlainText((brief.summary ?? fallback.summary).trim(), 220),
     marketImpact: impact,
     rationale: sanitizePlainText((brief.rationale ?? fallback.rationale).trim(), 200),
   };
+  return reconcileLexicon(merged, item);
 }
 
 function inferImpact(item: Pick<RssItem, "description" | "title">): {
@@ -449,25 +518,68 @@ function inferImpact(item: Pick<RssItem, "description" | "title">): {
   rationale: string;
 } {
   const blob = `${item.title} ${item.description}`.toLowerCase();
-  const bullishTerms = ["beats", "surge", "growth", "rally", "upgrade", "cooling inflation"];
-  const bearishTerms = ["misses", "cuts", "downgrade", "selloff", "layoffs", "hot inflation"];
+  const bullishTerms = [
+    "beat expectations",
+    "beats estimates",
+    "surge",
+    "soar",
+    "rally",
+    "record high",
+    "upgrade",
+    "strong earnings",
+    "profit jump",
+    "raises guidance",
+    "cooling inflation",
+    "rate cut",
+    "cuts rates",
+    "deal closed",
+    "merger approved",
+    "breakthrough",
+    "expansion",
+    "growth accelerat",
+  ];
+  const bearishTerms = [
+    "miss estimates",
+    "misses estimates",
+    "downgrade",
+    "selloff",
+    "layoff",
+    "layoffs",
+    "job cuts",
+    "warning",
+    "probe",
+    "investigation",
+    "fraud",
+    "default",
+    "bankrupt",
+    "recession",
+    "plunge",
+    "rout",
+    "crash",
+    "tariff",
+    "sanction",
+    "hot inflation",
+    "hawkish",
+    "rate hike",
+    "raises rates",
+  ];
   const bullScore = bullishTerms.reduce((acc, t) => acc + Number(blob.includes(t)), 0);
   const bearScore = bearishTerms.reduce((acc, t) => acc + Number(blob.includes(t)), 0);
   if (bullScore > bearScore) {
     return {
       marketImpact: "bullish",
-      rationale: "Tone appears risk-on; this may support equities in related sectors.",
+      rationale: "Headline skews positive for risk assets or financial conditions.",
     };
   }
   if (bearScore > bullScore) {
     return {
       marketImpact: "bearish",
-      rationale: "Tone appears risk-off; this could pressure valuations near-term.",
+      rationale: "Headline skews negative for risk appetite or corporate fundamentals.",
     };
   }
   return {
     marketImpact: "neutral",
-    rationale: "Likely mixed market impact until more data confirms direction.",
+    rationale: "Mixed or company-specific read without a clear broad-market tilt.",
   };
 }
 

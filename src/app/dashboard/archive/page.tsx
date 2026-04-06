@@ -91,8 +91,8 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
               Past data
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">
-              Past timeline and headlines that no longer show on the main dashboard, usually about 3–30 days
-              back.
+              Past timeline and archived news only (headlines older than three days — nothing from the live
+              briefing window). Pick dates below; roughly 3–30 days back.
             </p>
           </div>
           <Link

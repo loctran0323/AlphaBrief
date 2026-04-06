@@ -23,6 +23,52 @@ export type MarketMapRoot = {
   children: MarketMapSector[];
 };
 
+/** Treemap ribbon labels — short enough to avoid mid-word “…” truncation. */
+const SECTOR_TREEMAP_LABEL: Record<string, string> = {
+  Technology: "Tech",
+  Communications: "Comm",
+  Consumer: "Cons",
+  Staples: "Staples",
+  Healthcare: "Health",
+  Financials: "Fin",
+  Energy: "Energy",
+  Industrials: "Indust",
+  Materials: "Matls",
+  Utilities: "Utils",
+};
+
+const INDUSTRY_TREEMAP_LABEL: Record<string, string> = {
+  Semiconductors: "Semis",
+  Software: "Software",
+  "Hardware & IT services": "HW & IT",
+  "Internet & media": "Media",
+  Telecom: "Telco",
+  "E‑commerce & autos": "E-com & EV",
+  "Retail & dining": "Retail",
+  "Household & food": "Household",
+  Tobacco: "Tobacco",
+  "Managed care & tools": "Mgd care",
+  "Pharma & biotech": "Pharma",
+  Banks: "Banks",
+  "Capital markets": "Cap mkts",
+  "Integrated & E&P": "Oil & E&P",
+  "Oilfield & refining": "Oilfield",
+  "Machinery & transport": "Machinery",
+  "Chemicals & mining": "Chemicals",
+  "Regulated utilities": "Utilities",
+};
+
+export function treemapSectorLabel(name: string): string {
+  return SECTOR_TREEMAP_LABEL[name] ?? name;
+}
+
+export function treemapIndustryLabel(name: string): string {
+  if (INDUSTRY_TREEMAP_LABEL[name]) return INDUSTRY_TREEMAP_LABEL[name]!;
+  const parts = name.split(/[\s&‑-]+/).filter(Boolean);
+  if (parts.length <= 2) return name;
+  return parts.map((p) => p[0]!.toUpperCase()).join("");
+}
+
 export const YAHOO_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 

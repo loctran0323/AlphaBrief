@@ -1,4 +1,5 @@
 import type { MarketEvent } from "@/types/database";
+import { NEWS_VISIBLE_MAX_AGE_MS } from "@/lib/news";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -51,11 +52,13 @@ export function utcDayEndMs(ms: number): number {
 export function defaultArchiveBounds(nowMs = Date.now()): ArchiveSectionBounds {
   const end = Math.min(nowMs, utcDayEndMs(nowMs));
   const start = utcDayStartMs(nowMs - ARCHIVE_NEWS_MAX_LOOKBACK_MS);
+  /** Archived news must be older than main briefing (no overlap with last 3 days). */
+  const newsEnd = Math.max(0, nowMs - NEWS_VISIBLE_MAX_AGE_MS - 1);
   return {
     eventsFromMs: start,
     eventsToMs: end,
     newsFromMs: start,
-    newsToMs: end,
+    newsToMs: newsEnd,
   };
 }
 
@@ -79,8 +82,9 @@ export function parseArchiveSearchParams(
   let newsToMs = parseYmdBound(str("newsTo"), "end", def.newsToMs);
 
   const rssStart = utcDayStartMs(nowMs - ARCHIVE_NEWS_MAX_LOOKBACK_MS);
-  newsFromMs = Math.max(rssStart, Math.min(newsFromMs, nowMs));
-  newsToMs = Math.max(rssStart, Math.min(newsToMs, nowMs));
+  const newsLatest = Math.max(0, nowMs - NEWS_VISIBLE_MAX_AGE_MS - 1);
+  newsFromMs = Math.max(rssStart, Math.min(newsFromMs, newsLatest));
+  newsToMs = Math.max(rssStart, Math.min(newsToMs, newsLatest));
   if (newsFromMs > newsToMs) [newsFromMs, newsToMs] = [newsToMs, newsFromMs];
 
   eventsFromMs = Math.min(eventsFromMs, nowMs);
