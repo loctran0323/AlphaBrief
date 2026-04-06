@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const features = [
   {
-    title: "Home market snapshot (need account)",
+    title: "Home market view (need account)",
     body:
       "ETFs, indices, top movers and screeners. Sign in to save a watchlist and wire tickers into the rest of the app.",
   },
