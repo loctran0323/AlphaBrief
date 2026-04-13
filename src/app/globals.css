@@ -1,19 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080b10;
-  --foreground: #f0f3f7;
-  /* Secondary text: light enough to read on dark blue-gray (not mud-on-mud). */
-  --muted: #aab8c6;
-  --faint: #6f8296;
-  --card: #101722;
-  --border: #2a3548;
-  --surface: #151d2e;
-  --surface-highlight: #1a2538;
-  --accent: #5b9fff;
-  --accent-muted: #3b7ae0;
-  --success: #34d399;
-  --warning: #fbbf24;
+  --background: #F9FAFB;
+  --foreground: #111827;
+  --muted: #6B7280;
+  --faint: #9CA3AF;
+  --card: #FFFFFF;
+  --border: #E5E7EB;
+  --surface: #F3F4F6;
+  --surface-highlight: #EDE9FE;
+  --accent: #6C5CE7;
+  --accent-muted: #5B4FD4;
+  --success: #059669;
+  --warning: #D97706;
+  /* Brand purple — used on splash/auth/app */
+  --brand: #6C5CE7;
+  --brand-light: #EDE9FE;
 }
 
 @theme inline {
@@ -27,10 +29,4 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  /* Soft color in the background so the page isn’t flat black. */
-  background-image:
-    radial-gradient(ellipse 120% 80% at 15% -15%, rgba(91, 159, 255, 0.12), transparent 55%),
-    radial-gradient(ellipse 90% 60% at 85% 0%, rgba(139, 92, 246, 0.07), transparent 50%),
-    radial-gradient(ellipse 100% 100% at 50% 100%, rgba(15, 23, 42, 0.5), transparent 60%);
-  background-attachment: fixed;
 }
