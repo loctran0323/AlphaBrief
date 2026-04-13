@@ -21,12 +21,12 @@ const features = [
   {
     icon: "🗺️",
     title: "Market map",
-    body: "Sector \u2192 industry treemap; click a name for headlines and a short \"why it's moving\" brief.",
+    body: 'Heat map that allows you to click a name for headlines and a short "why it\'s moving" brief.',
   },
   {
     icon: "📰",
     title: "News briefing",
-    body: "RSS headlines with summaries and bullish / bearish / neutral tags plus rationale for faster context.",
+    body: "Headlines with summaries and bullish / bearish / neutral tags plus rationale for faster context.",
   },
   {
     icon: "🗄️",
