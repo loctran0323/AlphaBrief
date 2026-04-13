@@ -77,8 +77,8 @@ export default async function HomePage() {
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
           Market snapshot
         </h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
-          ETFs, top movers, and your watchlist — all in one view. Catalysts and news live on the dashboard.
+        <p className="mt-3 max-w-full text-sm leading-relaxed text-[var(--muted)] whitespace-nowrap overflow-x-auto [scrollbar-width:thin]">
+          ETFs, top movers, and your watchlist all in one view. Catalysts and news live on the dashboard.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
