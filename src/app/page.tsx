@@ -6,17 +6,17 @@ const features = [
   {
     icon: "📈",
     title: "Home market view",
-    body: "ETFs, indices, top movers and screeners. Sign in to save a watchlist and wire tickers into the rest of the app.",
+    body: "ETFs, indices, top movers and screeners. Sign in to save a watchlist and tickers of companies.",
   },
   {
     icon: "🔭",
     title: "Explore (no login needed)",
-    body: "Macro timeline and news briefing without an account. Sign in for watchlist tagging and the full dashboard.",
+    body: "Macro timeline and news briefing without an account. Sign in for full access.",
   },
   {
     icon: "⚡",
     title: "Dashboard",
-    body: 'Watchlist, upcoming catalysts, news tabs, and ET-based "today" — your main workspace after login.',
+    body: "Watchlist, upcoming catalysts and news tabs. Your main workspace after login.",
   },
   {
     icon: "🗺️",
