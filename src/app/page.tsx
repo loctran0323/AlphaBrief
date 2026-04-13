@@ -289,7 +289,12 @@ export default async function HomePage() {
             </div>
             <span className="font-bold text-white">Alpha Brief</span>
           </div>
-          <p className="text-sm text-gray-400">Your alpha, briefly.</p>
+          <Link
+            href="/legal"
+            className="text-sm text-gray-400 transition hover:text-white"
+          >
+            Privacy and terms
+          </Link>
         </div>
       </footer>
     </div>

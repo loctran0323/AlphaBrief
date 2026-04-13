@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none">
+  <rect x="0" y="4" width="56" height="56" rx="12" fill="#6C5CE7"/>
+  <path d="M31 16L18.5 34H27L27 48L39.5 30H31L31 16Z" fill="white"/>
+  <text x="72" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif" font-size="28" font-weight="700" fill="#111827" letter-spacing="-0.5">Alpha Brief</text>
+</svg>
