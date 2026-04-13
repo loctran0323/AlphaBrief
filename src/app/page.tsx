@@ -31,7 +31,7 @@ const features = [
   {
     icon: "🗄️",
     title: "Archive & settings",
-    body: "Past timeline and headlines older than three days. Settings for digest email when Resend is on.",
+    body: "Past timeline and headlines older than three days. Settings for digest emails to keep up with markets.",
   },
 ] as const;
 
