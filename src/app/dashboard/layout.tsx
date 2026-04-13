@@ -49,7 +49,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen">
       <AppNav email={user.email ?? undefined} signedIn />
-      <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
+      <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
     </div>
   );
 }

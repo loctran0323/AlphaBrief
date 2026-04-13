@@ -10,19 +10,29 @@ export function AuthShell({
   subtitle?: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#1a2332_0%,_transparent_55%)]" />
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-        <Link
-          href="/"
-          className="mb-6 text-sm text-[var(--muted)] transition hover:text-white"
-        >
-          ← Alpha Brief
-        </Link>
-        <div className="rounded-2xl border border-white/[0.12] bg-[var(--card)]/85 p-8 shadow-xl shadow-black/25 backdrop-blur-md">
-          <h1 className="text-3xl font-extralight tracking-tight text-white">{title}</h1>
-          {subtitle && <div className="mt-3 text-sm text-[var(--muted)]">{subtitle}</div>}
-          <div className="mt-8">{children}</div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="border-b border-gray-100 bg-white px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
+              <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+              </svg>
+            </div>
+            <span className="text-base font-bold text-gray-900">Alpha Brief</span>
+          </Link>
+        </div>
+      </header>
+
+      <div className="flex min-h-[calc(100vh-65px)] items-center justify-center px-6 py-16">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+            <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+            {subtitle && (
+              <div className="mt-2 text-sm text-gray-500">{subtitle}</div>
+            )}
+            <div className="mt-6">{children}</div>
+          </div>
         </div>
       </div>
     </div>

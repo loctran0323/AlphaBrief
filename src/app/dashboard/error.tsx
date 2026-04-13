@@ -16,7 +16,7 @@ export default function DashboardError({
 
   return (
     <div className="mx-auto max-w-lg rounded-xl border border-red-500/40 bg-red-500/10 px-6 py-8 text-center">
-      <h2 className="text-lg font-semibold text-red-100">Something went wrong</h2>
+      <h2 className="text-lg font-semibold text-red-700">Something went wrong</h2>
       <p className="mt-2 text-sm text-[var(--muted)]">
         {error.message || "Unexpected error on the dashboard."}
       </p>
@@ -28,7 +28,7 @@ export default function DashboardError({
         >
           Try again
         </button>
-        <Link href="/" className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-white">
+        <Link href="/" className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)]">
           Home
         </Link>
       </div>

@@ -9,7 +9,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     return (
       <div className="min-h-screen">
         <AppNav signedIn={false} />
-        <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
+        <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
       </div>
     );
   }
@@ -36,7 +36,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen">
       <AppNav email={user?.email ?? undefined} signedIn={Boolean(user)} />
-      <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
+      <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
     </div>
   );
 }
