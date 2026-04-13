@@ -22,7 +22,7 @@ export function WatchlistPanel({
         />
         <button
           type="submit"
-          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#0b1220] transition hover:bg-[var(--accent-muted)]"
+          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
         >
           Add
         </button>
@@ -44,7 +44,7 @@ export function WatchlistPanel({
                 <input type="hidden" name="item_id" value={item.id} />
                 <button
                   type="submit"
-                  className="rounded-r-full px-2 py-1 text-[var(--faint)] transition hover:bg-white/5 hover:text-rose-300"
+                  className="rounded-r-full px-2 py-1 text-[var(--faint)] transition hover:bg-red-50 hover:text-red-600"
                   aria-label={`Remove ${item.ticker}`}
                 >
                   ×

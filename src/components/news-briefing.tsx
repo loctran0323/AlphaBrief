@@ -17,19 +17,19 @@ const categoryLabel: Record<Category, string> = {
 };
 
 function impactBarClass(impact: NewsArticle["marketImpact"]): string {
-  if (impact === "bullish") return "bg-emerald-400";
+  if (impact === "bullish") return "bg-emerald-500";
   if (impact === "bearish") return "bg-rose-500";
   return "bg-amber-400";
 }
 
 function impactBadgeClass(impact: NewsArticle["marketImpact"]): string {
   if (impact === "bullish") {
-    return "border-emerald-400/40 bg-emerald-500/15 text-emerald-100";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
   if (impact === "bearish") {
-    return "border-rose-400/40 bg-rose-500/15 text-rose-100";
+    return "border-rose-200 bg-rose-50 text-rose-700";
   }
-  return "border-amber-400/50 bg-amber-500/15 text-amber-100";
+  return "border-amber-200 bg-amber-50 text-amber-700";
 }
 
 export function NewsBriefing({

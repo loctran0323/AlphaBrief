@@ -7,18 +7,18 @@ const typeStyles: Record<
   { bar: string; badge: string; label: string }
 > = {
   macro: {
-    bar: "bg-sky-400",
-    badge: "border-sky-400/35 bg-sky-500/15 text-sky-100",
+    bar: "bg-sky-500",
+    badge: "border-sky-200 bg-sky-50 text-sky-700",
     label: "Macro",
   },
   earnings: {
-    bar: "bg-violet-400",
-    badge: "border-violet-400/35 bg-violet-500/15 text-violet-100",
+    bar: "bg-violet-500",
+    badge: "border-violet-200 bg-violet-50 text-violet-700",
     label: "Earnings",
   },
   catalyst: {
-    bar: "bg-amber-400",
-    badge: "border-amber-400/35 bg-amber-500/12 text-amber-100",
+    bar: "bg-amber-500",
+    badge: "border-amber-200 bg-amber-50 text-amber-700",
     label: "Key event",
   },
 };

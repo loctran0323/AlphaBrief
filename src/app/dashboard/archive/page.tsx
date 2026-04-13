@@ -26,14 +26,10 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   const supabase = await createClient();
 
   const { data: watchlists, error: wErr } = await supabase
-    .from("watchlists")
-    .select("id, name")
-    .order("created_at", { ascending: true })
-    .limit(1);
+    .from("watchlists").select("id, name")
+    .order("created_at", { ascending: true }).limit(1);
 
-  if (wErr) {
-    return <DashboardQueryError context="Loading watchlists" err={wErr} />;
-  }
+  if (wErr) return <DashboardQueryError context="Loading watchlists" err={wErr} />;
 
   const watchlist = watchlists?.[0];
   if (!watchlist) {
@@ -45,14 +41,11 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   }
 
   const { data: items, error: iErr } = await supabase
-    .from("watchlist_items")
-    .select("*")
+    .from("watchlist_items").select("*")
     .eq("watchlist_id", watchlist.id)
     .order("created_at", { ascending: true });
 
-  if (iErr) {
-    return <DashboardQueryError context="Loading watchlist tickers" err={iErr} />;
-  }
+  if (iErr) return <DashboardQueryError context="Loading watchlist tickers" err={iErr} />;
 
   const tickers = (items ?? []).map((i) => i.ticker);
 
@@ -64,14 +57,8 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
     return <DashboardQueryError context="Loading past timeline" err={err} />;
   }
 
-  const pastEvents = filterEventsByEventDateRange(
-    pastEventsAll,
-    bounds.eventsFromMs,
-    bounds.eventsToMs,
-  );
-
+  const pastEvents = filterEventsByEventDateRange(pastEventsAll, bounds.eventsFromMs, bounds.eventsToMs);
   const readMoreUrlsByEventId = await fetchReadMoreUrlsWithConcurrency(pastEvents, 4);
-
   const archivedNews = await getArchivedNewsBriefing({
     tickers,
     limit: 200,
@@ -80,30 +67,50 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   });
 
   return (
-    <div className="mx-auto max-w-4xl pb-12">
+    <div className="mx-auto max-w-4xl pb-16">
       <AutoRefresh everyMs={300000} />
 
-      <div className="divide-y divide-[var(--border)]">
-        <header className="flex flex-wrap items-start justify-between gap-4 pb-8">
+      {/* ── Page header ── */}
+      <header className="border-b border-[var(--border)] pb-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--faint)]">Archive</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Archive</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
               Past data
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted)]">
-              Past timeline and archived news only (headlines older than three days — nothing from the live
-              briefing window). Pick dates below; roughly 3–30 days back.
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
+              Past timeline and archived headlines — nothing from the live briefing window.
+              Pick a date range below; roughly 3–30 days back.
             </p>
           </div>
           <Link
             href="/dashboard"
-            className="shrink-0 text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-muted)]"
+            className="shrink-0 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]/50"
           >
             ← Dashboard
           </Link>
-        </header>
+        </div>
 
-        <div className="py-8">
+        {/* Stat chips */}
+        <div className="mt-5 flex flex-wrap gap-3">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
+            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{pastEvents.length}</p>
+            <p className="mt-0.5 text-xs text-[var(--muted)]">past events</p>
+          </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
+            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{archivedNews.length}</p>
+            <p className="mt-0.5 text-xs text-[var(--muted)]">archived headlines</p>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Date range toolbar ── */}
+      <section className="border-b border-[var(--border)] py-8">
+        <div className="mb-5">
+          <h2 className="text-lg font-bold text-[var(--foreground)]">Date range</h2>
+          <p className="mt-1 text-sm text-[var(--muted)]">Narrow events and news independently, then apply.</p>
+        </div>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
           <ArchiveDateToolbar
             key={`${bounds.eventsFromMs}-${bounds.eventsToMs}-${bounds.newsFromMs}-${bounds.newsToMs}`}
             eventsFromYmd={toYmdUtc(bounds.eventsFromMs)}
@@ -112,28 +119,29 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
             newsToYmd={toYmdUtc(bounds.newsToMs)}
           />
         </div>
+      </section>
 
-        <section className="space-y-6 py-8 pt-2">
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-white/[0.06] sm:p-7">
-            <DashboardTimelineTabs
-              events={pastEvents}
-              watchlistItems={items ?? []}
-              perPage={2}
-              pastArchiveMode
-              sectionTitle="Past timeline"
-              readMoreUrlsByEventId={readMoreUrlsByEventId}
-            />
-          </div>
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-white/[0.06] sm:p-7">
-            <NewsBriefing
-              title="Archived news"
-              articles={archivedNews}
-              itemsPerPage={2}
-              emptyHintTickers="No watchlist-tagged headlines in this range. Try All, widen dates, or check back later."
-            />
-          </div>
-        </section>
-      </div>
+      {/* ── Timeline & News ── */}
+      <section className="space-y-5 pt-8">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
+          <DashboardTimelineTabs
+            events={pastEvents}
+            watchlistItems={items ?? []}
+            perPage={2}
+            pastArchiveMode
+            sectionTitle="Past timeline"
+            readMoreUrlsByEventId={readMoreUrlsByEventId}
+          />
+        </div>
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
+          <NewsBriefing
+            title="Archived news"
+            articles={archivedNews}
+            itemsPerPage={2}
+            emptyHintTickers="No watchlist-tagged headlines in this range. Try All, widen dates, or check back later."
+          />
+        </div>
+      </section>
     </div>
   );
 }
