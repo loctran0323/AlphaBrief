@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
   title: "Alpha Brief — watchlist, timeline & market news",
   description: siteDescription,
+  icons: {
+    icon: "/alpha-brief-icon.svg",
+    shortcut: "/alpha-brief-icon.svg",
+    apple: "/alpha-brief-icon.svg",
+  },
   openGraph: {
     title: "Alpha Brief — watchlist, timeline & market news",
     description: siteDescription,
