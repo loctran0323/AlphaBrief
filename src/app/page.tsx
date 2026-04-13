@@ -178,8 +178,7 @@ export default async function HomePage() {
                 briefly.
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-gray-500">
-                Signal first, noise last. Macro and ticker timeline, RSS news with bullish / bearish
-                takes, sector map — all in one brief.
+                Signal first, noise last.
               </p>
 
               {configured ? (
@@ -224,7 +223,7 @@ export default async function HomePage() {
               )}
 
               <p className="mt-5 text-xs text-gray-400">
-                Recently rebranded from Catalyst — same app, new name.
+                Recently rebranded from Catalyst to Alpha Brief — same app, new name.
               </p>
             </div>
           </div>

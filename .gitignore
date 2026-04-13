@@ -22,6 +22,9 @@
 .DS_Store
 *.pem
 
+# Claude Code local worktrees (duplicate tree; may contain .env.local / .next — do not commit)
+.claude/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
