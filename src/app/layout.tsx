@@ -22,8 +22,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
   title: "Alpha Brief — watchlist, timeline & market news",
-  description:
-    "Your alpha, briefly: macro and ticker timeline, RSS news with market takes, sector map, optional digests — built around your watchlist.",
+  description: "Signal first, noise last.",
 };
 
 export default function RootLayout({
