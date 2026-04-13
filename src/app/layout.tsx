@@ -19,10 +19,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteDescription = "Signal first, noise last.";
+
 export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
   title: "Alpha Brief — watchlist, timeline & market news",
-  description: "Signal first, noise last.",
+  description: siteDescription,
+  openGraph: {
+    title: "Alpha Brief — watchlist, timeline & market news",
+    description: siteDescription,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alpha Brief — watchlist, timeline & market news",
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({
