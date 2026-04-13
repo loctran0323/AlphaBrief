@@ -4,32 +4,26 @@ import { createClient } from "@/lib/supabase/server";
 
 const features = [
   {
-    icon: "📈",
     title: "Home market view",
     body: "ETFs, indices, top movers and screeners. Sign in to save a watchlist and tickers of companies.",
   },
   {
-    icon: "🔭",
     title: "Explore (no login needed)",
     body: "Macro timeline and news briefing without an account. Sign in for full access.",
   },
   {
-    icon: "⚡",
     title: "Dashboard",
     body: "Watchlist, upcoming catalysts and news tabs. Your main workspace after login.",
   },
   {
-    icon: "🗺️",
     title: "Market map",
     body: 'Heat map that allows you to click a name for headlines and a short "why it\'s moving" brief.',
   },
   {
-    icon: "📰",
     title: "News briefing",
     body: "Headlines with summaries and bullish / bearish / neutral tags plus rationale for faster context.",
   },
   {
-    icon: "🗄️",
     title: "Archive & settings",
     body: "Past timeline and headlines older than three days. Settings for digest email.",
   },
@@ -246,8 +240,7 @@ export default async function HomePage() {
                   key={f.title}
                   className="rounded-xl border border-gray-200 bg-white p-6 text-left"
                 >
-                  <span className="text-2xl">{f.icon}</span>
-                  <h3 className="mt-3 font-semibold text-gray-900">{f.title}</h3>
+                  <h3 className="font-semibold text-gray-900">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-gray-500">{f.body}</p>
                 </li>
               ))}
