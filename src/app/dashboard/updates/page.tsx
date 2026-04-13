@@ -11,13 +11,16 @@ const UPDATE_GROUPS: { period: string; bullets: string[] }[] = [
   {
     period: "April 2026",
     bullets: [
-      "Recently rebranded from Catalyst to Alpha Brief — same product, new name and site URL.",
+      "Recently rebranded from Catalyst to Alpha Brief — same product, new name and site URL (alpha-brief.vercel.app).",
+      "Light marketing splash: sticky header with logo, hero (Your alpha + sparkle + briefly), What's inside feature grid, bottom CTA, and footer.",
+      "Hero tagline and default meta description are just “Signal first, noise last.” — Open Graph and Twitter previews use the same line.",
+      "Landing feature cards: tighter Home / Explore / Dashboard blurbs; Market map described as a clickable heat map; News briefing says “Headlines…” instead of “RSS headlines…”.",
+      "Market map screen: removed the duplicate subtitle under the page title; the gray instruction callout above the map stays.",
       "Market map: larger default view, zoom range, clipped labels, short sector/industry names.",
       "Macro timeline: fewer duplicate events, Eastern-time dates, tier-1 releases only.",
       "News tags: better bullish / bearish / neutral classification.",
       "Archive news: only items older than three days so it doesn't overlap the live briefing.",
       'Dashboard dates and "Updated" times use US Eastern (ET).',
-      "Splash page: six feature cards with clearer copy.",
     ],
   },
   {
