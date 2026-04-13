@@ -558,9 +558,6 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
           Market map
         </h1>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Sector → industry treemap. Click any stock for headlines and a read on why it&apos;s moving.
-        </p>
       </header>
 
       <div className="mt-8 space-y-4">
