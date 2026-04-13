@@ -37,6 +37,9 @@ export function AppNav({
               <Link href="/dashboard/updates" className="text-gray-500 transition hover:text-gray-900">
                 Updates
               </Link>
+              <Link href="/dashboard/settings" className="text-gray-500 transition hover:text-gray-900">
+                Settings
+              </Link>
               {email && (
                 <span className="hidden text-gray-400 sm:inline text-xs">{email}</span>
               )}
