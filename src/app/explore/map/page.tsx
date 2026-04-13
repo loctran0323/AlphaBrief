@@ -5,14 +5,14 @@ import { fetchMarketMapTree } from "@/lib/market-map-data";
 export default async function ExploreMapPage() {
   const tree = await fetchMarketMapTree();
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-[var(--muted)]">
+    <div>
+      <div className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--surface-highlight)] px-5 py-3 text-sm text-[var(--muted)]">
         Same map as signed-in users.{" "}
-        <Link href="/signup" className="text-[var(--accent)] hover:underline">
+        <Link href="/signup" className="font-medium text-[var(--accent)] hover:underline">
           Sign up
         </Link>{" "}
-        to save a watchlist on your dashboard.
-      </p>
+        to save a watchlist and access the full dashboard.
+      </div>
       <MarketMapExplorer tree={tree} />
     </div>
   );

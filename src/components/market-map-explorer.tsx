@@ -342,14 +342,14 @@ function MapTooltip({
   if (!p.symbol) {
     return (
       <div className="max-w-xs rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--foreground)] shadow-lg">
-        <span className="font-semibold text-white">{p.name}</span>
+        <span className="font-semibold text-white/90">{p.name}</span>
         <p className="mt-1 text-[var(--muted)]">Sector or industry group</p>
       </div>
     );
   }
   return (
     <div className="max-w-xs rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--foreground)] shadow-lg">
-      <div className="font-semibold text-white">{p.shortName ?? p.symbol}</div>
+      <div className="font-semibold text-white/90">{p.shortName ?? p.symbol}</div>
       <div className="text-[var(--muted)]">{p.symbol}</div>
       <div className="mt-1 font-medium">
         {typeof p.changePct === "number" ? (
@@ -391,16 +391,16 @@ function MapViewToolbar({
   onToggleFullscreen: () => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-3">
+    <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] pb-3">
       <span className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
         Map view
       </span>
-      <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-black/20 p-0.5">
+      <div className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5">
         <button
           type="button"
           aria-label="Zoom out"
           onClick={onZoomOut}
-          className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
+          className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--border)] disabled:cursor-not-allowed disabled:opacity-35"
           disabled={zoom <= ZOOM_MIN + 0.01}
         >
           −
@@ -412,7 +412,7 @@ function MapViewToolbar({
           type="button"
           aria-label="Zoom in"
           onClick={onZoomIn}
-          className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35"
+          className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--border)] disabled:cursor-not-allowed disabled:opacity-35"
           disabled={zoom >= ZOOM_MAX - 0.01}
         >
           +
@@ -421,7 +421,7 @@ function MapViewToolbar({
       <button
         type="button"
         onClick={onResetZoom}
-        className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:border-white/20 hover:text-white"
+        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
       >
         Reset
       </button>
@@ -543,8 +543,8 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
   const moveColor =
     selected && typeof selected.changePct === "number"
       ? selected.changePct >= 0
-        ? "text-emerald-300"
-        : "text-rose-300"
+        ? "text-emerald-600"
+        : "text-red-600"
       : "text-[var(--muted)]";
 
   const embedScrollMax = "min(92vh, 1680px)";
@@ -553,26 +553,31 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
     <div className="space-y-6">
       <AutoRefresh everyMs={900000} />
 
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--faint)]">Map</p>
-        <h1 className="mt-1 text-2xl font-semibold text-white">Market map</h1>
+      <header className="border-b border-[var(--border)] pb-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Map</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
+          Market map
+        </h1>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Sector → industry treemap. Click any stock for headlines and a read on why it&apos;s moving.
+        </p>
       </header>
 
-      <div className="space-y-3">
+      <div className="mt-8 space-y-4">
         {!selected?.symbol ? (
-          <p className="max-w-full text-sm text-[var(--muted)]">
-            Click a stock in the map to see headlines and an AI-style read on why it might be moving.
-          </p>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-sm text-[var(--muted)]">
+            Click any stock in the map below to see recent headlines and a brief on why it might be moving.
+          </div>
         ) : (
-          <div className="min-h-[140px] max-w-full">
+          <div className="min-h-[140px] max-w-full rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="text-xl font-semibold text-[var(--foreground)]">
                 {selected.shortName ?? selected.symbol}
               </h2>
               <span className="font-mono text-sm text-[var(--muted)]">{selected.symbol}</span>
               <span className="text-sm text-[var(--muted)]">
                 {selected.price != null ? (
-                  <span className="font-medium text-white">${selected.price.toFixed(2)}</span>
+                  <span className="font-medium text-[var(--foreground)]">${selected.price.toFixed(2)}</span>
                 ) : (
                   <span>—</span>
                 )}
@@ -593,7 +598,7 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
               <p className="mt-3 text-sm text-[var(--muted)]">Loading headlines…</p>
             )}
             {error && (
-              <p className="mt-3 text-sm text-red-400" role="alert">
+              <p className="mt-3 text-sm text-red-600" role="alert">
                 {error}
               </p>
             )}
@@ -602,9 +607,9 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
                 {news.slice(0, 6).map((a) => (
                   <li
                     key={a.id}
-                    className="min-w-0 max-w-full rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                    className="min-w-0 max-w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
                   >
-                    <p className="line-clamp-2 break-words text-sm font-medium text-white">
+                    <p className="line-clamp-2 break-words text-sm font-medium text-[var(--foreground)]">
                       {a.title}
                     </p>
                     <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-[var(--muted)]">
@@ -635,7 +640,7 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
           className={
             isFullscreen
               ? "flex h-screen max-h-[100dvh] min-h-0 w-full flex-col bg-[var(--background)] p-4"
-              : "flex flex-col rounded-xl border border-white/15 bg-[var(--background)]/90 p-3"
+              : "flex flex-col rounded-xl border border-[var(--border)] bg-[var(--card)] p-3"
           }
         >
           <MapViewToolbar

@@ -82,7 +82,7 @@ export function ArchiveDateToolbar({
         <button
           type="button"
           onClick={apply}
-          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#0b1220] transition hover:bg-[var(--accent-muted)]"
+          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
         >
           Apply ranges
         </button>
