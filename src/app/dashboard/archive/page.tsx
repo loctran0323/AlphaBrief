@@ -13,6 +13,7 @@ import { fetchMergedPastDashboardEvents } from "@/lib/events";
 import { fetchReadMoreUrlsWithConcurrency } from "@/lib/release-web-context";
 import { getArchivedNewsBriefing } from "@/lib/news";
 import { createClient } from "@/lib/supabase/server";
+import { getUserTier } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,37 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   const sp = await searchParams;
   const bounds = parseArchiveSearchParams(sp);
   const supabase = await createClient();
+
+  // Pro-only gate
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const tier = await getUserTier(supabase, user.id, user.email);
+    if (tier !== "pro") {
+      return (
+        <div className="mx-auto max-w-2xl pb-16">
+          <header className="border-b border-[var(--border)] pb-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Archive</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)]">Pro feature</h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              Access to the full archive is available on the Pro plan.
+            </p>
+          </header>
+          <div className="mt-10 rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-highlight)] p-8 text-center">
+            <p className="text-2xl font-black text-[var(--foreground)]">Upgrade to Pro</p>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              Unlock the full archive, unlimited market map lookups, and priority access to new features.
+            </p>
+            <Link
+              href="/dashboard/upgrade"
+              className="mt-6 inline-block rounded-lg bg-[var(--accent)] px-8 py-3 font-semibold text-white transition hover:bg-[var(--accent-muted)]"
+            >
+              See Pro plan
+            </Link>
+          </div>
+        </div>
+      );
+    }
+  }
 
   const { data: watchlists, error: wErr } = await supabase
     .from("watchlists").select("id, name")
@@ -78,9 +110,8 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
               Past data
             </h1>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
-              Past timeline and archived headlines — nothing from the live briefing window.
-              Pick a date range below; roughly 3–30 days back.
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              Past events and headlines — pick a date range below (3–30 days back).
             </p>
           </div>
           <Link
