@@ -25,7 +25,7 @@ export async function POST() {
   // Look up existing Stripe customer, or create one
   const { data: profile } = await supabase
     .from("profiles")
-    .select("stripe_customer_id, subscription_tier")
+    .select("stripe_customer_id, subscription_tier, stripe_subscription_id")
     .eq("id", user.id)
     .single();
 
