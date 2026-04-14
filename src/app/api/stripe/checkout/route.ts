@@ -29,7 +29,8 @@ export async function POST() {
     .eq("id", user.id)
     .single();
 
-  if (profile?.subscription_tier === "pro") {
+  // Only block if they have an actual paid Stripe subscription (not admin override)
+  if (profile?.subscription_tier === "pro" && profile?.stripe_subscription_id) {
     return NextResponse.json({ error: "Already subscribed" }, { status: 400 });
   }
 
@@ -43,18 +44,23 @@ export async function POST() {
     await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
   }
 
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: STRIPE_PRO_PRICE_ID, quantity: 1 }],
-    success_url: `${siteUrl}/dashboard?upgraded=1`,
-    cancel_url: `${siteUrl}/#pricing`,
-    allow_promotion_codes: true,
-    metadata: { supabase_user_id: user.id },
-    subscription_data: {
+  try {
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: "subscription",
+      line_items: [{ price: STRIPE_PRO_PRICE_ID, quantity: 1 }],
+      success_url: `${siteUrl}/dashboard?upgraded=1`,
+      cancel_url: `${siteUrl}/#pricing`,
+      allow_promotion_codes: true,
       metadata: { supabase_user_id: user.id },
-    },
-  });
-
-  return NextResponse.json({ url: session.url });
+      subscription_data: {
+        metadata: { supabase_user_id: user.id },
+      },
+    });
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Stripe error";
+    console.error("[stripe/checkout]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

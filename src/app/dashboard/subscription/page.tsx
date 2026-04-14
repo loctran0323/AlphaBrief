@@ -8,11 +8,21 @@ export const metadata: Metadata = {
   title: "Subscription — Alpha Brief",
 };
 
+function isAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const admins = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  return admins.includes(email.toLowerCase());
+}
+
 export default async function SubscriptionPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const tier = user ? await getUserTier(supabase, user.id, user.email) : "free";
   const isPro = tier === "pro";
+  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <div className="mx-auto max-w-xl pb-16">
@@ -63,14 +73,16 @@ export default async function SubscriptionPage() {
 
         {isPro ? (
           <>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-              <p className="text-sm font-medium text-[var(--foreground)]">Billing & cancellation</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Update your payment method, download invoices, or cancel your subscription from the
-                Stripe billing portal.
-              </p>
-              <ManageBillingButton />
-            </div>
+            {!isAdmin && (
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+                <p className="text-sm font-medium text-[var(--foreground)]">Billing & cancellation</p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  Update your payment method, download invoices, or cancel your subscription from the
+                  Stripe billing portal.
+                </p>
+                <ManageBillingButton />
+              </div>
+            )}
           </>
         ) : (
           <div className="rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-highlight)] p-6">
