@@ -10,7 +10,7 @@ export function ExploreNav() {
               <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
             </svg>
           </div>
-          <span className="text-base font-bold text-gray-900">Alpha Brief</span>
+          <span className="text-base font-bold text-gray-900">AlphaBrief</span>
         </Link>
 
         <nav className="flex flex-wrap items-center gap-4 text-sm sm:gap-5">

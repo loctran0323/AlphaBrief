@@ -4,7 +4,7 @@ import { getUserTier } from "@/lib/subscription";
 import { UpgradeButton } from "./upgrade-button";
 
 export const metadata: Metadata = {
-  title: "Upgrade to Pro — Alpha Brief",
+  title: "Upgrade to Pro — AlphaBrief",
 };
 
 const planRows: { label: string; free: string | boolean; pro: string | boolean }[] = [

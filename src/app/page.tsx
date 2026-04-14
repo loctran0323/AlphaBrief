@@ -117,7 +117,7 @@ export default async function HomePage() {
                 <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
               </svg>
             </div>
-            <span className="text-base font-bold text-gray-900">Alpha Brief</span>
+            <span className="text-base font-bold text-gray-900">AlphaBrief</span>
           </Link>
 
           <nav className="flex items-center gap-2 text-sm">
@@ -231,7 +231,7 @@ export default async function HomePage() {
         <section className="border-t border-gray-100 bg-gray-50 px-6 py-24">
           <div className="mx-auto max-w-6xl">
             <div className="mb-14 text-center">
-              <h2 className="text-4xl font-bold text-gray-900">What&apos;s inside Alpha Brief</h2>
+              <h2 className="text-4xl font-bold text-gray-900">What&apos;s inside AlphaBrief</h2>
               <p className="mt-3 text-lg text-gray-500">
                 Everything you need to stay ahead of the market — with more on the way.
               </p>
@@ -356,7 +356,7 @@ export default async function HomePage() {
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-4xl font-bold text-gray-900">Ready to cut through the noise?</h2>
               <p className="mt-4 text-lg text-gray-500">
-                Join Alpha Brief — free to start, no credit card required.
+                Join AlphaBrief — free to start, no credit card required.
               </p>
               <div className="mt-8 flex justify-center gap-3">
                 <Link
@@ -380,7 +380,7 @@ export default async function HomePage() {
                 <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
               </svg>
             </div>
-            <span className="font-bold text-white">Alpha Brief</span>
+            <span className="font-bold text-white">AlphaBrief</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="#pricing" className="text-sm text-gray-400 transition hover:text-white">

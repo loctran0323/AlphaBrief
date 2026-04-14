@@ -11,7 +11,7 @@ const UPDATE_GROUPS: { period: string; bullets: string[] }[] = [
   {
     period: "April 2026",
     bullets: [
-      "Recently rebranded from Catalyst to Alpha Brief — same product, new name and site URL (alpha-brief.vercel.app).",
+      "Recently rebranded from Catalyst to AlphaBrief — same product, new name and site URL (alpha-brief.vercel.app).",
       "Light marketing splash: sticky header with logo, hero (Your alpha + sparkle + briefly), What's inside feature grid, bottom CTA, and footer.",
       "Hero tagline and default meta description are just “Signal first, noise last.” — Open Graph and Twitter previews use the same line.",
       "Landing feature cards: tighter Home / Explore / Dashboard blurbs; Market map described as a clickable heat map; News briefing says “Headlines…” instead of “RSS headlines…”.",
@@ -37,7 +37,7 @@ export default function DashboardUpdatesPage() {
     <div className="mx-auto max-w-2xl pb-16">
       {/* ── Page header ── */}
       <header className="border-b border-[var(--border)] pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Alpha Brief</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">AlphaBrief</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
           Updates
         </h1>

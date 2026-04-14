@@ -23,7 +23,7 @@ const siteDescription = "Signal first, noise last.";
 
 export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
-  title: "Alpha Brief — watchlist, timeline & market news",
+  title: "AlphaBrief — watchlist, timeline & market news",
   description: siteDescription,
   icons: {
     icon: "/alpha-brief-icon.svg",
@@ -31,13 +31,13 @@ export const metadata: Metadata = {
     apple: "/alpha-brief-icon.svg",
   },
   openGraph: {
-    title: "Alpha Brief — watchlist, timeline & market news",
+    title: "AlphaBrief — watchlist, timeline & market news",
     description: siteDescription,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Alpha Brief — watchlist, timeline & market news",
+    title: "AlphaBrief — watchlist, timeline & market news",
     description: siteDescription,
   },
 };

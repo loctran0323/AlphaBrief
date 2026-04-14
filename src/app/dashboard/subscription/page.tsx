@@ -5,7 +5,7 @@ import { ManageBillingButton } from "./manage-billing-button";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Subscription — Alpha Brief",
+  title: "Subscription — AlphaBrief",
 };
 
 function isAdminEmail(email?: string | null): boolean {

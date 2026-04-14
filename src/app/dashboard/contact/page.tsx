@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
-  title: "Contact Us — Alpha Brief",
+  title: "Contact Us — AlphaBrief",
 };
 
 export default async function ContactPage() {
