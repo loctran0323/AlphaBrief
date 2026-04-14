@@ -65,7 +65,7 @@ export default async function SettingsPage({
 
       {digestTest === "sent" && (
         <div
-          className="mt-6 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200"
+          className="mt-6 rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
           role="status"
         >
           Test digest sent — check your inbox (and spam).
