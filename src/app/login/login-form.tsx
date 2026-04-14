@@ -84,14 +84,6 @@ export function LoginForm() {
         >
           {loading ? "Signing in…" : "Log in"}
         </button>
-        <p className="text-center">
-          <Link
-            href="/explore"
-            className="text-xs text-gray-400 transition hover:text-gray-600"
-          >
-            Continue without signing in →
-          </Link>
-        </p>
       </form>
     </AuthShell>
   );

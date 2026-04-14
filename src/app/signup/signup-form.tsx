@@ -90,14 +90,6 @@ export function SignupForm() {
         >
           {loading ? "Creating account…" : "Create account"}
         </button>
-        <p className="text-center">
-          <Link
-            href="/explore"
-            className="text-xs text-gray-400 transition hover:text-gray-600"
-          >
-            Continue without signing in →
-          </Link>
-        </p>
       </form>
     </AuthShell>
   );

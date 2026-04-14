@@ -16,6 +16,7 @@ import {
 } from "@/lib/market-map-data";
 import type { NewsArticle } from "@/types/news";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { checkAndRecordLookup } from "@/app/dashboard/map/actions";
 
 type LeafPayload = {
   name: string;
@@ -436,7 +437,17 @@ function MapViewToolbar({
   );
 }
 
-export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
+export function MarketMapExplorer({
+  tree,
+  isPro = false,
+  lookupsUsed = 0,
+  maxLookups = 3,
+}: {
+  tree: MarketMapRoot;
+  isPro?: boolean;
+  lookupsUsed?: number;
+  maxLookups?: number;
+}) {
   const leafByTicker = useMemo(() => {
     const m = new Map<string, MarketMapLeaf>();
     for (const sector of tree.children as MarketMapSector[]) {
@@ -454,6 +465,8 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lookupsLeft, setLookupsLeft] = useState(isPro ? Infinity : maxLookups - lookupsUsed);
+  const [limitHit, setLimitHit] = useState(!isPro && lookupsUsed >= maxLookups);
 
   const mapShellRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
@@ -525,7 +538,7 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
   }, []);
 
   const onTreemapClick = useCallback(
-    (node: TreemapNode) => {
+    async (node: TreemapNode) => {
       const n = node as TreemapNode & LeafPayload;
       const fromNode =
         typeof n.symbol === "string" && n.symbol.trim()
@@ -534,10 +547,25 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
       const fromName = typeof n.name === "string" ? n.name.trim().toUpperCase() : "";
       const hit = (fromNode && leafByTicker.get(fromNode)) || leafByTicker.get(fromName);
       if (!hit) return;
+
+      // Check quota before loading
+      if (!isPro) {
+        if (lookupsLeft <= 0) {
+          setLimitHit(true);
+          return;
+        }
+        const result = await checkAndRecordLookup(hit.symbol);
+        if (!result.allowed) {
+          setLimitHit(true);
+          return;
+        }
+        setLookupsLeft((n) => Math.max(0, n - 1));
+      }
+
       setSelected({ ...hit, symbol: hit.symbol });
       void loadNews(hit.symbol);
     },
-    [leafByTicker, loadNews],
+    [leafByTicker, loadNews, isPro, lookupsLeft],
   );
 
   const moveColor =
@@ -555,10 +583,41 @@ export function MarketMapExplorer({ tree }: { tree: MarketMapRoot }) {
 
       <header className="border-b border-[var(--border)] pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Map</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
-          Market map
-        </h1>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
+            Market map
+          </h1>
+          {!isPro && (
+            <span className="mb-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs text-[var(--muted)]">
+              {limitHit ? (
+                <a href="/dashboard/upgrade" className="font-semibold text-[var(--accent)] hover:underline">
+                  Upgrade for unlimited lookups
+                </a>
+              ) : (
+                <>
+                  <span className="font-semibold text-[var(--foreground)]">{Math.max(0, lookupsLeft)}</span>
+                  {" "}of {maxLookups} free lookups left today
+                </>
+              )}
+            </span>
+          )}
+        </div>
       </header>
+
+      {limitHit && (
+        <div className="rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-highlight)] p-6 text-center">
+          <p className="font-semibold text-[var(--foreground)]">Daily limit reached</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Free members get {maxLookups} market map lookups per day. Upgrade to Pro for unlimited access.
+          </p>
+          <a
+            href="/dashboard/upgrade"
+            className="mt-4 inline-block rounded-lg bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
+          >
+            Upgrade to Pro
+          </a>
+        </div>
+      )}
 
       <div className="mt-8 space-y-4">
         {!selected?.symbol ? (

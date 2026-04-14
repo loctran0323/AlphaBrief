@@ -1,9 +1,25 @@
-import { ExploreNav } from "@/components/explore-nav";
+import { redirect } from "next/navigation";
+import { isSupabaseConfigured } from "@/lib/env";
+import { createClient } from "@/lib/supabase/server";
+import { AppNav } from "@/components/app-nav";
 
-export default function ExploreLayout({ children }: { children: React.ReactNode }) {
+export default async function ExploreLayout({ children }: { children: React.ReactNode }) {
+  if (!isSupabaseConfigured()) {
+    redirect("/");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen">
-      <ExploreNav />
+      <AppNav email={user.email ?? undefined} signedIn />
       <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
     </div>
   );
