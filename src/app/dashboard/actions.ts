@@ -92,7 +92,7 @@ export async function sendTestDigest() {
   ]);
   const result = await sendDigestEmail({
     to: user.email,
-    subject: "[Alpha Brief] Test digest — briefing & upcoming events",
+    subject: "[AlphaBrief] Test digest — briefing & upcoming events",
     events,
     articles: newsArticles,
   });

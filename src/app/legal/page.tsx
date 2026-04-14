@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy & terms — Alpha Brief",
-  description: "Privacy Policy and Terms of Use for Alpha Brief.",
+  title: "Privacy & terms — AlphaBrief",
+  description: "Privacy Policy and Terms of Use for AlphaBrief.",
 };
 
 const lastUpdated = "April 13, 2026";
@@ -24,7 +24,7 @@ export default function LegalPage() {
                 <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
               </svg>
             </div>
-            <span className="text-base font-bold">Alpha Brief</span>
+            <span className="text-base font-bold">AlphaBrief</span>
           </Link>
         </div>
       </header>
@@ -53,14 +53,14 @@ export default function LegalPage() {
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">Privacy Policy</h1>
             <p className="mt-2 text-sm text-gray-500">Last updated: {lastUpdated}</p>
             <p className="mt-8 text-base leading-relaxed text-gray-600">
-              This Privacy Policy describes how Alpha Brief (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;)
+              This Privacy Policy describes how AlphaBrief (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;)
               collects, uses, and shares information when you use our website and related services
               (the &quot;Service&quot;). Please read it carefully.
             </p>
 
             <Section title="1. Who we are">
               <p>
-                Alpha Brief provides market news, timelines, watchlists, and related tools. For
+                AlphaBrief provides market news, timelines, watchlists, and related tools. For
                 privacy purposes, we act as the controller of personal information described in this
                 policy, except where a provider (such as our authentication vendor) determines
                 certain processing on our behalf as described below.
@@ -218,13 +218,13 @@ export default function LegalPage() {
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">Terms of Use</h2>
             <p className="mt-2 text-sm text-gray-500">Last updated: {lastUpdated}</p>
             <p className="mt-8 text-base leading-relaxed text-gray-600">
-              These Terms of Use (&quot;Terms&quot;) govern your access to and use of Alpha Brief
+              These Terms of Use (&quot;Terms&quot;) govern your access to and use of AlphaBrief
               (the &quot;Service&quot;). By using the Service, you agree to these Terms.
             </p>
 
             <Section title="1. The Service">
               <p>
-                Alpha Brief offers market-related information, including news summaries, timelines,
+                AlphaBrief offers market-related information, including news summaries, timelines,
                 watchlists, and exploratory tools. The Service is provided for informational
                 purposes only.{" "}
                 <strong className="text-gray-800">
@@ -305,7 +305,7 @@ export default function LegalPage() {
 
             <Section title="8. Indemnity">
               <p>
-                You will defend and indemnify Alpha Brief and its affiliates against claims, damages,
+                You will defend and indemnify AlphaBrief and its affiliates against claims, damages,
                 losses, and expenses (including reasonable attorneys&apos; fees) arising from your
                 use of the Service, your content, or your violation of these Terms.
               </p>
@@ -348,7 +348,7 @@ export default function LegalPage() {
 
           <p className="mt-12 text-center text-sm text-gray-500">
             <Link href="/" className="text-[#6C5CE7] hover:underline">
-              ← Back to Alpha Brief
+              ← Back to AlphaBrief
             </Link>
           </p>
         </main>

@@ -38,7 +38,7 @@ export async function sendContactMessage(formData: FormData): Promise<{ ok: bool
     from,
     to,
     replyTo: email,
-    subject: `Alpha Brief — message from ${name}`,
+    subject: `AlphaBrief — message from ${name}`,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:560px;color:#111827;">
   <h2 style="font-size:18px;font-weight:700;margin:0 0 16px;">New contact message</h2>
