@@ -227,6 +227,199 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* ── Demo ── */}
+        <section className="border-t border-gray-100 px-6 py-20">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-10 text-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#6C5CE7]/30 bg-[#EDE9FE] px-3 py-1 text-xs font-semibold text-[#6C5CE7]">
+                Product preview
+              </span>
+              <h2 className="mt-4 text-4xl font-bold text-gray-900">See it in action</h2>
+              <p className="mt-3 text-lg text-gray-500">
+                Your dashboard — watchlist, upcoming catalysts, and AI-tagged headlines.
+              </p>
+            </div>
+
+            {/* Browser chrome frame */}
+            <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-2xl shadow-gray-200/60">
+              {/* Browser top bar */}
+              <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3">
+                <span className="h-3 w-3 rounded-full bg-red-400" />
+                <span className="h-3 w-3 rounded-full bg-yellow-400" />
+                <span className="h-3 w-3 rounded-full bg-green-400" />
+                <div className="mx-3 flex flex-1 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-1 text-xs text-gray-400 max-w-xs">
+                  <svg className="h-3 w-3 shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                  alphabrief.net/dashboard
+                </div>
+              </div>
+
+              {/* Mock dashboard — matches actual app styling */}
+              <div className="bg-white px-6 py-8">
+                {/* Page header */}
+                <div className="border-b border-gray-100 pb-7">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6C5CE7]">Dashboard</p>
+                  <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-gray-900">Wednesday, Apr 16</h1>
+                  <p className="mt-1 text-sm text-gray-500">Watchlist, upcoming catalysts, and news briefing.</p>
+                  {/* Stat chips */}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {[
+                      { val: "12", label: "timeline events" },
+                      { val: "38", label: "headlines" },
+                      { val: "5", label: "watchlist tickers" },
+                    ].map((c) => (
+                      <div key={c.label} className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5">
+                        <p className="text-xl font-black tabular-nums text-gray-900">{c.val}</p>
+                        <p className="mt-0.5 text-xs text-gray-500">{c.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Watchlist */}
+                <div className="border-b border-gray-100 py-6">
+                  <h2 className="mb-3 text-sm font-bold text-gray-900">Watchlist</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {["AAPL", "MSFT", "NVDA", "TSLA", "META"].map((t) => (
+                      <span key={t} className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 pl-3 pr-2 py-1 text-sm font-semibold text-gray-800">
+                        {t}
+                        <span className="text-gray-300 hover:text-red-400 cursor-pointer px-1">×</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-5 pt-6 lg:grid-cols-2">
+                  {/* Timeline events */}
+                  <div className="rounded-xl border border-gray-200 bg-white p-5">
+                    <h2 className="mb-1 text-sm font-semibold text-gray-900">Timeline</h2>
+                    <p className="mb-4 text-xs text-gray-400">Updated 9:32 AM ET</p>
+                    <div className="divide-y divide-gray-100">
+                      {[
+                        {
+                          bar: "bg-violet-500",
+                          badge: "border-violet-200 bg-violet-50 text-violet-700",
+                          type: "Earnings",
+                          ticker: "NVDA",
+                          date: "Apr 23, 2025",
+                          title: "NVIDIA Q1 FY2026 Earnings Call",
+                          why: "Data center revenue and Blackwell GPU demand will signal AI capex health.",
+                          watch: "Forward guidance and margin commentary.",
+                        },
+                        {
+                          bar: "bg-sky-500",
+                          badge: "border-sky-200 bg-sky-50 text-sky-700",
+                          type: "Macro",
+                          ticker: null,
+                          date: "Apr 30, 2025",
+                          title: "Fed FOMC Rate Decision",
+                          why: "Markets pricing 85% chance of a hold. Tone around cuts is the real catalyst.",
+                          watch: "Powell presser language on inflation and labor.",
+                        },
+                        {
+                          bar: "bg-amber-500",
+                          badge: "border-amber-200 bg-amber-50 text-amber-700",
+                          type: "Key event",
+                          ticker: "AAPL",
+                          date: "May 7, 2025",
+                          title: "Apple WWDC 2025 Keynote",
+                          why: "AI integration announcements likely to reprice the stock.",
+                          watch: "On-device LLM depth and App Store policy changes.",
+                        },
+                      ].map((e) => (
+                        <article key={e.title} className="flex gap-0 py-4 first:pt-0 last:pb-0">
+                          <div className={`w-1 shrink-0 rounded-full ${e.bar}`} />
+                          <div className="min-w-0 flex-1 pl-4">
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                              <span className="font-mono">{e.date}</span>
+                              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${e.badge}`}>{e.type}</span>
+                              {e.ticker && (
+                                <span className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 font-semibold text-gray-800">{e.ticker}</span>
+                              )}
+                            </div>
+                            <h3 className="mt-2 text-sm font-semibold leading-snug text-gray-900">{e.title}</h3>
+                            <p className="mt-1 text-xs leading-relaxed text-gray-500">{e.why}</p>
+                            <p className="mt-1 text-xs text-gray-700"><span className="font-medium">Watch for: </span>{e.watch}</p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* News briefing */}
+                  <div className="rounded-xl border border-gray-200 bg-white p-5">
+                    <h2 className="mb-1 text-sm font-semibold text-gray-900">News briefing</h2>
+                    <p className="mb-3 text-xs text-gray-400">Updated 9:32 AM ET</p>
+                    {/* Filter tabs */}
+                    <div className="mb-4 flex flex-wrap gap-1.5">
+                      {["All (38)", "Tickers (6)", "Markets", "Economics", "Policy"].map((tab, i) => (
+                        <span key={tab} className={`rounded-lg border px-2.5 py-1 text-xs font-semibold ${i === 0 ? "border-[#6C5CE7] bg-[#6C5CE7]/10 text-gray-900" : "border-gray-200 bg-gray-50 text-gray-500"}`}>{tab}</span>
+                      ))}
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {[
+                        {
+                          bar: "bg-emerald-500",
+                          badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+                          impact: "bullish",
+                          ticker: "NVDA",
+                          source: "Bloomberg",
+                          title: "Blackwell shipments ahead of schedule, suppliers confirm",
+                          summary: "Supply chain checks show NVIDIA's GB200 NVL72 racks shipping 3–4 weeks early, boosting near-term revenue confidence.",
+                          rationale: "Earlier-than-expected supply eases the bear case on execution risk.",
+                        },
+                        {
+                          bar: "bg-rose-500",
+                          badge: "border-rose-200 bg-rose-50 text-rose-700",
+                          impact: "bearish",
+                          ticker: null,
+                          source: "Reuters",
+                          title: "Treasury yields spike as auction demand disappoints",
+                          summary: "10-year yield climbs to 4.72% after soft 20-year bond auction, raising the discount rate on growth stocks.",
+                          rationale: "Higher long-end yields pressure tech valuations and reduce risk appetite.",
+                        },
+                        {
+                          bar: "bg-amber-400",
+                          badge: "border-amber-200 bg-amber-50 text-amber-700",
+                          impact: "neutral",
+                          ticker: "AAPL",
+                          source: "WSJ",
+                          title: "Apple expands India manufacturing as China tensions persist",
+                          summary: "Foxconn and Tata ramp iPhone 16 assembly in Chennai; Apple aims for 25% India share by 2026.",
+                          rationale: "Positive long-term diversification, limited near-term earnings impact.",
+                        },
+                      ].map((a) => (
+                        <article key={a.title} className="flex gap-0 py-4 first:pt-0 last:pb-0">
+                          <div className={`w-1 shrink-0 rounded-full ${a.bar}`} />
+                          <div className="min-w-0 flex-1 pl-4">
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                              <span>{a.source}</span>
+                              {a.ticker && (
+                                <span className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 font-semibold text-gray-800">{a.ticker}</span>
+                              )}
+                              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${a.badge}`}>{a.impact}</span>
+                            </div>
+                            <h3 className="mt-2 text-sm font-semibold leading-snug text-gray-900">{a.title}</h3>
+                            <p className="mt-1 text-xs leading-relaxed text-gray-500">{a.summary}</p>
+                            <p className="mt-1 text-xs italic text-gray-400">{a.rationale}</p>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-5 text-center text-sm text-gray-400">
+              Sample data for illustration.{" "}
+              <Link href="/signup" className="text-[#6C5CE7] hover:underline">
+                Sign up free
+              </Link>{" "}
+              to see live markets.
+            </p>
+          </div>
+        </section>
+
         {/* ── Features ── */}
         <section className="border-t border-gray-100 bg-gray-50 px-6 py-24">
           <div className="mx-auto max-w-6xl">
