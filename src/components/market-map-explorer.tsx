@@ -467,6 +467,8 @@ export function MarketMapExplorer({
   const [error, setError] = useState<string | null>(null);
   const [lookupsLeft, setLookupsLeft] = useState(isPro ? Infinity : maxLookups - lookupsUsed);
   const [limitHit, setLimitHit] = useState(!isPro && lookupsUsed >= maxLookups);
+  const [aiSummary, setAiSummary] = useState<{ summary: string; sentiment: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const mapShellRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
@@ -537,6 +539,24 @@ export function MarketMapExplorer({
     }
   }, []);
 
+  const loadAiSummary = useCallback(async (symbol: string, changePct?: number, price?: number | null) => {
+    setAiLoading(true);
+    setAiSummary(null);
+    try {
+      const params = new URLSearchParams({ symbol });
+      if (changePct != null) params.set("changePct", changePct.toFixed(4));
+      if (price != null) params.set("price", price.toFixed(2));
+      const res = await fetch(`/api/market/stock-summary?${params.toString()}`);
+      if (!res.ok) throw new Error("AI summary failed");
+      const data = (await res.json()) as { sentiment: string; summary: string };
+      setAiSummary(data);
+    } catch {
+      setAiSummary(null);
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
+
   const onTreemapClick = useCallback(
     async (node: TreemapNode) => {
       const n = node as TreemapNode & LeafPayload;
@@ -564,8 +584,9 @@ export function MarketMapExplorer({
 
       setSelected({ ...hit, symbol: hit.symbol });
       void loadNews(hit.symbol);
+      void loadAiSummary(hit.symbol, hit.changePct, hit.price);
     },
-    [leafByTicker, loadNews, isPro, lookupsLeft],
+    [leafByTicker, loadNews, loadAiSummary, isPro, lookupsLeft],
   );
 
   const moveColor =
@@ -650,6 +671,16 @@ export function MarketMapExplorer({
                 <span className="ml-1 text-xs font-normal text-[var(--muted)]">vs prior close</span>
               </span>
             </div>
+            {/* AI price summary */}
+            {aiLoading && (
+              <p className="mt-3 text-xs text-[var(--muted)]">Analysing move…</p>
+            )}
+            {!aiLoading && aiSummary?.summary && (
+              <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+                {aiSummary.summary}
+              </p>
+            )}
+
             {loading && (
               <p className="mt-3 text-sm text-[var(--muted)]">Loading headlines…</p>
             )}

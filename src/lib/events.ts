@@ -7,6 +7,7 @@ import {
 } from "@/lib/macro-timeline";
 import { fetchOnlineTickerTimelineEvents } from "@/lib/online-ticker-events";
 import { filterPastMarketEvents, filterUpcomingMarketEvents } from "@/lib/timeline-upcoming";
+import { fetchEarningsForTickers } from "@/lib/earnings";
 
 export { filterPastMarketEvents, filterUpcomingMarketEvents };
 
@@ -54,7 +55,7 @@ export async function fetchDashboardEvents(
   return filterUpcomingMarketEvents(sorted);
 }
 
-/** DB watchlist + macro events merged with a rolling synthetic macro/housing calendar. */
+/** DB watchlist + macro events merged with a rolling synthetic macro/housing calendar + earnings. */
 export async function fetchMergedDashboardEvents(
   supabase: SupabaseClient,
   watchlistTickers: string[],
@@ -62,13 +63,19 @@ export async function fetchMergedDashboardEvents(
   const dbEvents = await fetchDashboardEventsFromDb(supabase, watchlistTickers);
   const synthetic = getSyntheticMacroTimeline();
   let online: MarketEvent[] = [];
+  let earnings: MarketEvent[] = [];
   try {
-    online = await fetchOnlineTickerTimelineEvents(watchlistTickers);
+    [online, earnings] = await Promise.all([
+      fetchOnlineTickerTimelineEvents(watchlistTickers),
+      fetchEarningsForTickers(watchlistTickers),
+    ]);
   } catch {
     online = [];
+    earnings = [];
   }
   const withMacro = mergeTimelineEvents(dbEvents, synthetic);
-  const merged = mergeTimelineEvents(withMacro, online);
+  const withOnline = mergeTimelineEvents(withMacro, online);
+  const merged = mergeTimelineEvents(withOnline, earnings);
   return filterUpcomingMarketEvents(merged);
 }
 
