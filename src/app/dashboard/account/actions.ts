@@ -29,3 +29,4 @@ export async function updatePassword(formData: FormData) {
   if (error) return redirect(`/dashboard/account?error=${encodeURIComponent(error.message)}`);
   return redirect("/dashboard/account?passwordChanged=1");
 }
+
