@@ -1,57 +1,52 @@
-# Alpha Brief
+# AlphaBrief
 
-A Next.js dashboard for retail investors: **watchlist**, **upcoming macro and ticker timeline**, **RSS news briefing** (with optional AI summaries), and a **sector → industry market map**. Auth and data live in **Supabase**; optional digests via **Resend**.
+A Next.js market intelligence dashboard for retail investors. Signal first, noise last.
 
-**Live app:** [alpha-brief.vercel.app](https://alpha-brief.vercel.app/)
-
-## Updates
-
-- **March 2026** — I renamed the website and product from **Catalyst** to **Alpha Brief**. The public deployment, repo metadata, and docs now use the new name and [alpha-brief.vercel.app](https://alpha-brief.vercel.app/).
+**Live app:** [alphabrief.net](https://alphabrief.net)
 
 ## Features
 
-- **Auth** — Email/password (and compatible flows) with Supabase Auth
-- **Watchlist** — Tickers drive ticker-tagged headlines and company timeline rows
-- **Timeline** — Merged `market_events`, rolling synthetic macro schedule, and Google News headline rows per symbol (upcoming-only filtering)
-- **News briefing** — Multiple public RSS sources; All / Tickers / topic tabs; main view shows roughly the last **3 days** (older items on signed-in **Archive** when feeds still carry them); optional OpenAI-generated summary and bullish/bearish/neutral read
-- **Market map** — Treemap-style sector view with Yahoo-backed quotes (best-effort)
-- **Settings** — Digest frequency (daily / weekly / off) and test email when Resend is configured
-- **Auto-refresh** — Dashboard polls server data on an interval while the tab is open (`dynamic` route + client `router.refresh`)
+- **Watchlist** — Track tickers; drives ticker-tagged headlines and company timeline rows
+- **Timeline** — Upcoming macro events, earnings calendar (via Finnhub), and ticker-specific catalysts
+- **News briefing** — Multi-source aggregation (Finnhub, Alpha Vantage, RSS); bullish/bearish/neutral sentiment; All / Tickers / category tabs; 3-day rolling window with Archive for Pro users
+- **Market map** — Treemap sector view with Yahoo-backed quotes and AI stock move summaries
+- **Archive** — Historical timeline events and news briefings (Pro)
+- **Community chat** — Live real-time chat between users via Supabase Realtime
+- **Account settings** — Password change, digest preferences
+- **Pro plan** — $4/month via Stripe; funds better APIs, infrastructure, and new features
+- **Email digests** — Optional daily/weekly digest via Resend
+- **Auto-refresh** — Dashboard polls for fresh data while the tab is open
 
 ## Tech stack
 
-- [Next.js](https://nextjs.org/) 15 (App Router) · React 19 · TypeScript
+- [Next.js](https://nextjs.org/) 15 (App Router, Turbopack) · React 19 · TypeScript
 - [Tailwind CSS](https://tailwindcss.com/) v4
-- [Supabase](https://supabase.com/) (Postgres, Auth, SSR client)
-- [Resend](https://resend.com/) (email)
-- Optional [OpenAI](https://openai.com/) API for headline briefs
-
-## Prerequisites
-
-- Node.js 20+ recommended
-- A [Supabase](https://supabase.com) project
-- (Optional) Resend account and verified sender
-- (Optional) OpenAI API key
+- [Supabase](https://supabase.com/) — Postgres, Auth, Realtime
+- [Stripe](https://stripe.com/) — Pro subscriptions
+- [Resend](https://resend.com/) — Email digests
+- [Finnhub](https://finnhub.io/) — Market news, company news, earnings calendar
+- [Alpha Vantage](https://www.alphavantage.co/) — News sentiment
+- Optional [OpenAI](https://openai.com/) — AI headline summaries and key points
 
 ## Local setup
 
 ```bash
 git clone <your-repo-url>
-cd StartUpIdeaMarkets
+cd Alpha-Brief
 npm install
 cp .env.example .env.local
 ```
 
-Edit **`.env.local`** with your Supabase URL and anon (or publishable) key at minimum. See `.env.example` for all variables.
+Edit **`.env.local`** with your credentials. See `.env.example` for all variables.
 
 ### Database
 
-Run SQL migrations in order against your Supabase SQL editor (or CLI):
+Run SQL migrations in order in your Supabase SQL editor:
 
 1. `supabase/migrations/001_initial.sql`
 2. `supabase/migrations/002_profiles_insert_policy.sql`
 
-Optionally run **`supabase/seed.sql`** for sample `market_events`.
+Optionally run `supabase/seed.sql` for sample `market_events`.
 
 ### Dev server
 
@@ -59,55 +54,53 @@ Optionally run **`supabase/seed.sql`** for sample `market_events`.
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Sign up, then use the dashboard.
+Open [http://localhost:3000](http://localhost:3000).
 
 ### Scripts
 
-| Command        | Description        |
-|----------------|--------------------|
-| `npm run dev`  | Dev server (Turbopack) |
-| `npm run build`| Production build   |
-| `npm run start`| Start production server |
-| `npm run lint` | ESLint             |
+| Command | Description |
+|---|---|
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | ESLint |
 
 ## Environment variables
 
-Copy from **`.env.example`**. Important entries:
-
 | Variable | Required | Purpose |
-|----------|----------|---------|
+|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon / publishable key |
-| `NEXT_PUBLIC_SITE_URL` | Production | Canonical site URL for auth redirects |
-| `RESEND_API_KEY` | Optional | Digest / test emails |
-| `RESEND_FROM_EMAIL` | Optional | From address (must be allowed in Resend) |
-| `OPENAI_API_KEY` | Optional | Richer news briefs |
-| `CRON_SECRET` | Cron only | Protects `/api/cron/digest` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-side Supabase operations |
+| `NEXT_PUBLIC_SITE_URL` | Production | Canonical URL for auth redirects |
+| `FINNHUB_API_KEY` | Yes | News, company news, earnings calendar |
+| `ALPHA_VANTAGE_API_KEY` | Yes | News sentiment |
+| `STRIPE_SECRET_KEY` | Pro plan | Stripe secret key |
+| `STRIPE_PRO_PRICE_ID` | Pro plan | Stripe price ID |
+| `STRIPE_WEBHOOK_SECRET` | Pro plan | Stripe webhook verification |
+| `RESEND_API_KEY` | Optional | Email digests |
+| `RESEND_FROM_EMAIL` | Optional | From address |
+| `OPENAI_API_KEY` | Optional | AI headline summaries |
+| `ADMIN_EMAILS` | Optional | Comma-separated emails always treated as Pro |
 
-Never commit **`.env.local`** or service role keys.
+Never commit `.env.local` or service role keys.
 
 ## Deploying to Vercel
 
-1. Push this repo to GitHub (or GitLab / Bitbucket).
-2. Import the repo in [Vercel](https://vercel.com) as a Next.js project.
-3. Add the same env vars as in `.env.example`. For production, set `NEXT_PUBLIC_SITE_URL` to `https://alpha-brief.vercel.app` (HTTPS, no trailing slash), or your custom domain if you add one.
-4. In Supabase **Authentication → URL configuration**, set **Site URL** and **Redirect URLs** to that same origin (including `https://alpha-brief.vercel.app/auth/callback` and any preview URLs you use).
+1. Push to GitHub and import in [Vercel](https://vercel.com) as a Next.js project.
+2. Add all env vars from `.env.example` in Vercel project settings.
+3. Set `NEXT_PUBLIC_SITE_URL` to your production domain (e.g. `https://alphabrief.net`).
+4. In Supabase → Authentication → URL configuration, add your domain to Site URL and Redirect URLs.
 
-**Cron:** `vercel.json` schedules `/api/cron/digest` daily. Set `CRON_SECRET` in Vercel; confirm cron availability for your Vercel plan. The route is a stub you can extend for batch digests.
-
-## Project layout (high level)
+## Project layout
 
 ```
-src/app/           # App Router pages (landing, auth, dashboard, map, settings)
-src/components/    # UI components
-src/lib/           # Supabase client, news RSS, events, market map data, email
+src/app/           # App Router pages (landing, auth, home, dashboard, map, archive, legal)
+src/components/    # UI components (news briefing, market map, chat room, timeline, etc.)
+src/lib/           # News aggregation, earnings, events, market data, subscription, email
 supabase/migrations/
 ```
 
 ## Disclaimer
 
-RSS and third-party market data are **informational only**, not investment advice. Verify material facts before acting. This is still a work in progress.
-
-## License
-
-Private / all rights reserved unless you add an explicit license file.
+All content is informational only and does not constitute investment advice. See [alphabrief.net/legal](https://alphabrief.net/legal) for full terms.
