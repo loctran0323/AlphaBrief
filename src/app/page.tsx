@@ -168,15 +168,12 @@ export default async function HomePage() {
               <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#6C5CE7]">
                 Markets · Timeline · News
               </p>
-              <h1 className="mt-3 text-6xl font-black leading-[1.05] tracking-tight text-gray-900 md:text-7xl">
-                Your alpha,{" "}
-                <span className="inline-flex items-center gap-1 text-[#6C5CE7]">
-                  <Sparkle className="h-10 w-10" />
-                </span>{" "}
-                briefly.
+              <h1 className="mt-3 inline-flex items-center gap-3 text-6xl font-black leading-[1.05] tracking-tight text-gray-900 md:text-7xl">
+                AlphaBrief
+                <Sparkle className="h-10 w-10 shrink-0 text-[#6C5CE7] md:h-12 md:w-12" />
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-relaxed text-gray-500">
-                Signal first, noise last.
+                Signal first, noise last. Your alpha, briefly.
               </p>
 
               {configured ? (
