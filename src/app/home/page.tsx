@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { ChatRoom } from "@/components/chat-room";
 import { HomeMoverList } from "@/components/home-mover-list";
 import { HomeTickerMonitor } from "@/components/home-ticker-monitor";
 import { isSupabaseConfigured } from "@/lib/env";
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
 import { createClient } from "@/lib/supabase/server";
+import { getUserTier } from "@/lib/subscription";
 import type { WatchlistItem } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +39,8 @@ export default async function HomePage() {
   const data = await fetchMarketHomeData();
 
   let isAuthenticated = false;
+  let userEmail: string | null = null;
+  let userIsPro = false;
   let watchlistId: string | null = null;
   let savedItems: WatchlistItem[] = [];
 
@@ -45,6 +49,9 @@ export default async function HomePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       isAuthenticated = true;
+      userEmail = user.email ?? null;
+      const tier = await getUserTier(supabase, user.id, user.email);
+      userIsPro = tier === "pro";
       const { data: watchlists } = await supabase
         .from("watchlists").select("id")
         .order("created_at", { ascending: true }).limit(1);
@@ -170,19 +177,28 @@ export default async function HomePage() {
           </section>
         </div>
 
-        {/* Watchlist sidebar */}
-        <aside className="w-full shrink-0 lg:sticky lg:top-24 lg:w-72 xl:w-80">
-          <div className="mb-3">
-            <h2 className="text-lg font-bold text-[var(--foreground)]">Your watchlist</h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">Tickers synced with dashboard &amp; news.</p>
+        {/* Watchlist + Chat sidebar */}
+        <aside className="w-full shrink-0 space-y-6 lg:sticky lg:top-24 lg:w-72 xl:w-80">
+          <div>
+            <div className="mb-3">
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Your watchlist</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Tickers synced with dashboard &amp; news.</p>
+            </div>
+            <HomeTickerMonitor
+              layout="sidebar"
+              isAuthenticated={isAuthenticated}
+              watchlistId={watchlistId}
+              savedItems={savedItems}
+              savedQuotes={savedQuotes}
+            />
           </div>
-          <HomeTickerMonitor
-            layout="sidebar"
-            isAuthenticated={isAuthenticated}
-            watchlistId={watchlistId}
-            savedItems={savedItems}
-            savedQuotes={savedQuotes}
-          />
+          <div>
+            <div className="mb-3">
+              <h2 className="text-lg font-bold text-[var(--foreground)]">Community</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Live chat with other AlphaBrief users.</p>
+            </div>
+            <ChatRoom email={userEmail} isPro={userIsPro} />
+          </div>
         </aside>
       </div>
     </div>

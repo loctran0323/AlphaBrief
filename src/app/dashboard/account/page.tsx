@@ -6,6 +6,8 @@ import { updatePassword } from "./actions";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Account" };
 
+const inputCls = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]";
+
 export default async function AccountPage({
   searchParams,
 }: {
@@ -17,9 +19,7 @@ export default async function AccountPage({
   const passwordChanged = get("passwordChanged") === "1";
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <div className="mx-auto max-w-2xl pb-16">
@@ -39,41 +39,23 @@ export default async function AccountPage({
           {error}
         </div>
       )}
-      {passwordChanged && (
+{passwordChanged && (
         <div className="mt-6 rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           Password updated successfully.
         </div>
       )}
 
-      <section className="mt-10">
+      <section className="mt-10 space-y-6">
+        {/* Password */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Change password</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
             Enter your current password to confirm, then choose a new one.
           </p>
           <form action={updatePassword} className="mt-5 space-y-3">
-            <input
-              type="password"
-              name="current"
-              required
-              placeholder="Current password"
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-            />
-            <input
-              type="password"
-              name="password"
-              required
-              minLength={8}
-              placeholder="New password"
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-            />
-            <input
-              type="password"
-              name="confirm"
-              required
-              placeholder="Confirm new password"
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-            />
+            <input type="password" name="current" required placeholder="Current password" className={inputCls} />
+            <input type="password" name="password" required minLength={8} placeholder="New password" className={inputCls} />
+            <input type="password" name="confirm" required placeholder="Confirm new password" className={inputCls} />
             <button
               type="submit"
               className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
