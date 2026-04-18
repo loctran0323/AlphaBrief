@@ -72,7 +72,8 @@ export function ChatRoom({
       });
 
     channelRef.current = channel;
-    return () => { void supabase.current.removeChannel(channel); };
+    const sb = supabase.current;
+    return () => { void sb.removeChannel(channel); };
   }, [email]);
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export function ChatRoom({
       ts: Date.now(),
     };
     await channelRef.current.send({ type: "broadcast", event: "msg", payload: msg });
-  }, [input, email]);
+  }, [input, email, isPro]);
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
