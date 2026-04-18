@@ -19,10 +19,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteDescription = "Signal first, noise last.";
+const siteDescription =
+  "AlphaBrief is a markets workspace for your watchlist, catalyst timeline, sector map, and AI-tagged news — signal first, noise last.";
 
 export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
+  applicationName: "AlphaBrief",
   title: "AlphaBrief — watchlist, timeline & market news",
   description: siteDescription,
   icons: {
@@ -34,6 +36,8 @@ export const metadata: Metadata = {
     title: "AlphaBrief — watchlist, timeline & market news",
     description: siteDescription,
     type: "website",
+    siteName: "AlphaBrief",
+    url: "/",
   },
   twitter: {
     card: "summary_large_image",
@@ -41,6 +45,33 @@ export const metadata: Metadata = {
     description: siteDescription,
   },
 };
+
+function structuredDataJsonLd(): string {
+  const base = siteMetadataBase().origin;
+  const payload = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${base}/#website`,
+        name: "AlphaBrief",
+        url: base,
+        description:
+          "Markets workspace: watchlist, catalyst timeline, sector map, and AI-tagged news.",
+        publisher: { "@id": `${base}/#organization` },
+        inLanguage: "en",
+      },
+      {
+        "@type": "Organization",
+        "@id": `${base}/#organization`,
+        name: "AlphaBrief",
+        url: base,
+        logo: `${base}/alpha-brief-icon.svg`,
+      },
+    ],
+  };
+  return JSON.stringify(payload);
+}
 
 export default function RootLayout({
   children,
@@ -52,6 +83,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen antialiased`}
       >
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger -- JSON-LD for search engines
+          dangerouslySetInnerHTML={{ __html: structuredDataJsonLd() }}
+        />
         {children}
       </body>
     </html>
