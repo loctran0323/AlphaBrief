@@ -115,6 +115,7 @@ export function DashboardTimelineTabs({
         perPage={perPage}
         readMoreUrlsByEventId={readMoreUrlsByEventId}
         showTickerBadge={tab === "tickers"}
+        archiveMode={pastArchiveMode}
       />
     </div>
   );

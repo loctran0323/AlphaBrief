@@ -5,6 +5,7 @@ export type NewsArticle = {
   url: string;
   publishedAt: string | null;
   summary: string;
+  keyPoints?: string[];
   matchedTicker: string | null;
   category: "economics" | "markets" | "consumers" | "companies" | "policy";
   marketImpact: "bullish" | "bearish" | "neutral";

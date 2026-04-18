@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { MarketEvent } from "@/types/database";
 
 type EventType = MarketEvent["event_type"];
@@ -33,11 +36,45 @@ type Props = {
   event: MarketEvent;
   showTickerBadge?: boolean;
   readMoreUrl?: string | null;
+  /** Show "What happened?" AI summary button for past events */
+  archiveMode?: boolean;
 };
 
-export function EventCard({ event, showTickerBadge = true, readMoreUrl }: Props) {
+export function EventCard({ event, showTickerBadge = true, readMoreUrl, archiveMode = false }: Props) {
   const styles = typeStyles[event.event_type];
   const ticker = event.ticker?.trim();
+
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiShown, setAiShown] = useState(false);
+
+  const loadAiSummary = async () => {
+    if (aiShown) {
+      setAiShown(false);
+      return;
+    }
+    if (aiSummary) {
+      setAiShown(true);
+      return;
+    }
+    setAiLoading(true);
+    setAiShown(true);
+    try {
+      const params = new URLSearchParams({
+        title: event.title,
+        date: event.event_date,
+        eventType: event.event_type,
+      });
+      const res = await fetch(`/api/events/ai-summary?${params.toString()}`);
+      if (!res.ok) throw new Error("fetch failed");
+      const data = (await res.json()) as { summary?: string };
+      setAiSummary(data.summary ?? "No summary available.");
+    } catch {
+      setAiSummary("Could not load AI summary.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   return (
     <article className="flex gap-0 py-5">
@@ -64,6 +101,19 @@ export function EventCard({ event, showTickerBadge = true, readMoreUrl }: Props)
           <span className="font-medium text-[var(--foreground)]">Watch for: </span>
           {event.watch_for}
         </p>
+
+        {/* AI summary for archive mode */}
+        {archiveMode && aiShown && (
+          <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--faint)]">What happened</p>
+            {aiLoading ? (
+              <p className="text-sm text-[var(--muted)]">Loading…</p>
+            ) : (
+              <p className="text-sm leading-relaxed text-[var(--foreground)]">{aiSummary}</p>
+            )}
+          </div>
+        )}
+
         <div className="mt-4 flex flex-wrap gap-3">
           {readMoreUrl ? (
             <a
@@ -75,6 +125,15 @@ export function EventCard({ event, showTickerBadge = true, readMoreUrl }: Props)
               Read coverage →
             </a>
           ) : null}
+          {archiveMode && (
+            <button
+              type="button"
+              onClick={loadAiSummary}
+              className="text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
+            >
+              {aiShown ? "Hide AI summary" : "What happened? →"}
+            </button>
+          )}
         </div>
       </div>
     </article>
