@@ -259,9 +259,9 @@ export default function LegalPage() {
                 AlphaBrief aggregates news metadata — including headlines, publication dates, and
                 source attribution — through third-party news and market data APIs. We display this
                 metadata alongside AI-generated analysis; we do not reproduce full article text.
-                Links to original articles open in a new window and direct you to the publisher's
+                Links to original articles open in a new window and direct you to the publisher&apos;s
                 website. These links do not constitute an endorsement of or affiliation with those
-                publishers. Your access to linked articles is subject to each publisher's own terms
+                publishers. Your access to linked articles is subject to each publisher&apos;s own terms
                 of service.
               </p>
             </Section>
