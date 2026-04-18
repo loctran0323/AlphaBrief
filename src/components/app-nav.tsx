@@ -76,6 +76,18 @@ function UserMenu({ email, tier }: { email?: string; tier: "free" | "pro" }) {
             </Link>
           </div>
           <div className="border-t border-gray-100 py-1">
+            <Link
+              href="/dashboard/account"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900"
+            >
+              <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+              Account
+            </Link>
+          </div>
+          <div className="border-t border-gray-100 py-1">
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
