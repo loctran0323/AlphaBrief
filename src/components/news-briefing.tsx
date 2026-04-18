@@ -28,19 +28,41 @@ function impactBadgeClass(impact: NewsArticle["marketImpact"]): string {
   return "border-amber-200 bg-amber-50 text-amber-700";
 }
 
-/** Returns true if summary is just the title echoed back (common in Reuters/Bloomberg RSS). */
-function isDuplicateSummary(summary: string, title: string): boolean {
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
-  const ns = norm(summary);
-  const nt = norm(title);
-  // Exact match or summary starts with the title (RSS often appends source name)
-  return ns === nt || ns.startsWith(nt.slice(0, Math.min(nt.length, 60)));
+/** Normalise text for comparison. */
+function normText(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
+}
+
+/** Pick the best one-line description to show under the headline. */
+function pickDescription(article: NewsArticle): string | null {
+  const nt = normText(article.title);
+
+  // Use summary if it has meaningful content beyond the title
+  if (article.summary) {
+    const ns = normText(article.summary);
+    // Show if meaningfully different: not an exact match AND either longer or clearly different start
+    const sameStart = ns.startsWith(nt.slice(0, Math.min(nt.length, 80)));
+    if (!(sameStart && ns.length <= nt.length + 30)) {
+      return article.summary;
+    }
+  }
+
+  // Fall back to rationale if it's informative (not the generic placeholder)
+  if (
+    article.marketImpactRationale &&
+    !article.marketImpactRationale.startsWith("Mixed or company-specific") &&
+    !article.marketImpactRationale.startsWith("Alpha Vantage rates")
+  ) {
+    return article.marketImpactRationale;
+  }
+
+  return null;
 }
 
 function ArticleCard({ article }: { article: NewsArticle }) {
   const [expanded, setExpanded] = useState(false);
   const hasKeyPoints = Array.isArray(article.keyPoints) && article.keyPoints.length > 0;
-  const showSummary = article.summary && !isDuplicateSummary(article.summary, article.title);
+  const description = pickDescription(article);
 
   return (
     <article className="flex gap-0 py-5">
@@ -73,14 +95,8 @@ function ArticleCard({ article }: { article: NewsArticle }) {
           {article.title}
         </h3>
 
-        {showSummary && (
-          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{article.summary}</p>
-        )}
-
-        {article.marketImpactRationale && (
-          <p className="mt-2 text-sm italic leading-relaxed text-[var(--faint)]">
-            {article.marketImpactRationale}
-          </p>
+        {description && (
+          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{description}</p>
         )}
 
         {hasKeyPoints && (
@@ -120,12 +136,14 @@ function ArticleCard({ article }: { article: NewsArticle }) {
 
 export function NewsBriefing({
   articles,
+  watchlistTickers = [],
   itemsPerPage = 4,
   title = "News briefing",
   emptyHintTickers,
   dataFetchedAt,
 }: {
   articles: NewsArticle[];
+  watchlistTickers?: string[];
   itemsPerPage?: number;
   title?: string;
   emptyHintTickers?: string;
@@ -134,11 +152,20 @@ export function NewsBriefing({
   const [tab, setTab] = useState<Tab>("all");
   const [page, setPage] = useState(0);
 
+  const watchlistSet = useMemo(
+    () => new Set(watchlistTickers.map((t) => t.toUpperCase())),
+    [watchlistTickers],
+  );
+
   const filtered = useMemo(() => {
-    if (tab === "all") return articles; // show everything
-    if (tab === "tickers") return articles.filter((a) => a.matchedTicker);
+    if (tab === "all") return articles;
+    if (tab === "tickers")
+      // Only articles whose matched ticker is in the user's actual watchlist
+      return articles.filter(
+        (a) => a.matchedTicker && watchlistSet.has(a.matchedTicker.toUpperCase()),
+      );
     return articles.filter((a) => a.category === tab);
-  }, [articles, tab]);
+  }, [articles, tab, watchlistSet]);
 
   useEffect(() => {
     setPage(0);
@@ -169,7 +196,8 @@ export function NewsBriefing({
             : categoryLabel[id as Category];
           const count =
             id === "all" ? articles.length
-            : id === "tickers" ? articles.filter((a) => a.matchedTicker).length
+            : id === "tickers"
+              ? articles.filter((a) => a.matchedTicker && watchlistSet.has(a.matchedTicker.toUpperCase())).length
             : articles.filter((a) => a.category === id).length;
           return (
             <button

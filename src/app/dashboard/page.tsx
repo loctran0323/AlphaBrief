@@ -106,7 +106,7 @@ export default async function DashboardPage() {
           />
         </div>
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
-          <NewsBriefing articles={news} itemsPerPage={4} dataFetchedAt={serverFetchedAt} />
+          <NewsBriefing articles={news} watchlistTickers={tickers} itemsPerPage={4} dataFetchedAt={serverFetchedAt} />
         </div>
       </section>
     </div>

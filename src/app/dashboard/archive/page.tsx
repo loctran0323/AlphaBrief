@@ -168,7 +168,7 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
           <NewsBriefing
             title="Archived news"
             articles={archivedNews}
-            itemsPerPage={2}
+            itemsPerPage={4}
             emptyHintTickers="No watchlist-tagged headlines in this range. Try All, widen dates, or check back later."
           />
         </div>
