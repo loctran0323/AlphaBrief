@@ -9,6 +9,7 @@ type Props = {
   perPage?: number;
   readMoreUrlsByEventId?: Record<string, string>;
   showTickerBadge?: boolean;
+  archiveMode?: boolean;
 };
 
 export function TimelinePager({
@@ -16,6 +17,7 @@ export function TimelinePager({
   perPage = 2,
   readMoreUrlsByEventId,
   showTickerBadge = true,
+  archiveMode = false,
 }: Props) {
   const [page, setPage] = useState(0);
 
@@ -44,6 +46,7 @@ export function TimelinePager({
             event={event}
             showTickerBadge={showTickerBadge}
             readMoreUrl={readMoreUrlsByEventId?.[event.id] ?? null}
+            archiveMode={archiveMode}
           />
         ))}
       </div>

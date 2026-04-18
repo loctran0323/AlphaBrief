@@ -2,6 +2,59 @@ import crypto from "node:crypto";
 import type { NewsArticle } from "@/types/news";
 import { rssGetTag } from "@/lib/rss-parse";
 
+/** Common ticker → name aliases so "Amazon" matches AMZN, "Apple" matches AAPL, etc. */
+const TICKER_ALIASES: Record<string, string[]> = {
+  AMZN: ["amazon"],
+  AAPL: ["apple"],
+  MSFT: ["microsoft"],
+  GOOGL: ["google", "alphabet"],
+  GOOG: ["google", "alphabet"],
+  META: ["meta", "facebook"],
+  TSLA: ["tesla"],
+  NVDA: ["nvidia"],
+  NFLX: ["netflix"],
+  AMD: ["amd", "advanced micro"],
+  INTC: ["intel"],
+  ORCL: ["oracle"],
+  CRM: ["salesforce"],
+  ADBE: ["adobe"],
+  PYPL: ["paypal"],
+  UBER: ["uber"],
+  LYFT: ["lyft"],
+  SHOP: ["shopify"],
+  COIN: ["coinbase"],
+  PLTR: ["palantir"],
+  SNAP: ["snap", "snapchat"],
+  TWTR: ["twitter", "x corp"],
+  SPOT: ["spotify"],
+  ABNB: ["airbnb"],
+  DASH: ["doordash"],
+  RBLX: ["roblox"],
+  BA: ["boeing"],
+  JPM: ["jpmorgan", "j.p. morgan"],
+  GS: ["goldman sachs", "goldman"],
+  MS: ["morgan stanley"],
+  BAC: ["bank of america"],
+  WFC: ["wells fargo"],
+  C: ["citigroup", "citi"],
+  V: ["visa"],
+  MA: ["mastercard"],
+  BRK: ["berkshire"],
+  JNJ: ["johnson & johnson", "johnson and johnson"],
+  PFE: ["pfizer"],
+  MRNA: ["moderna"],
+  UNH: ["unitedhealth"],
+  CVX: ["chevron"],
+  XOM: ["exxon"],
+  WMT: ["walmart"],
+  TGT: ["target"],
+  HD: ["home depot"],
+  DIS: ["disney"],
+  CMCSA: ["comcast"],
+  T: ["at&t"],
+  VZ: ["verizon"],
+};
+
 type SourceFeed = {
   source: string;
   url: string;
@@ -13,6 +66,12 @@ type RssItem = {
   pubDate: string | null;
   description: string;
   source: string;
+};
+
+type NormalizedItem = RssItem & {
+  nativeSentiment?: "bullish" | "bearish" | "neutral";
+  nativeSummary?: string;
+  nativeRationale?: string;
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -45,6 +104,7 @@ type NewsBrief = {
   summary: string;
   marketImpact: "bullish" | "bearish" | "neutral";
   rationale: string;
+  keyPoints: string[];
 };
 
 const FEEDS: SourceFeed[] = [
@@ -58,8 +118,18 @@ const FEEDS: SourceFeed[] = [
   { source: "Nasdaq", url: "https://www.nasdaq.com/feed/rssoutbound?category=Stocks" },
 ];
 
-/** Newest N rows from the merged RSS list always qualify so briefings churn with top headlines, not only macro/ticker keyword hits. */
-const TOP_MERGED_FEED_SLOTS = 28;
+/** Newest N rows from the merged feed always qualify (general market discovery, not just watchlist/macro). */
+const TOP_MERGED_FEED_SLOTS = 50;
+
+/**
+ * Popular tickers surfaced in the "All" tab even when not in the user's watchlist.
+ * Articles mentioning these get tagged so users discover market movers beyond their list.
+ */
+const DISCOVERY_TICKERS = [
+  "NVDA", "AAPL", "MSFT", "TSLA", "META", "GOOGL", "GOOG", "AMD",
+  "NFLX", "UBER", "COIN", "PLTR", "SPY", "QQQ", "JPM", "BAC",
+  "AMZN", "GS", "V", "MA", "DIS", "XOM", "CVX", "WMT",
+];
 
 const MACRO_KEYWORDS = [
   "inflation",
@@ -86,67 +156,321 @@ const MACRO_KEYWORDS = [
   "durable goods",
 ];
 
+// ─── Alpha Vantage ────────────────────────────────────────────────────────────
+
+type AvFeedItem = {
+  title: string;
+  url: string;
+  time_published: string; // "20240115T143000"
+  summary: string;
+  source: string;
+  overall_sentiment_score: number;
+  overall_sentiment_label: string;
+  ticker_sentiment?: Array<{
+    ticker: string;
+    relevance_score: string;
+    ticker_sentiment_score: string;
+    ticker_sentiment_label: string;
+  }>;
+};
+
+function avSentimentLabel(label: string): "bullish" | "bearish" | "neutral" {
+  const l = label.toLowerCase();
+  if (l.includes("bullish")) return "bullish";
+  if (l.includes("bearish")) return "bearish";
+  return "neutral";
+}
+
+function avTimeToIso(t: string): string {
+  // "20240115T143000" → "2024-01-15T14:30:00Z"
+  try {
+    const y = t.slice(0, 4);
+    const mo = t.slice(4, 6);
+    const d = t.slice(6, 8);
+    const h = t.slice(9, 11);
+    const mi = t.slice(11, 13);
+    const s = t.slice(13, 15) || "00";
+    return `${y}-${mo}-${d}T${h}:${mi}:${s}Z`;
+  } catch {
+    return new Date().toISOString();
+  }
+}
+
+/** AV time format: YYYYMMDDTHHMM */
+function toAvTime(ms: number): string {
+  const d = new Date(ms);
+  const pad = (n: number, len = 2) => String(n).padStart(len, "0");
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;
+}
+
+async function fetchAlphaVantageNews(
+  tickers: string[],
+  opts?: { fromMs?: number; toMs?: number },
+): Promise<NormalizedItem[]> {
+  const key = process.env.ALPHA_VANTAGE_API_KEY;
+  if (!key) return [];
+
+  const tickerParam = tickers.slice(0, 5).join(",");
+  const params = new URLSearchParams({ function: "NEWS_SENTIMENT", sort: "LATEST", limit: "50", apikey: key });
+  if (tickerParam) params.set("tickers", tickerParam);
+  if (opts?.fromMs) params.set("time_from", toAvTime(opts.fromMs));
+  if (opts?.toMs) params.set("time_to", toAvTime(opts.toMs));
+  const base = `https://www.alphavantage.co/query?${params.toString()}`;
+
+  try {
+    const res = await fetch(base, { cache: "no-store" });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { feed?: AvFeedItem[] };
+    if (!Array.isArray(data.feed)) return [];
+
+    return data.feed.map((item) => {
+      const pubDate = avTimeToIso(item.time_published);
+      const sentiment = avSentimentLabel(item.overall_sentiment_label);
+      const rationale =
+        sentiment === "bullish"
+          ? "Alpha Vantage rates this headline as positive for equities."
+          : sentiment === "bearish"
+            ? "Alpha Vantage rates this headline as negative for risk assets."
+            : "Alpha Vantage rates this headline as neutral.";
+
+      // Only tag a ticker if relevance score is meaningful (>=0.35), not just a passing mention
+      const topTicker = item.ticker_sentiment
+        ?.sort((a, b) => parseFloat(b.relevance_score) - parseFloat(a.relevance_score))
+        .find((ts) => tickers.includes(ts.ticker.toUpperCase()) && parseFloat(ts.relevance_score) >= 0.35);
+
+      return {
+        title: sanitizePlainText(item.title, 220),
+        link: item.url,
+        pubDate,
+        description: sanitizePlainText(item.summary, 280),
+        source: item.source ?? "Alpha Vantage",
+        nativeSentiment: sentiment,
+        nativeSummary: sanitizePlainText(item.summary, 220),
+        nativeRationale: rationale,
+        // attach matched ticker from AV data
+        _avMatchedTicker: topTicker?.ticker ?? null,
+      } as NormalizedItem & { _avMatchedTicker: string | null };
+    });
+  } catch {
+    return [];
+  }
+}
+
+// ─── Finnhub ──────────────────────────────────────────────────────────────────
+
+type FinnhubNewsItem = {
+  category: string;
+  datetime: number; // unix timestamp
+  headline: string;
+  id: number;
+  related: string;
+  source: string;
+  summary: string;
+  url: string;
+};
+
+async function fetchFinnhubNews(): Promise<NormalizedItem[]> {
+  const key = process.env.FINNHUB_API_KEY;
+  if (!key) return [];
+
+  try {
+    const res = await fetch(
+      `https://finnhub.io/api/v1/news?category=general&token=${key}`,
+      { cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const data = (await res.json()) as FinnhubNewsItem[];
+    if (!Array.isArray(data)) return [];
+
+    return data.slice(0, 40).map((item) => ({
+      title: sanitizePlainText(item.headline, 220),
+      link: item.url,
+      pubDate: new Date(item.datetime * 1000).toISOString(),
+      description: sanitizePlainText(item.summary, 280),
+      source: item.source ?? "Finnhub",
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function fetchFinnhubTickerNews(
+  ticker: string,
+  opts?: { fromMs?: number; toMs?: number },
+): Promise<NormalizedItem[]> {
+  const key = process.env.FINNHUB_API_KEY;
+  if (!key) return [];
+
+  const to = opts?.toMs ? new Date(opts.toMs) : new Date();
+  const from = opts?.fromMs ? new Date(opts.fromMs) : new Date(Date.now() - 7 * MS_PER_DAY);
+  const fmt = (d: Date) => d.toISOString().split("T")[0]!;
+
+  try {
+    const res = await fetch(
+      `https://finnhub.io/api/v1/company-news?symbol=${encodeURIComponent(ticker)}&from=${fmt(from)}&to=${fmt(to)}&token=${key}`,
+      { cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const data = (await res.json()) as FinnhubNewsItem[];
+    if (!Array.isArray(data)) return [];
+
+    return data.slice(0, 20).map((item) => ({
+      title: sanitizePlainText(item.headline, 220),
+      link: item.url,
+      pubDate: new Date(item.datetime * 1000).toISOString(),
+      description: sanitizePlainText(item.summary, 280),
+      source: item.source ?? "Finnhub",
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// ─── Build article list ───────────────────────────────────────────────────────
+
 async function buildNewsArticleList(
   tickers: string[],
   candidateCap: number,
 ): Promise<NewsArticle[]> {
-  const feedItems = await loadFeedItems(NEWS_RSS_FETCH_MAX_AGE_MS);
-  const candidates = feedItems
-    .map((item, rank) => toCandidate(item, tickers, rank))
-    .filter((item): item is RssItem & { matchedTicker: string | null } => item !== null)
+  // Fetch per-ticker Finnhub company news — cap at 3 per ticker so general news still fills "All"
+  const MAX_PER_TICKER = 3;
+  const perTickerFinnhub = tickers.length > 0
+    ? await Promise.all(tickers.map(async (t) => {
+        const items = await fetchFinnhubTickerNews(t);
+        return items.slice(0, MAX_PER_TICKER).map((item) => ({ ...item, _forcedTicker: t }));
+      }))
+    : [];
+  const tickerFinnhubFlat = perTickerFinnhub.flat();
+
+  const [feedItems, avItems, finnhubItems] = await Promise.all([
+    loadFeedItems(NEWS_RSS_FETCH_MAX_AGE_MS),
+    fetchAlphaVantageNews(tickers),
+    fetchFinnhubNews(),
+  ]);
+
+  // Merge: per-ticker Finnhub first (guaranteed coverage), then AV, general Finnhub, RSS
+  const allItems = dedupeByLink([...tickerFinnhubFlat, ...avItems, ...finnhubItems, ...feedItems]);
+
+  const candidates = allItems
+    .map((item, rank) => toCandidate(item as NormalizedItem, tickers, rank))
+    .filter((item): item is NormalizedItem & { matchedTicker: string | null } => item !== null)
     .slice(0, candidateCap);
 
-  const summaries = await summarizeArticles(candidates);
+  // Items with native sentiment skip OpenAI
+  const needsSummarization = candidates.filter((c) => !c.nativeSentiment);
+  const summaries = await summarizeArticles(needsSummarization);
 
-  return candidates.map((item, i) => ({
-    id: crypto.createHash("sha1").update(`${item.link}-${item.pubDate ?? ""}`).digest("hex"),
-    source: item.source,
-    title: item.title,
-    url: item.link,
-    publishedAt: item.pubDate,
-    summary: sanitizePlainText(summaries[i]?.summary ?? fallbackSummary(item), 220),
-    matchedTicker: item.matchedTicker,
-    category: classifyCategory(item),
-    marketImpact: summaries[i]?.marketImpact ?? inferImpact(item).marketImpact,
-    marketImpactRationale:
-      summaries[i]?.rationale ?? inferImpact(item).rationale,
-  }));
+  let summIdx = 0;
+  return candidates.map((item) => {
+    if (item.nativeSentiment) {
+      return {
+        id: crypto.createHash("sha1").update(`${item.link}-${item.pubDate ?? ""}`).digest("hex"),
+        source: item.source,
+        title: item.title,
+        url: item.link,
+        publishedAt: item.pubDate,
+        summary: item.nativeSummary ?? fallbackSummary(item),
+        keyPoints: [],
+        matchedTicker: item.matchedTicker,
+        category: classifyCategory(item),
+        marketImpact: item.nativeSentiment,
+        marketImpactRationale: item.nativeRationale ?? "",
+      };
+    }
+
+    const brief = summaries[summIdx++];
+    return {
+      id: crypto.createHash("sha1").update(`${item.link}-${item.pubDate ?? ""}`).digest("hex"),
+      source: item.source,
+      title: item.title,
+      url: item.link,
+      publishedAt: item.pubDate,
+      summary: sanitizePlainText(brief?.summary ?? fallbackSummary(item), 220),
+      keyPoints: brief?.keyPoints ?? [],
+      matchedTicker: item.matchedTicker,
+      category: classifyCategory(item),
+      marketImpact: brief?.marketImpact ?? inferImpact(item).marketImpact,
+      marketImpactRationale: brief?.rationale ?? inferImpact(item).rationale,
+    };
+  });
 }
 
-/** Ranked RSS rows whose pubDate falls in [from, to] before summarization (cheaper + narrower than full merge). */
+/** Ranked rows (RSS + AV + Finnhub) whose pubDate falls in [from, to]. */
 async function buildNewsArticleListInPublishedRange(
   tickers: string[],
   publishedFromMs: number,
   publishedToMs: number,
   summarizeCap: number,
 ): Promise<NewsArticle[]> {
-  const feedItems = await loadFeedItems(NEWS_RSS_FETCH_MAX_AGE_MS);
-  const candidates = feedItems
-    .map((item, rank) => toCandidate(item, tickers, rank))
-    .filter((item): item is RssItem & { matchedTicker: string | null } => item !== null)
-    .filter((item) => {
-      if (!item.pubDate) return false;
-      const t = Date.parse(item.pubDate);
-      if (Number.isNaN(t)) return false;
-      return t >= publishedFromMs && t <= publishedToMs;
-    })
+  const dateOpts = { fromMs: publishedFromMs, toMs: publishedToMs };
+
+  // Per-ticker Finnhub historical news — higher cap for archive
+  const perTickerFinnhubArchive = tickers.length > 0
+    ? await Promise.all(tickers.map(async (t) => {
+        const items = await fetchFinnhubTickerNews(t, dateOpts);
+        return items.slice(0, 20).map((item) => ({ ...item, _forcedTicker: t }));
+      }))
+    : [];
+
+  const [feedItems, avItems, finnhubItems] = await Promise.all([
+    loadFeedItems(NEWS_RSS_FETCH_MAX_AGE_MS),
+    fetchAlphaVantageNews(tickers, dateOpts),
+    fetchFinnhubNews(),
+  ]);
+
+  const tickerFinnhubFlat = perTickerFinnhubArchive.flat();
+
+  const allItems = dedupeByLink([...tickerFinnhubFlat, ...avItems, ...finnhubItems, ...feedItems]);
+
+  const inRange = (item: RssItem) => {
+    if (!item.pubDate) return false;
+    const t = Date.parse(item.pubDate);
+    if (Number.isNaN(t)) return false;
+    return t >= publishedFromMs && t <= publishedToMs;
+  };
+
+  const candidates = allItems
+    .filter(inRange)
+    .map((item, rank) => toCandidate(item as NormalizedItem, tickers, rank, { archiveMode: true }))
+    .filter((item): item is NormalizedItem & { matchedTicker: string | null } => item !== null)
     .slice(0, Math.max(0, summarizeCap));
 
-  const summaries = await summarizeArticles(candidates);
+  const needsSummarization = candidates.filter((c) => !(c as NormalizedItem).nativeSentiment);
+  const summaries = await summarizeArticles(needsSummarization);
 
-  return candidates.map((item, i) => ({
-    id: crypto.createHash("sha1").update(`${item.link}-${item.pubDate ?? ""}`).digest("hex"),
-    source: item.source,
-    title: item.title,
-    url: item.link,
-    publishedAt: item.pubDate,
-    summary: sanitizePlainText(summaries[i]?.summary ?? fallbackSummary(item), 220),
-    matchedTicker: item.matchedTicker,
-    category: classifyCategory(item),
-    marketImpact: summaries[i]?.marketImpact ?? inferImpact(item).marketImpact,
-    marketImpactRationale:
-      summaries[i]?.rationale ?? inferImpact(item).rationale,
-  }));
+  let summIdx = 0;
+  return candidates.map((item) => {
+    if ((item as NormalizedItem).nativeSentiment) {
+      const n = item as NormalizedItem;
+      return {
+        id: crypto.createHash("sha1").update(`${item.link}-${item.pubDate ?? ""}`).digest("hex"),
+        source: item.source,
+        title: item.title,
+        url: item.link,
+        publishedAt: item.pubDate,
+        summary: n.nativeSummary ?? fallbackSummary(item),
+        keyPoints: [],
+        matchedTicker: item.matchedTicker,
+        category: classifyCategory(item),
+        marketImpact: n.nativeSentiment!,
+        marketImpactRationale: n.nativeRationale ?? "",
+      };
+    }
+    const brief = summaries[summIdx++];
+    return {
+      id: crypto.createHash("sha1").update(`${item.link}-${item.pubDate ?? ""}`).digest("hex"),
+      source: item.source,
+      title: item.title,
+      url: item.link,
+      publishedAt: item.pubDate,
+      summary: sanitizePlainText(brief?.summary ?? fallbackSummary(item), 220),
+      keyPoints: brief?.keyPoints ?? [],
+      matchedTicker: item.matchedTicker,
+      category: classifyCategory(item),
+      marketImpact: brief?.marketImpact ?? inferImpact(item).marketImpact,
+      marketImpactRationale: brief?.rationale ?? inferImpact(item).rationale,
+    };
+  });
 }
 
 export async function getNewsBriefing(params: {
@@ -196,13 +520,12 @@ export async function getArchivedNewsBriefing(params: {
   );
 
   return mapped
-    .filter((a) => isPublishedBeforeArchiveCutoff(a.publishedAt))
     .sort((a, b) => toTime(b.publishedAt) - toTime(a.publishedAt))
     .slice(0, limit);
 }
 
 /**
- * Headlines focused on one ticker (Google News RSS + business feeds). Not investment advice.
+ * Headlines focused on one ticker (Google News RSS + Finnhub company news + business feeds).
  */
 export async function getNewsForTicker(ticker: string, limit = 8): Promise<NewsArticle[]> {
   const t = ticker.trim().toUpperCase();
@@ -210,9 +533,10 @@ export async function getNewsForTicker(ticker: string, limit = 8): Promise<NewsA
 
   const gNewsUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(`${t} stock`)}&hl=en-US&gl=US&ceid=US:en`;
 
-  const [googleItems, feedItems] = await Promise.all([
+  const [googleItems, feedItems, finnhubItems] = await Promise.all([
     fetchRssUrl(gNewsUrl, "Google News"),
     loadFeedItems(),
+    fetchFinnhubTickerNews(t),
   ]);
 
   const fromFeeds = feedItems.filter((item) => {
@@ -225,7 +549,7 @@ export async function getNewsForTicker(ticker: string, limit = 8): Promise<NewsA
     );
   });
 
-  const merged = dedupeByLink([...googleItems, ...fromFeeds])
+  const merged = dedupeByLink([...finnhubItems, ...googleItems, ...fromFeeds])
     .filter((item) => publishedWithinWindow(item.pubDate, NEWS_RSS_FETCH_MAX_AGE_MS))
     .sort((a, b) => toTime(b.pubDate) - toTime(a.pubDate));
 
@@ -243,6 +567,7 @@ export async function getNewsForTicker(ticker: string, limit = 8): Promise<NewsA
     url: item.link,
     publishedAt: item.pubDate,
     summary: sanitizePlainText(summaries[i]?.summary ?? fallbackSummary(item), 220),
+    keyPoints: summaries[i]?.keyPoints ?? [],
     matchedTicker: t,
     category: classifyCategory(item),
     marketImpact: summaries[i]?.marketImpact ?? inferImpact(item).marketImpact,
@@ -328,7 +653,7 @@ function decodeHtmlEntities(s: string): string {
     });
 }
 
-/** Strip embedded links, raw URLs, and tags so RSS snippets don’t overflow the UI. */
+/** Strip embedded links, raw URLs, and tags so RSS snippets don't overflow the UI. */
 function sanitizePlainText(raw: string, maxLen = 240): string {
   if (!raw) return "";
   let s = decodeHtmlEntities(raw.trim());
@@ -355,19 +680,40 @@ function parseRssXml(xml: string, source: string): RssItem[] {
     .filter((x): x is RssItem => Boolean(x));
 }
 
-function toCandidate(item: RssItem, tickers: string[], mergeRank: number) {
+function tickerMentionedInText(ticker: string, blob: string): boolean {
+  const terms = [ticker.toLowerCase(), ...(TICKER_ALIASES[ticker.toUpperCase()] ?? [])];
+  return terms.some((term) =>
+    new RegExp(`(^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z0-9]|$)`).test(blob),
+  );
+}
+
+function toCandidate(
+  item: NormalizedItem & { _forcedTicker?: string },
+  tickers: string[],
+  mergeRank: number,
+  opts?: { archiveMode?: boolean },
+) {
   const blob = `${item.title} ${item.description}`.toLowerCase();
-  const matchedTicker = tickers.find((t) => blob.includes(t.toLowerCase())) ?? null;
+  // Watchlist ticker match
+  const matchedTicker = tickers.find((t) => tickerMentionedInText(t, blob)) ?? null;
   const isMacro = MACRO_KEYWORDS.some((k) => blob.includes(k));
   const inHeadlineWindow = mergeRank < TOP_MERGED_FEED_SLOTS;
-  if (!matchedTicker && !isMacro && tickers.length > 0 && !inHeadlineWindow) {
-    return null;
+
+  if (matchedTicker || isMacro || inHeadlineWindow || opts?.archiveMode) {
+    // Discovery: tag popular non-watchlist tickers so they appear with a badge in "All"
+    const discoveryTicker =
+      !matchedTicker
+        ? (DISCOVERY_TICKERS.find(
+            (d) => !tickers.includes(d) && tickerMentionedInText(d, blob),
+          ) ?? null)
+        : null;
+    return { ...item, matchedTicker: matchedTicker ?? discoveryTicker };
   }
-  return { ...item, matchedTicker };
+  return null;
 }
 
 async function summarizeArticles(
-  items: Array<RssItem & { matchedTicker: string | null }>,
+  items: Array<RssItem & { matchedTicker?: string | null }>,
 ): Promise<NewsBrief[]> {
   if (!items.length) return [];
   const key = process.env.OPENAI_API_KEY;
@@ -394,7 +740,7 @@ async function summarizeArticles(
           {
             role: "system",
             content:
-              "For each headline, return JSON { briefs: [{summary, marketImpact, rationale}] } in the same order. marketImpact = how US large-cap / broad risk appetite likely reacts: bullish (tailwind for equities or easier financial conditions), bearish (headwind, risk-off), neutral only if truly balanced or idiosyncratic with no clear S&P read. Avoid labeling everything neutral—use headline tone (beats, surges, routs, layoffs, downgrades, probes). One sentence each for summary and rationale.",
+              'For each headline, return JSON { briefs: [{summary, marketImpact, rationale, keyPoints}] } in the same order. marketImpact = how US large-cap / broad risk appetite likely reacts: bullish (tailwind for equities or easier financial conditions), bearish (headwind, risk-off), neutral only if truly balanced or idiosyncratic with no clear S&P read. Avoid labeling everything neutral—use headline tone (beats, surges, routs, layoffs, downgrades, probes). One sentence each for summary and rationale. keyPoints = array of 2-3 short bullet-point strings (plain text, no markdown, under 80 chars each) highlighting the most important details.',
           },
           { role: "user", content: input },
         ],
@@ -427,6 +773,7 @@ function fallbackBrief(item: Pick<RssItem, "description" | "title">): NewsBrief 
       summary: fallbackSummary(item),
       marketImpact: impact.marketImpact,
       rationale: impact.rationale,
+      keyPoints: [],
     },
     item,
   );
@@ -509,6 +856,9 @@ function normalizeBrief(
     summary: sanitizePlainText((brief.summary ?? fallback.summary).trim(), 220),
     marketImpact: impact,
     rationale: sanitizePlainText((brief.rationale ?? fallback.rationale).trim(), 200),
+    keyPoints: Array.isArray(brief.keyPoints)
+      ? brief.keyPoints.filter((p) => typeof p === "string" && p.trim()).map((p) => p.trim().slice(0, 120))
+      : [],
   };
   return reconcileLexicon(merged, item);
 }
