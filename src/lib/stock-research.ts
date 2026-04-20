@@ -65,15 +65,6 @@ function raw(obj: Record<string, unknown>, key: string): number | null {
   }
   return null;
 }
-function str(obj: Record<string, unknown>, key: string): string {
-  const val = obj[key];
-  if (typeof val === "string") return val;
-  if (typeof val === "object" && val !== null && "fmt" in val) {
-    const f = (val as { fmt?: unknown }).fmt;
-    return typeof f === "string" ? f : "";
-  }
-  return "";
-}
 
 type FinnhubQuote = { c: number; d: number; dp: number; h: number; l: number; o: number; pc: number };
 type FinnhubMetric = { metric: Record<string, number | string | null> };
