@@ -115,8 +115,8 @@ export function StockChart({ symbol, initialData, initialRange, isPositive }: Pr
                   borderRadius: 8,
                   fontSize: 12,
                 }}
-                labelFormatter={(v: number) => new Date(v).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                formatter={(v: number) => [`$${v.toFixed(2)}`, "Price"]}
+                labelFormatter={(v) => new Date(v as number).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                formatter={(v) => [`$${(v as number).toFixed(2)}`, "Price"]}
               />
               <Area
                 type="monotone"
