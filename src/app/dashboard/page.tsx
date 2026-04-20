@@ -46,7 +46,7 @@ export default async function DashboardPage() {
     return <DashboardQueryError context="Loading timeline" err={err} />;
   }
 
-  const news = await getNewsBriefing({ tickers, limit: 72 });
+  const news = await getNewsBriefing({ tickers, limit: 200 });
   const serverFetchedAt = new Date().toISOString();
   const todayHeading = formatDateHeading(new Date());
 
