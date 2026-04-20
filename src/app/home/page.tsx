@@ -100,6 +100,12 @@ export default async function HomePage() {
           >
             Open map
           </Link>
+          <Link
+            href="/dashboard/research"
+            className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]/50"
+          >
+            Research
+          </Link>
         </div>
       </header>
 
