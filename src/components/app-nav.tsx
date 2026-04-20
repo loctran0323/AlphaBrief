@@ -141,6 +141,9 @@ export function AppNav({
               <Link href="/dashboard/map" className="rounded-md px-3 py-1.5 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900">
                 Map
               </Link>
+              <Link href="/dashboard/research" className="rounded-md px-3 py-1.5 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900">
+                Research
+              </Link>
               {tier === "pro" ? (
                 <Link href="/dashboard/archive" className="rounded-md px-3 py-1.5 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900">
                   Archive
