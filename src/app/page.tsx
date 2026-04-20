@@ -499,7 +499,7 @@ export default async function HomePage() {
                       </span>
                     </div>
                     <div className="mt-3 flex items-end gap-1">
-                      <span className="text-5xl font-black text-gray-900">$4</span>
+                      <span className="text-5xl font-black text-gray-900">$9</span>
                       <span className="mb-1.5 text-sm text-gray-400">/month</span>
                     </div>
                     <p className="mt-2 text-sm text-gray-500">Locked in for early supporters.</p>

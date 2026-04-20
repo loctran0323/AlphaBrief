@@ -86,7 +86,7 @@ export default async function SubscriptionPage() {
           </>
         ) : (
           <div className="rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-highlight)] p-6">
-            <p className="font-semibold text-[var(--foreground)]">Upgrade to Pro — $4/month</p>
+            <p className="font-semibold text-[var(--foreground)]">Upgrade to Pro — $9/month</p>
             <p className="mt-1 text-sm text-[var(--muted)]">
               Unlock the full archive, unlimited market map lookups, and priority access to new
               features. Beta price locked in for early supporters.

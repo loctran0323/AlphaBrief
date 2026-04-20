@@ -36,7 +36,7 @@ export function UpgradeButton() {
         disabled={loading}
         className="rounded-xl bg-[var(--accent)] px-10 py-4 text-base font-bold text-white shadow-lg shadow-[var(--accent)]/25 transition hover:bg-[var(--accent-muted)] hover:scale-[1.02] disabled:opacity-60"
       >
-        {loading ? "Redirecting to Stripe…" : "Upgrade to Pro — $4/month"}
+        {loading ? "Redirecting to Stripe…" : "Upgrade to Pro — $9/month"}
       </button>
     </div>
   );

@@ -124,7 +124,7 @@ export default async function UpgradePage() {
               </th>
               <th className="w-1/4 bg-[var(--accent)]/5 px-4 py-5 text-center">
                 <p className="text-xs font-semibold uppercase tracking-widest text-[var(--accent)]">Pro</p>
-                <p className="mt-1 text-2xl font-black text-[var(--foreground)]">$4</p>
+                <p className="mt-1 text-2xl font-black text-[var(--foreground)]">$9</p>
                 <p className="text-xs text-[var(--faint)]">/month</p>
               </th>
             </tr>
