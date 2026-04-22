@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
 import { DashboardTimelineTabs } from "@/components/dashboard-timeline-tabs";
+import { LocalDateHeading } from "@/components/local-date-heading";
 import { NewsBriefing } from "@/components/news-briefing";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { fetchMergedDashboardEvents } from "@/lib/events";
@@ -54,50 +55,42 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-4xl pb-16">
       <AutoRefresh everyMs={300000} />
 
-      {/* ── Page header ── */}
-      <header className="border-b border-[var(--border)] pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Dashboard</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
-          {todayHeading}
-        </h1>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Watchlist, upcoming catalysts, and news briefing.{" "}
-          <Link href="/dashboard/archive" className="font-medium text-[var(--accent)] hover:underline">
-            Archive →
-          </Link>
-        </p>
-
-        {/* Stat chips */}
-        <div className="mt-5 flex flex-wrap gap-3">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
-            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{events.length}</p>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">timeline events</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
-            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{news.length}</p>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">headlines</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
-            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{items?.length ?? 0}</p>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">watchlist tickers</p>
+      {/* ── Header ── */}
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
+            <LocalDateHeading fallback={todayHeading} />
+          </h1>
+          <div className="mt-1.5 flex items-center gap-3 text-sm text-[var(--muted)]">
+            <span><span className="font-semibold text-[var(--foreground)]">{events.length}</span> events</span>
+            <span className="text-[var(--faint)]">·</span>
+            <span><span className="font-semibold text-[var(--foreground)]">{news.length}</span> headlines</span>
+            <span className="text-[var(--faint)]">·</span>
+            <span><span className="font-semibold text-[var(--foreground)]">{items?.length ?? 0}</span> tickers</span>
           </div>
         </div>
-      </header>
+        <Link
+          href="/dashboard/archive"
+          className="rounded-lg px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+          style={{ border: "1px solid var(--border)" }}
+        >
+          Archive →
+        </Link>
+      </div>
 
       {/* ── Watchlist ── */}
-      <section className="border-b border-[var(--border)] py-8">
-        <div className="mb-5">
-          <h2 className="text-lg font-bold text-[var(--foreground)]">Watchlist</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Symbols drive ticker-specific timeline rows and headline matching.
-          </p>
+      <div className="mb-8 overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
+        <div className="flex items-center justify-between border-b px-5 py-3.5" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Watchlist</p>
         </div>
-        <WatchlistPanel watchlistId={watchlist.id} items={items ?? []} />
-      </section>
+        <div className="bg-[var(--card)] px-5 py-4">
+          <WatchlistPanel watchlistId={watchlist.id} items={items ?? []} />
+        </div>
+      </div>
 
-      {/* ── Timeline & News ── */}
-      <section className="space-y-5 pt-8">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
+      {/* ── Timeline ── */}
+      <div className="mb-8 overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
+        <div className="px-5 py-5">
           <DashboardTimelineTabs
             events={events}
             watchlistItems={items ?? []}
@@ -105,10 +98,14 @@ export default async function DashboardPage() {
             dataFetchedAt={serverFetchedAt}
           />
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
+      </div>
+
+      {/* ── News briefing ── */}
+      <div className="overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
+        <div className="px-5 py-5">
           <NewsBriefing articles={news} watchlistTickers={tickers} itemsPerPage={4} dataFetchedAt={serverFetchedAt} />
         </div>
-      </section>
+      </div>
     </div>
   );
 }

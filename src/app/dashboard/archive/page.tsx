@@ -33,14 +33,13 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
     if (tier !== "pro") {
       return (
         <div className="mx-auto max-w-2xl pb-16">
-          <header className="border-b border-[var(--border)] pb-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Archive</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)]">Pro feature</h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Access to the full archive is available on the Pro plan.
-            </p>
-          </header>
-          <div className="mt-10 rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-highlight)] p-8 text-center">
+          <div className="mb-8 flex items-start justify-between">
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Archive</h1>
+            <Link href="/dashboard" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
+              ← Dashboard
+            </Link>
+          </div>
+          <div className="rounded-xl p-8 text-center" style={{ border: "2px solid var(--accent)", background: "var(--surface-highlight)" }}>
             <p className="text-2xl font-black text-[var(--foreground)]">Upgrade to Pro</p>
             <p className="mt-2 text-sm text-[var(--muted)]">
               Unlock the full archive, unlimited market map lookups, and priority access to new features.
@@ -102,46 +101,31 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
     <div className="mx-auto max-w-4xl pb-16">
       <AutoRefresh everyMs={300000} />
 
-      {/* ── Page header ── */}
-      <header className="border-b border-[var(--border)] pb-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Archive</p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
-              Past data
-            </h1>
-            <p className="mt-2 text-sm text-[var(--muted)]">
-              Past events and headlines — pick a date range below (3–30 days back).
-            </p>
+      {/* ── Header ── */}
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Past data</h1>
+          <div className="mt-1.5 flex items-center gap-3 text-sm text-[var(--muted)]">
+            <span><span className="font-semibold text-[var(--foreground)]">{pastEvents.length}</span> past events</span>
+            <span className="text-[var(--faint)]">·</span>
+            <span><span className="font-semibold text-[var(--foreground)]">{archivedNews.length}</span> archived headlines</span>
           </div>
-          <Link
-            href="/dashboard"
-            className="shrink-0 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]/50"
-          >
-            ← Dashboard
-          </Link>
         </div>
+        <Link
+          href="/dashboard"
+          className="rounded-lg px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+          style={{ border: "1px solid var(--border)" }}
+        >
+          ← Dashboard
+        </Link>
+      </div>
 
-        {/* Stat chips */}
-        <div className="mt-5 flex flex-wrap gap-3">
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
-            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{pastEvents.length}</p>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">past events</p>
-          </div>
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-5 py-3">
-            <p className="text-2xl font-black tabular-nums text-[var(--foreground)]">{archivedNews.length}</p>
-            <p className="mt-0.5 text-xs text-[var(--muted)]">archived headlines</p>
-          </div>
+      {/* ── Date range ── */}
+      <div className="mb-8 overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
+        <div className="border-b px-5 py-3.5" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Date range</p>
         </div>
-      </header>
-
-      {/* ── Date range toolbar ── */}
-      <section className="border-b border-[var(--border)] py-8">
-        <div className="mb-5">
-          <h2 className="text-lg font-bold text-[var(--foreground)]">Date range</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">Narrow events and news independently, then apply.</p>
-        </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="bg-[var(--card)] px-5 py-5">
           <ArchiveDateToolbar
             key={`${bounds.eventsFromMs}-${bounds.eventsToMs}-${bounds.newsFromMs}-${bounds.newsToMs}`}
             eventsFromYmd={toYmdUtc(bounds.eventsFromMs)}
@@ -150,11 +134,11 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
             newsToYmd={toYmdUtc(bounds.newsToMs)}
           />
         </div>
-      </section>
+      </div>
 
-      {/* ── Timeline & News ── */}
-      <section className="space-y-5 pt-8">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
+      {/* ── Past timeline ── */}
+      <div className="mb-8 overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
+        <div className="px-5 py-5">
           <DashboardTimelineTabs
             events={pastEvents}
             watchlistItems={items ?? []}
@@ -164,7 +148,11 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
             readMoreUrlsByEventId={readMoreUrlsByEventId}
           />
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-7">
+      </div>
+
+      {/* ── Archived news ── */}
+      <div className="overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
+        <div className="px-5 py-5">
           <NewsBriefing
             title="Archived news"
             articles={archivedNews}
@@ -172,7 +160,7 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
             emptyHintTickers="No watchlist-tagged headlines in this range. Try All, widen dates, or check back later."
           />
         </div>
-      </section>
+      </div>
     </div>
   );
 }

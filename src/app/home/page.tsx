@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChatRoom } from "@/components/chat-room";
 import { HomeMoverList } from "@/components/home-mover-list";
-import { HomeTickerMonitor } from "@/components/home-ticker-monitor";
+import { WatchlistRow } from "@/components/watchlist-row";
+import { addTicker } from "@/app/dashboard/actions";
 import { isSupabaseConfigured } from "@/lib/env";
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
@@ -70,143 +71,127 @@ export default async function HomePage() {
     savedItems.map(async (item) => {
       const sym = item.ticker.trim().toUpperCase();
       const snap = await fetchYahooChartSnapshot(sym);
-      return { symbol: sym, shortName: snap?.shortName ?? sym, price: snap?.price ?? null, changePct: snap?.changePct ?? 0 };
+      return {
+        symbol: sym,
+        shortName: snap?.shortName ?? sym,
+        price: snap?.price ?? null,
+        changePct: snap?.changePct ?? 0,
+      };
     }),
   );
 
   const mapHref = isAuthenticated ? "/dashboard/map" : "/explore/map";
 
   return (
-    <div>
-      {/* ── Page header ── */}
-      <header className="border-b border-[var(--border)] pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Home</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
-          Market snapshot
-        </h1>
-        <p className="mt-3 max-w-full text-sm leading-relaxed text-[var(--muted)] whitespace-nowrap overflow-x-auto [scrollbar-width:thin]">
-          ETFs, top movers, and your watchlist all in one view. Catalysts and news live on the dashboard.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link
-            href="/dashboard"
-            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
-          >
-            Open dashboard
-          </Link>
-          <Link
-            href={mapHref}
-            className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]/50"
-          >
-            Open map
-          </Link>
-          <Link
-            href="/dashboard/research"
-            className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]/50"
-          >
-            Open research
-          </Link>
+    <div className="space-y-8">
+      {/* ── Header ── */}
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Market snapshot</h1>
+          <p className="mt-0.5 text-sm text-[var(--muted)]">ETFs, top movers, and your watchlist in one view.</p>
         </div>
-      </header>
+        <nav className="flex items-center gap-4 text-sm text-[var(--muted)]">
+          <Link href="/dashboard" className="transition-colors hover:text-[var(--foreground)]">Dashboard</Link>
+          <span className="text-[var(--faint)]">/</span>
+          <Link href={mapHref} className="transition-colors hover:text-[var(--foreground)]">Map</Link>
+          <span className="text-[var(--faint)]">/</span>
+          <Link href="/dashboard/research" className="transition-colors hover:text-[var(--foreground)]">Research</Link>
+        </nav>
+      </div>
 
       {/* ── ETFs & indices ── */}
-      <section className="pt-8">
-        <div className="mb-5">
-          <h2 className="text-lg font-bold text-[var(--foreground)]">ETFs &amp; indices</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">Key benchmarks — prices and day change.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {data.benchmarks.map((b) => (
+      <section>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">ETFs &amp; indices</p>
+        <div
+          className="grid grid-cols-2 overflow-hidden rounded-xl sm:grid-cols-4"
+          style={{ border: "1px solid var(--border)" }}
+        >
+          {data.benchmarks.map((b, i) => (
             <div
               key={b.symbol}
-              className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4"
+              className="bg-[var(--card)] p-4"
+              style={{
+                borderRight: i % 4 !== 3 ? "1px solid var(--border)" : undefined,
+                borderBottom: i < 4 ? "1px solid var(--border)" : undefined,
+              }}
             >
-              <p className="truncate text-xs text-[var(--muted)]">{b.label}</p>
-              <p className="mt-1 font-mono text-[11px] font-semibold text-[var(--accent)]">{b.symbol}</p>
-              <p className="mt-2 text-xl font-black tabular-nums text-[var(--foreground)]">
+              <div className="flex items-start justify-between gap-1">
+                <p className="truncate text-xs text-[var(--muted)]">{b.label}</p>
+                <p className={`shrink-0 text-xs font-semibold tabular-nums ${pctClass(b.changePct)}`}>
+                  {b.changePct >= 0 ? "+" : ""}{b.changePct.toFixed(2)}%
+                </p>
+              </div>
+              <p className="mt-2 text-lg font-bold tabular-nums text-[var(--foreground)]">
                 {formatPrice(b.price, b.symbol)}
               </p>
-              <p className={`mt-0.5 text-sm font-semibold tabular-nums ${pctClass(b.changePct)}`}>
-                {b.changePct >= 0 ? "+" : ""}
-                {b.changePct.toFixed(2)}%
-              </p>
+              <p className="mt-0.5 font-mono text-[10px] text-[var(--faint)]">{b.symbol}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Movers + Watchlist ── */}
-      <div className="mt-10 flex flex-col gap-8 lg:flex-row lg:items-start">
-        <div className="min-w-0 flex-1 space-y-8">
-          {/* Gainers & Losers */}
-          <section>
-            <div className="mb-5">
-              <h2 className="text-lg font-bold text-[var(--foreground)]">Top movers</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Largest % up and down in today&apos;s session.</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <HomeMoverList
-                title="Top gainers"
-                subtitle="Largest % up in the session."
-                rows={data.gainers}
-                emptyHint="No gainers loaded — market may be closed."
+      {/* ── Watchlist horizontal row ── */}
+      {isAuthenticated && watchlistId && (
+        <section>
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Your watchlist</p>
+            <form action={addTicker} className="flex items-center gap-2">
+              <input type="hidden" name="watchlist_id" value={watchlistId} />
+              <input
+                name="ticker"
+                placeholder="Add ticker…"
+                maxLength={16}
+                autoComplete="off"
+                className="w-28 rounded-lg border bg-[var(--surface)] px-2.5 py-1 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/20"
+                style={{ borderColor: "var(--border)" }}
               />
-              <HomeMoverList
-                title="Top losers"
-                subtitle="Largest % down in the session."
-                rows={data.losers}
-                emptyHint="No losers loaded — market may be closed."
-              />
-            </div>
-          </section>
+              <button
+                type="submit"
+                className="rounded-lg bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white transition hover:opacity-90"
+              >
+                Add
+              </button>
+            </form>
+          </div>
+          <WatchlistRow
+            watchlistId={watchlistId}
+            savedItems={savedItems}
+            savedQuotes={savedQuotes}
+            showAddForm={false}
+          />
+        </section>
+      )}
 
-          {/* Volume & Market cap */}
-          <section>
-            <div className="mb-5">
-              <h2 className="text-lg font-bold text-[var(--foreground)]">Volume &amp; size</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Most-traded by volume and mega-cap leaders.</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <HomeMoverList
-                title="Most active"
-                subtitle="By share volume."
-                rows={data.mostActives}
-                emptyHint="Could not load most-active list."
-              />
-              <HomeMoverList
-                title="Largest market cap"
-                subtitle="Mega-cap leaders."
-                rows={data.largestByCap}
-                emptyHint="Could not load market-cap list."
-              />
-            </div>
-          </section>
+      {/* ── All four mover lists in one unified grid ── */}
+      <section>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Movers &amp; volume</p>
+        <div
+          className="grid grid-cols-1 gap-px overflow-hidden rounded-xl sm:grid-cols-2"
+          style={{ background: "var(--border)", border: "1px solid var(--border)" }}
+        >
+          <div className="bg-[var(--card)] p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Gainers</p>
+            <HomeMoverList title="Gainers" rows={data.gainers} emptyHint="No gainers — market may be closed." bare />
+          </div>
+          <div className="bg-[var(--card)] p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Losers</p>
+            <HomeMoverList title="Losers" rows={data.losers} emptyHint="No losers — market may be closed." bare />
+          </div>
+          <div className="bg-[var(--card)] p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Most active</p>
+            <HomeMoverList title="Most active" rows={data.mostActives} emptyHint="Could not load most-active list." bare />
+          </div>
+          <div className="bg-[var(--card)] p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Largest cap</p>
+            <HomeMoverList title="Largest cap" rows={data.largestByCap} emptyHint="Could not load market-cap list." bare />
+          </div>
         </div>
+      </section>
 
-        {/* Watchlist + Chat sidebar */}
-        <aside className="w-full shrink-0 space-y-6 lg:sticky lg:top-24 lg:w-72 xl:w-80">
-          <div>
-            <div className="mb-3">
-              <h2 className="text-lg font-bold text-[var(--foreground)]">Your watchlist</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Tickers synced with dashboard &amp; news.</p>
-            </div>
-            <HomeTickerMonitor
-              layout="sidebar"
-              isAuthenticated={isAuthenticated}
-              watchlistId={watchlistId}
-              savedItems={savedItems}
-              savedQuotes={savedQuotes}
-            />
-          </div>
-          <div>
-            <div className="mb-3">
-              <h2 className="text-lg font-bold text-[var(--foreground)]">Community</h2>
-              <p className="mt-1 text-sm text-[var(--muted)]">Live chat with other AlphaBrief users.</p>
-            </div>
-            <ChatRoom email={userEmail} isPro={userIsPro} />
-          </div>
-        </aside>
-      </div>
+      {/* ── Community chat — full-width row ── */}
+      <section>
+        <ChatRoom email={userEmail} isPro={userIsPro} />
+      </section>
     </div>
   );
 }
