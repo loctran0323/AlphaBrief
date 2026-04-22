@@ -3,6 +3,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
 import { DashboardTimelineTabs } from "@/components/dashboard-timeline-tabs";
 import { LocalDateHeading } from "@/components/local-date-heading";
+import { MarketSummarySection } from "@/components/market-summary-section";
 import { NewsBriefing } from "@/components/news-briefing";
 import { WatchlistPanel } from "@/components/watchlist-panel";
 import { fetchMergedDashboardEvents } from "@/lib/events";
@@ -76,6 +77,11 @@ export default async function DashboardPage() {
         >
           Archive →
         </Link>
+      </div>
+
+      {/* ── AI Market Summary ── */}
+      <div className="mb-8">
+        <MarketSummarySection />
       </div>
 
       {/* ── Watchlist ── */}
