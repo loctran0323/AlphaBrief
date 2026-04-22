@@ -3,6 +3,7 @@ import { ChatRoom } from "@/components/chat-room";
 import { HomeMoverList } from "@/components/home-mover-list";
 import { WatchlistRow } from "@/components/watchlist-row";
 import { AddTickerForm } from "@/components/add-ticker-form";
+import { MarketSummarySection } from "@/components/market-summary-section";
 import { isSupabaseConfigured } from "@/lib/env";
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
@@ -143,6 +144,9 @@ export default async function HomePage() {
           })}
         </div>
       </section>
+
+      {/* ── AI Market Summary ── */}
+      <MarketSummarySection />
 
       {/* ── Watchlist horizontal row ── */}
       {isAuthenticated && watchlistId && (
