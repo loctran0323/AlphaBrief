@@ -18,8 +18,8 @@ export function SignupForm() {
     setError(null);
     setLoading(true);
     const supabase = createClient();
-    /** Use the current origin so confirm links match Vercel vs local; must be listed in Supabase → Auth → Redirect URLs. */
-    const emailRedirectTo = `${window.location.origin}/auth/callback`;
+    /** Always redirect to production so confirmation links work from any environment. */
+    const emailRedirectTo = `https://www.alphabrief.net/auth/callback?next=/home`;
     const { error: err } = await supabase.auth.signUp({
       email,
       password,
