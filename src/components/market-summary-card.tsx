@@ -56,7 +56,7 @@ export function MarketSummaryCard({
               color: "var(--accent)",
             }}
           >
-            Gemini
+            Groq
           </span>
         </div>
 

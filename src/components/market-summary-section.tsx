@@ -68,7 +68,7 @@ function MarketSummaryUnavailable() {
           className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
           style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}
         >
-          Gemini
+          Groq
         </span>
       </div>
       <div className="px-5 py-4">

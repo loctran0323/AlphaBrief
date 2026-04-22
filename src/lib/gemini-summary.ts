@@ -1,17 +1,17 @@
 /**
- * Low-level Gemini 2.0 Flash helper.
+ * AI summary helper — uses Groq (Llama 3.3 70B) via OpenAI-compatible API.
  * Builds a market-data prompt and returns the generated summary text.
  */
 
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { getNewsBriefing } from "@/lib/news";
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 export async function generateMarketSummaryText(): Promise<string> {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new Error("GEMINI_API_KEY is not set");
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error("GROQ_API_KEY is not set");
 
   // Fetch market data + recent headlines in parallel
   const [data, articles] = await Promise.all([
@@ -69,27 +69,31 @@ Write a 150–200 word market summary in 2–3 short paragraphs. No headers, no 
 
 Be specific with tickers and percentages where they add clarity. Write clearly for a retail investor.`;
 
-  // ── Call Gemini ─────────────────────────────────────────────────────────────
+  // ── Call Groq ───────────────────────────────────────────────────────────────
 
-  const res = await fetch(`${GEMINI_URL}?key=${key}`, {
+  const res = await fetch(GROQ_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.65, maxOutputTokens: 450 },
+      model: GROQ_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.65,
+      max_tokens: 450,
     }),
     signal: AbortSignal.timeout(25_000),
   });
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`Gemini ${res.status}: ${body.slice(0, 300)}`);
+    throw new Error(`Groq ${res.status}: ${body.slice(0, 300)}`);
   }
 
   const json = await res.json();
-  const text: string | undefined =
-    json.candidates?.[0]?.content?.parts?.[0]?.text;
+  const text: string | undefined = json.choices?.[0]?.message?.content;
 
-  if (!text) throw new Error("Unexpected Gemini response shape");
+  if (!text) throw new Error("Unexpected Groq response shape");
   return text.trim();
 }

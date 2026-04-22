@@ -35,7 +35,7 @@ export async function getMarketSummary(): Promise<MarketSummaryResult | null> {
   }
 
   // No key → return stale cache or nothing
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.GROQ_API_KEY) {
     return cached
       ? { summary: cached.summary, generatedAt: cached.generated_at }
       : null;
