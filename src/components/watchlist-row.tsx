@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
-import { addTicker, removeTicker } from "@/app/dashboard/actions";
+import { removeTicker } from "@/app/dashboard/actions";
+import { AddTickerForm } from "@/components/add-ticker-form";
 import type { WatchlistItem } from "@/types/database";
 
 type QuoteRow = {
@@ -29,7 +29,6 @@ export function WatchlistRow({
   savedQuotes: QuoteRow[];
   showAddForm?: boolean;
 }) {
-  const formRef = useRef<HTMLFormElement>(null);
   const quoteBySymbol = new Map(savedQuotes.map((q) => [q.symbol.toUpperCase(), q]));
 
   const sorted = [...savedItems].sort((a, b) => a.ticker.localeCompare(b.ticker));
@@ -85,30 +84,9 @@ export function WatchlistRow({
 
       {/* Add ticker form (inline at end of row — optional) */}
       {showAddForm && (
-        <form
-          ref={formRef}
-          action={async (fd) => {
-            await addTicker(fd);
-            formRef.current?.reset();
-          }}
-          className="flex shrink-0 items-center gap-2 bg-[var(--card)] px-4 py-4"
-        >
-          <input type="hidden" name="watchlist_id" value={watchlistId} />
-          <input
-            name="ticker"
-            placeholder="AAPL"
-            maxLength={16}
-            autoComplete="off"
-            className="w-20 rounded-lg border bg-[var(--surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/20"
-            style={{ borderColor: "var(--border)" }}
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
-          >
-            Add
-          </button>
-        </form>
+        <div className="flex shrink-0 items-center bg-[var(--card)] px-4 py-4">
+          <AddTickerForm watchlistId={watchlistId} size="sm" />
+        </div>
       )}
     </div>
   );

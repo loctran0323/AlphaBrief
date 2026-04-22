@@ -1,4 +1,5 @@
-import { addTicker, removeTicker } from "@/app/dashboard/actions";
+import { removeTicker } from "@/app/dashboard/actions";
+import { AddTickerForm } from "@/components/add-ticker-form";
 import type { WatchlistItem } from "@/types/database";
 
 export function WatchlistPanel({
@@ -12,21 +13,7 @@ export function WatchlistPanel({
 
   return (
     <div className="space-y-4">
-      <form action={addTicker} className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-        <input type="hidden" name="watchlist_id" value={watchlistId} />
-        <input
-          name="ticker"
-          placeholder="Ticker (e.g. AAPL)"
-          autoComplete="off"
-          className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] shadow-inner focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25 sm:max-w-xs"
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
-        >
-          Add
-        </button>
-      </form>
+      <AddTickerForm watchlistId={watchlistId} size="md" placeholder="Ticker (e.g. AAPL)" />
 
       {sorted.length === 0 ? (
         <p className="text-sm text-[var(--muted)]">

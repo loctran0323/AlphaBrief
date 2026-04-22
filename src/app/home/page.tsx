@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChatRoom } from "@/components/chat-room";
 import { HomeMoverList } from "@/components/home-mover-list";
 import { WatchlistRow } from "@/components/watchlist-row";
-import { addTicker } from "@/app/dashboard/actions";
+import { AddTickerForm } from "@/components/add-ticker-form";
 import { isSupabaseConfigured } from "@/lib/env";
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
@@ -149,23 +149,7 @@ export default async function HomePage() {
         <section>
           <div className="mb-3 flex items-center justify-between gap-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Your watchlist</p>
-            <form action={addTicker} className="flex items-center gap-2">
-              <input type="hidden" name="watchlist_id" value={watchlistId} />
-              <input
-                name="ticker"
-                placeholder="Add ticker…"
-                maxLength={16}
-                autoComplete="off"
-                className="w-28 rounded-lg border bg-[var(--surface)] px-2.5 py-1 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/20"
-                style={{ borderColor: "var(--border)" }}
-              />
-              <button
-                type="submit"
-                className="rounded-lg bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white transition hover:opacity-90"
-              >
-                Add
-              </button>
-            </form>
+            <AddTickerForm watchlistId={watchlistId} size="sm" placeholder="Add ticker…" />
           </div>
           <WatchlistRow
             watchlistId={watchlistId}
