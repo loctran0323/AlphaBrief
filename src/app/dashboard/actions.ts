@@ -3,6 +3,7 @@
 import { sendDigestEmail } from "@/lib/email";
 import { fetchDashboardEvents } from "@/lib/events";
 import { getNewsBriefing } from "@/lib/news";
+import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -11,6 +12,40 @@ function normalizeTicker(raw: string): string {
   return raw.trim().toUpperCase().replace(/[^A-Z0-9.-]/g, "");
 }
 
+export type AddTickerState = { error?: string } | null;
+
+/** Validates that the ticker exists on Yahoo Finance before inserting. */
+export async function addTickerValidated(
+  _prev: AddTickerState,
+  formData: FormData,
+): Promise<AddTickerState> {
+  const watchlistId = String(formData.get("watchlist_id") ?? "");
+  const raw = String(formData.get("ticker") ?? "");
+  const ticker = normalizeTicker(raw);
+
+  if (!ticker) return { error: "Please enter a ticker symbol." };
+  if (!watchlistId) return { error: "Watchlist not found." };
+
+  const snap = await fetchYahooChartSnapshot(ticker);
+  if (!snap || snap.price == null) {
+    return { error: `"${ticker}" doesn't exist — try a different symbol.` };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("watchlist_items").insert({
+    watchlist_id: watchlistId,
+    ticker,
+  });
+  if (error && error.code !== "23505") {
+    return { error: error.message };
+  }
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/archive");
+  revalidatePath("/home");
+  return null;
+}
+
+/** Legacy unvalidated action — kept for backward compat. */
 export async function addTicker(formData: FormData) {
   const watchlistId = String(formData.get("watchlist_id") ?? "");
   const raw = String(formData.get("ticker") ?? "");
