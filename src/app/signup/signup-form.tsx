@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AuthShell } from "@/components/auth-shell";
 import { createClient } from "@/lib/supabase/client";
 
 export function SignupForm() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,8 +29,7 @@ export function SignupForm() {
       setError(err.message);
       return;
     }
-    router.push("/home");
-    router.refresh();
+    setSent(true);
   }
 
   async function signUpWithGoogle() {
@@ -40,6 +38,55 @@ export function SignupForm() {
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback?next=/home` },
     });
+  }
+
+  if (sent) {
+    return (
+      <AuthShell
+        title="Check your inbox"
+        subtitle={
+          <>
+            Already have an account?{" "}
+            <Link href="/login" className="text-[#6C5CE7] hover:underline">
+              Log in
+            </Link>
+          </>
+        }
+      >
+        <div className="rounded-xl border p-6 text-center" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          {/* Envelope icon */}
+          <div
+            className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full"
+            style={{ background: "var(--surface-highlight)" }}
+          >
+            <svg className="h-7 w-7" style={{ color: "var(--accent)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5H4.5a2.25 2.25 0 00-2.25 2.25m19.5 0-9.75 6.75L2.25 6.75" />
+            </svg>
+          </div>
+
+          <p className="text-base font-semibold" style={{ color: "var(--foreground)" }}>
+            Confirmation email sent
+          </p>
+          <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
+            We sent a verification link to{" "}
+            <span className="font-medium" style={{ color: "var(--foreground)" }}>{email}</span>.
+            Click the link to activate your account and get started.
+          </p>
+          <p className="mt-3 text-xs" style={{ color: "var(--faint)" }}>
+            Can&apos;t find it? Check your spam or junk folder.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => { setSent(false); setEmail(""); setPassword(""); }}
+          className="mt-2 w-full rounded-lg py-2.5 text-sm font-medium transition"
+          style={{ border: "1px solid var(--border)", color: "var(--muted)", background: "transparent" }}
+        >
+          Use a different email
+        </button>
+      </AuthShell>
+    );
   }
 
   return (
