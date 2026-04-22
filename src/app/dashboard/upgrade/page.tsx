@@ -19,6 +19,24 @@ const planRows: Row[] = [
     pro: "Unlimited",
   },
   {
+    label: "Research — news per ticker",
+    sub: "AI-tagged headlines on any stock",
+    free: "3 articles",
+    pro: "Full feed",
+  },
+  {
+    label: "Price alerts",
+    sub: "Email when a stock hits your target",
+    free: false,
+    pro: true,
+  },
+  {
+    label: "Email digest",
+    sub: "Daily briefing delivered to your inbox",
+    free: false,
+    pro: true,
+  },
+  {
     label: "Archive",
     sub: "Past timeline events & historical news",
     free: false,
