@@ -61,7 +61,7 @@ export async function generateMarketSummaryText(): Promise<string> {
     ? articles.slice(0, 6).map((a) => `• [${a.marketImpact}] ${a.title} (${a.source})`).join("\n")
     : "No headlines available.";
 
-  const prompt = `You are a concise financial analyst writing a daily market briefing for everyday investors.
+  const prompt = `You are a concise financial analyst writing a daily market briefing for everyday investors. Today is ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}.
 
 MARKET BENCHMARKS (today):
 ${benchmarkText}
@@ -72,14 +72,23 @@ TOP LOSERS:  ${loserText}
 RECENT HEADLINES:
 ${headlineText}
 
-Write a 150–200 word market summary in 2–3 short paragraphs. No headers, no bullet points.
-1. Open with the overall market direction and key index moves.
-2. Explain which sectors or themes drove the biggest moves and WHY — tie in the headlines as context.
-3. Close with one sentence on what investors should watch next.
+Write a structured daily market summary using exactly these four bold section headers, followed by content:
 
-Be specific with tickers and percentages where they add clarity. Write clearly for a retail investor.`;
+**MARKET SNAPSHOT**
+One sentence on overall market direction and the key index moves (S&P, Nasdaq, Dow with % changes).
 
-  return callGroq(prompt, 450);
+**WHAT'S DRIVING IT**
+2–3 bullet points explaining the main themes or catalysts behind today's moves. Each bullet should name a specific reason tied to the headlines. Use tickers where relevant.
+
+**KEY MOVERS**
+2–3 bullet points on the most notable individual stocks — who led, who lagged, and briefly why.
+
+**WATCH FOR**
+1–2 bullet points on the most important things to monitor going forward (upcoming data, earnings, macro events).
+
+Keep it tight and specific. Write clearly for a retail investor. Total length: 180–250 words.`;
+
+  return callGroq(prompt, 550);
 }
 
 // ── Weekly recap ─────────────────────────────────────────────────────────────
