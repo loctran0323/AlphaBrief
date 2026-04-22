@@ -1,22 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
-import { refreshMarketSummary } from "@/app/home/actions";
-
-function ageLabel(iso: string): string {
-  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (mins < 2) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
 /**
  * Renders structured summary text:
  * - **HEADER** lines → accent-colored section labels
- * - • bullet lines  → indented bullet list items
- * - Plain text      → normal paragraph
+ * - • or - bullet lines → indented bullet list items
+ * - Plain text → normal paragraph
  */
 function FormattedSummary({ text }: { text: string }) {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -24,7 +12,6 @@ function FormattedSummary({ text }: { text: string }) {
   return (
     <div className="space-y-3">
       {lines.map((line, i) => {
-        // Bold header: **SOME TITLE**
         if (line.startsWith("**") && line.endsWith("**")) {
           return (
             <p key={i} className="text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
@@ -32,7 +19,6 @@ function FormattedSummary({ text }: { text: string }) {
             </p>
           );
         }
-        // Bullet point: • or -
         if (line.startsWith("•") || line.startsWith("-")) {
           return (
             <div key={i} className="flex gap-2 text-sm leading-relaxed text-[var(--foreground)]">
@@ -41,7 +27,6 @@ function FormattedSummary({ text }: { text: string }) {
             </div>
           );
         }
-        // Normal paragraph
         return (
           <p key={i} className="text-sm leading-relaxed text-[var(--foreground)]">
             {line}
@@ -54,19 +39,10 @@ function FormattedSummary({ text }: { text: string }) {
 
 export function MarketSummaryCard({
   summary,
-  generatedAt,
 }: {
   summary: string;
   generatedAt: string;
 }) {
-  const [isPending, startTransition] = useTransition();
-
-  function handleRefresh() {
-    startTransition(async () => {
-      await refreshMarketSummary();
-    });
-  }
-
   return (
     <div
       className="overflow-hidden rounded-xl bg-[var(--card)]"
@@ -91,33 +67,12 @@ export function MarketSummaryCard({
             Groq
           </span>
         </div>
-
-        <button
-          onClick={handleRefresh}
-          disabled={isPending}
-          className="flex items-center gap-1.5 text-xs text-[var(--faint)] transition-colors hover:text-[var(--foreground)] disabled:opacity-40"
-        >
-          <svg
-            className={`h-3 w-3 ${isPending ? "animate-spin" : ""}`}
-            viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2}
-          >
-            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          {isPending ? "Generating…" : `${ageLabel(generatedAt)} · Refresh`}
-        </button>
+        <span className="text-xs text-[var(--faint)]">Updated every 6 hours</span>
       </div>
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
       <div className="px-5 py-4">
-        {isPending ? (
-          <div className="space-y-2.5">
-            {[100, 92, 85, 78, 100, 88, 72].map((w, i) => (
-              <div key={i} className="h-4 animate-pulse rounded bg-[var(--surface)]" style={{ width: `${w}%` }} />
-            ))}
-          </div>
-        ) : (
-          <FormattedSummary text={summary} />
-        )}
+        <FormattedSummary text={summary} />
       </div>
     </div>
   );
