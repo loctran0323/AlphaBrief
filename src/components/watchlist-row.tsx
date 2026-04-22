@@ -53,8 +53,15 @@ export function WatchlistRow({
             className="group relative flex min-w-[148px] shrink-0 flex-col bg-[var(--card)] px-5 py-4 transition-colors hover:bg-[var(--surface)]"
             style={{ borderRight: "1px solid var(--border)" }}
           >
-            {/* Remove button — shows on hover */}
-            <form action={removeTicker} className="absolute right-2 top-2">
+            {/* Full-card overlay link */}
+            <Link
+              href={`/dashboard/research/${item.ticker}`}
+              className="absolute inset-0"
+              aria-label={`Research ${item.ticker}`}
+            />
+
+            {/* Remove button — z-10 so it sits above the overlay link */}
+            <form action={removeTicker} className="absolute right-2 top-2 z-10">
               <input type="hidden" name="item_id" value={item.id} />
               <button
                 type="submit"
@@ -65,13 +72,7 @@ export function WatchlistRow({
               </button>
             </form>
 
-            {/* Ticker link */}
-            <Link
-              href={`/dashboard/research/${item.ticker}`}
-              className="font-mono text-xs font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
-            >
-              {item.ticker}
-            </Link>
+            <p className="font-mono text-xs font-semibold text-[var(--foreground)]">{item.ticker}</p>
             <p className="mt-1.5 text-sm font-bold tabular-nums text-[var(--foreground)]">
               {q?.price != null ? `$${q.price.toFixed(2)}` : "—"}
             </p>
