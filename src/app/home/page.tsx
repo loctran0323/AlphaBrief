@@ -106,28 +106,41 @@ export default async function HomePage() {
           className="grid grid-cols-2 overflow-hidden rounded-xl sm:grid-cols-4"
           style={{ border: "1px solid var(--border)" }}
         >
-          {data.benchmarks.map((b, i) => (
-            <Link
-              key={b.symbol}
-              href={`/dashboard/research/${encodeURIComponent(b.symbol)}`}
-              className="group bg-[var(--card)] p-4 transition-colors hover:bg-[var(--surface)]"
-              style={{
-                borderRight: i % 4 !== 3 ? "1px solid var(--border)" : undefined,
-                borderBottom: i < 4 ? "1px solid var(--border)" : undefined,
-              }}
-            >
-              <div className="flex items-start justify-between gap-1">
-                <p className="truncate text-xs text-[var(--muted)]">{b.label}</p>
-                <p className={`shrink-0 text-xs font-semibold tabular-nums ${pctClass(b.changePct)}`}>
-                  {b.changePct >= 0 ? "+" : ""}{b.changePct.toFixed(2)}%
+          {data.benchmarks.map((b, i) => {
+            const isIndex = b.symbol.startsWith("^");
+            const cellStyle = {
+              borderRight: i % 4 !== 3 ? "1px solid var(--border)" : undefined,
+              borderBottom: i < 4 ? "1px solid var(--border)" : undefined,
+            };
+            const inner = (
+              <>
+                <div className="flex items-start justify-between gap-1">
+                  <p className="truncate text-xs text-[var(--muted)]">{b.label}</p>
+                  <p className={`shrink-0 text-xs font-semibold tabular-nums ${pctClass(b.changePct)}`}>
+                    {b.changePct >= 0 ? "+" : ""}{b.changePct.toFixed(2)}%
+                  </p>
+                </div>
+                <p className="mt-2 text-lg font-bold tabular-nums text-[var(--foreground)] transition-colors group-hover:text-[var(--accent)]">
+                  {formatPrice(b.price, b.symbol)}
                 </p>
+                <p className="mt-0.5 font-mono text-[10px] text-[var(--faint)]">{b.symbol}</p>
+              </>
+            );
+            return isIndex ? (
+              <div key={b.symbol} className="bg-[var(--card)] p-4" style={cellStyle}>
+                {inner}
               </div>
-              <p className="mt-2 text-lg font-bold tabular-nums text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
-                {formatPrice(b.price, b.symbol)}
-              </p>
-              <p className="mt-0.5 font-mono text-[10px] text-[var(--faint)]">{b.symbol}</p>
-            </Link>
-          ))}
+            ) : (
+              <Link
+                key={b.symbol}
+                href={`/dashboard/research/${b.symbol}`}
+                className="group bg-[var(--card)] p-4 transition-colors hover:bg-[var(--surface)]"
+                style={cellStyle}
+              >
+                {inner}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
