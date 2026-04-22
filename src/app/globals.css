@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #F9FAFB;
   --foreground: #111827;
@@ -13,9 +16,44 @@
   --accent-muted: #5B4FD4;
   --success: #059669;
   --warning: #D97706;
-  /* Brand purple — used on splash/auth/app */
   --brand: #6C5CE7;
   --brand-light: #EDE9FE;
+  /* Nav-specific (overridden in dark) */
+  --nav-bg: rgba(255,255,255,0.92);
+  --nav-border: #F3F4F6;
+  --nav-text: #6B7280;
+  --nav-text-hover: #111827;
+  --nav-avatar-bg: #F3F4F6;
+  --nav-avatar-text: #374151;
+  --nav-dropdown-bg: #FFFFFF;
+  --nav-dropdown-border: #F3F4F6;
+  --nav-item-hover: #F9FAFB;
+}
+
+html.dark {
+  --background: #0F1117;
+  --foreground: #F1F5F9;
+  --muted: #94A3B8;
+  --faint: #64748B;
+  --card: #1A1D2B;
+  --border: #2A2D3E;
+  --surface: #161827;
+  --surface-highlight: #221E4A;
+  --accent: #7C6FF0;
+  --accent-muted: #6C5CE7;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --brand: #7C6FF0;
+  --brand-light: #221E4A;
+  --nav-bg: rgba(15,17,23,0.92);
+  --nav-border: #2A2D3E;
+  --nav-text: #94A3B8;
+  --nav-text-hover: #F1F5F9;
+  --nav-avatar-bg: #2A2D3E;
+  --nav-avatar-text: #CBD5E1;
+  --nav-dropdown-bg: #1A1D2B;
+  --nav-dropdown-border: #2A2D3E;
+  --nav-item-hover: #1E2235;
 }
 
 @theme inline {
@@ -29,4 +67,40 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* ── Global dark mode overrides for hardcoded Tailwind color classes ── */
+.dark .bg-white       { background-color: var(--card) !important; }
+.dark .bg-white\/90   { background-color: var(--nav-bg) !important; }
+.dark .bg-gray-50     { background-color: var(--surface) !important; }
+.dark .bg-gray-100    { background-color: var(--surface) !important; }
+.dark .bg-gray-200    { background-color: var(--border) !important; }
+/* only invert bg-gray-900 on interactive elements, not structural sections */
+.dark a.bg-gray-900,
+.dark button.bg-gray-900 { background-color: #F1F5F9 !important; }
+
+.dark .text-gray-900  { color: var(--foreground) !important; }
+.dark .text-gray-800  { color: var(--foreground) !important; }
+.dark .text-gray-700  { color: var(--muted) !important; }
+.dark .text-gray-600  { color: var(--muted) !important; }
+.dark .text-gray-500  { color: var(--muted) !important; }
+.dark .text-gray-400  { color: var(--faint) !important; }
+.dark .text-gray-300  { color: var(--faint) !important; }
+/* keep white text on colored backgrounds */
+.dark .text-white     { color: #FFFFFF !important; }
+
+.dark .border-gray-100 { border-color: var(--border) !important; }
+.dark .border-gray-200 { border-color: var(--border) !important; }
+.dark .border-gray-300 { border-color: var(--border) !important; }
+.dark .divide-gray-100 > * + * { border-color: var(--border) !important; }
+
+.dark .hover\:bg-gray-50:hover  { background-color: var(--surface) !important; }
+.dark .hover\:bg-gray-100:hover { background-color: var(--surface) !important; }
+.dark .hover\:bg-gray-200:hover { background-color: var(--border) !important; }
+.dark .hover\:bg-gray-700:hover { background-color: #374151 !important; }
+.dark .hover\:text-gray-900:hover { color: var(--foreground) !important; }
+
+/* bg-gray-900 buttons (Sign up, Log in CTA) — invert in dark */
+.dark .bg-gray-900.text-white { background-color: #F1F5F9 !important; color: #111827 !important; }
+.dark .hover\:bg-gray-700:hover { background-color: #D1D5DB !important; }
