@@ -14,6 +14,7 @@ import { fetchReadMoreUrlsWithConcurrency } from "@/lib/release-web-context";
 import { getArchivedNewsBriefing } from "@/lib/news";
 import { createClient } from "@/lib/supabase/server";
 import { getUserTier } from "@/lib/subscription";
+import { WeeklyMarketSummarySection } from "@/components/weekly-market-summary-section";
 
 export const dynamic = "force-dynamic";
 
@@ -134,6 +135,11 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
             newsToYmd={toYmdUtc(bounds.newsToMs)}
           />
         </div>
+      </div>
+
+      {/* ── Weekly AI Recap ── */}
+      <div className="mb-8">
+        <WeeklyMarketSummarySection />
       </div>
 
       {/* ── Past timeline ── */}
