@@ -107,9 +107,10 @@ export default async function HomePage() {
           style={{ border: "1px solid var(--border)" }}
         >
           {data.benchmarks.map((b, i) => (
-            <div
+            <Link
               key={b.symbol}
-              className="bg-[var(--card)] p-4"
+              href={`/dashboard/research/${encodeURIComponent(b.symbol)}`}
+              className="group bg-[var(--card)] p-4 transition-colors hover:bg-[var(--surface)]"
               style={{
                 borderRight: i % 4 !== 3 ? "1px solid var(--border)" : undefined,
                 borderBottom: i < 4 ? "1px solid var(--border)" : undefined,
@@ -121,11 +122,11 @@ export default async function HomePage() {
                   {b.changePct >= 0 ? "+" : ""}{b.changePct.toFixed(2)}%
                 </p>
               </div>
-              <p className="mt-2 text-lg font-bold tabular-nums text-[var(--foreground)]">
+              <p className="mt-2 text-lg font-bold tabular-nums text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
                 {formatPrice(b.price, b.symbol)}
               </p>
               <p className="mt-0.5 font-mono text-[10px] text-[var(--faint)]">{b.symbol}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
