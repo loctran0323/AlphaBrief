@@ -123,9 +123,6 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
 
       {/* ── Date range ── */}
       <div className="mb-8 overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
-        <div className="border-b px-5 py-3.5" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Date range</p>
-        </div>
         <div className="bg-[var(--card)] px-5 py-5">
           <ArchiveDateToolbar
             key={`${bounds.eventsFromMs}-${bounds.eventsToMs}-${bounds.newsFromMs}-${bounds.newsToMs}`}
