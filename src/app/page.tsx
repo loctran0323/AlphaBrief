@@ -94,9 +94,13 @@ const planRows: { label: string; free: boolean | string; pro: boolean | string }
   { label: "Home market view", free: true, pro: true },
   { label: "Dashboard & news briefing", free: true, pro: true },
   { label: "Market map lookups", free: "3 / day", pro: "Unlimited" },
+  { label: "Research news per ticker", free: "3 articles", pro: "Full feed" },
+  { label: "Price alerts via email", free: false, pro: true },
+  { label: "Email digest", free: false, pro: true },
   { label: "Archive (past timeline)", free: false, pro: true },
+  { label: "Community chat", free: true, pro: true },
   { label: "Priority new features", free: false, pro: true },
-  { label: "Support the beta", free: false, pro: true },
+  { label: "Support the mission", free: false, pro: true },
 ];
 
 export default async function HomePage() {
