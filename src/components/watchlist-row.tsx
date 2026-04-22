@@ -1,0 +1,115 @@
+"use client";
+
+import Link from "next/link";
+import { useRef } from "react";
+import { addTicker, removeTicker } from "@/app/dashboard/actions";
+import type { WatchlistItem } from "@/types/database";
+
+type QuoteRow = {
+  symbol: string;
+  price: number | null;
+  changePct: number;
+  shortName: string;
+};
+
+function pctClass(pct: number): string {
+  if (pct > 0.005) return "text-emerald-600";
+  if (pct < -0.005) return "text-red-500";
+  return "text-[var(--faint)]";
+}
+
+export function WatchlistRow({
+  watchlistId,
+  savedItems,
+  savedQuotes,
+  showAddForm = true,
+}: {
+  watchlistId: string;
+  savedItems: WatchlistItem[];
+  savedQuotes: QuoteRow[];
+  showAddForm?: boolean;
+}) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const quoteBySymbol = new Map(savedQuotes.map((q) => [q.symbol.toUpperCase(), q]));
+
+  const sorted = [...savedItems].sort((a, b) => a.ticker.localeCompare(b.ticker));
+
+  return (
+    <div
+      className="flex overflow-x-auto overflow-hidden rounded-xl [scrollbar-width:thin]"
+      style={{ border: "1px solid var(--border)" }}
+    >
+      {sorted.length === 0 && (
+        <div className="flex min-w-[200px] items-center bg-[var(--card)] px-5 py-4 text-xs text-[var(--faint)]"
+          style={{ borderRight: "1px solid var(--border)" }}>
+          No tickers yet — add one →
+        </div>
+      )}
+
+      {sorted.map((item) => {
+        const q = quoteBySymbol.get(item.ticker.toUpperCase());
+        return (
+          <div
+            key={item.id}
+            className="group relative flex min-w-[148px] shrink-0 flex-col bg-[var(--card)] px-5 py-4 transition-colors hover:bg-[var(--surface)]"
+            style={{ borderRight: "1px solid var(--border)" }}
+          >
+            {/* Remove button — shows on hover */}
+            <form action={removeTicker} className="absolute right-2 top-2">
+              <input type="hidden" name="item_id" value={item.id} />
+              <button
+                type="submit"
+                aria-label={`Remove ${item.ticker}`}
+                className="flex h-5 w-5 items-center justify-center rounded text-[13px] text-[var(--faint)] opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+              >
+                ×
+              </button>
+            </form>
+
+            {/* Ticker link */}
+            <Link
+              href={`/dashboard/research/${item.ticker}`}
+              className="font-mono text-xs font-semibold text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+            >
+              {item.ticker}
+            </Link>
+            <p className="mt-1.5 text-sm font-bold tabular-nums text-[var(--foreground)]">
+              {q?.price != null ? `$${q.price.toFixed(2)}` : "—"}
+            </p>
+            <p className={`mt-0.5 text-xs font-semibold tabular-nums ${pctClass(q?.changePct ?? 0)}`}>
+              {q ? `${q.changePct >= 0 ? "+" : ""}${q.changePct.toFixed(2)}%` : "—"}
+            </p>
+          </div>
+        );
+      })}
+
+      {/* Add ticker form (inline at end of row — optional) */}
+      {showAddForm && (
+        <form
+          ref={formRef}
+          action={async (fd) => {
+            await addTicker(fd);
+            formRef.current?.reset();
+          }}
+          className="flex shrink-0 items-center gap-2 bg-[var(--card)] px-4 py-4"
+        >
+          <input type="hidden" name="watchlist_id" value={watchlistId} />
+          <input
+            name="ticker"
+            placeholder="AAPL"
+            maxLength={16}
+            autoComplete="off"
+            className="w-20 rounded-lg border bg-[var(--surface)] px-2.5 py-1.5 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]/20"
+            style={{ borderColor: "var(--border)" }}
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+          >
+            Add
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
