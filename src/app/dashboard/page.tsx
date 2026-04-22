@@ -79,11 +79,6 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* ── AI Market Summary ── */}
-      <div className="mb-8">
-        <MarketSummarySection />
-      </div>
-
       {/* ── Watchlist ── */}
       <div className="mb-8 overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
         <div className="flex items-center justify-between border-b px-5 py-3.5" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
@@ -92,6 +87,11 @@ export default async function DashboardPage() {
         <div className="bg-[var(--card)] px-5 py-4">
           <WatchlistPanel watchlistId={watchlist.id} items={items ?? []} />
         </div>
+      </div>
+
+      {/* ── AI Market Summary ── */}
+      <div className="mb-8">
+        <MarketSummarySection />
       </div>
 
       {/* ── Timeline ── */}
