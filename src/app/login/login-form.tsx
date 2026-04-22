@@ -44,7 +44,7 @@ export function LoginForm() {
     >
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium" style={{ color: "var(--muted)" }}>
             Email
           </label>
           <input
@@ -54,12 +54,13 @@ export function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 outline-none placeholder:text-gray-400 focus:border-[#6C5CE7] focus:ring-2 focus:ring-[#6C5CE7]/20"
+            className="mt-1 w-full rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#6C5CE7]/20"
+            style={{ border: "1px solid var(--border)", background: "var(--surface)", color: "var(--foreground)" }}
             placeholder="you@example.com"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium" style={{ color: "var(--muted)" }}>
             Password
           </label>
           <input
@@ -69,7 +70,8 @@ export function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 outline-none focus:border-[#6C5CE7] focus:ring-2 focus:ring-[#6C5CE7]/20"
+            className="mt-1 w-full rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-[#6C5CE7]/20"
+            style={{ border: "1px solid var(--border)", background: "var(--surface)", color: "var(--foreground)" }}
           />
         </div>
         {error && (
@@ -80,7 +82,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-gray-900 py-3 font-semibold text-white transition hover:bg-gray-700 disabled:opacity-50"
+          className="w-full rounded-lg bg-gray-900 py-3 font-semibold text-white transition hover:bg-gray-700 disabled:opacity-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
         >
           {loading ? "Signing in…" : "Log in"}
         </button>
