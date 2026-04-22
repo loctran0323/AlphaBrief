@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { sendTestDigest, updateDigest } from "@/app/dashboard/actions";
 import { createClient } from "@/lib/supabase/server";
+import { getUserTier } from "@/lib/subscription";
 import type { DigestFrequency } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,9 @@ export default async function SettingsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const tier = user ? await getUserTier(supabase, user.id, user.email) : "free";
+  const isPro = tier === "pro";
 
   let frequency: DigestFrequency = "none";
   if (user) {
@@ -89,6 +93,25 @@ export default async function SettingsPage({
         </div>
       )}
 
+      {!isPro && (
+        <div className="mt-8 rounded-xl border border-[var(--accent)]/30 bg-[var(--surface-highlight)] p-6 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <p className="text-base font-semibold text-[var(--foreground)]">Email digest is a Pro feature</p>
+            <span className="rounded bg-[#EDE9FE] px-1.5 py-0.5 text-[10px] font-semibold text-[#6C5CE7]">Pro</span>
+          </div>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Upgrade to Pro to receive daily or weekly briefings — headlines, upcoming earnings, and price alerts — straight to your inbox.
+          </p>
+          <Link
+            href="/dashboard/upgrade"
+            className="mt-4 inline-block rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
+          >
+            Upgrade to Pro — $9/month
+          </Link>
+        </div>
+      )}
+
+      {isPro && (
       <section className="mt-10 space-y-6">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Digest frequency</h2>
@@ -138,6 +161,7 @@ export default async function SettingsPage({
           </form>
         </div>
       </section>
+      )}
 
       <p className="mt-10">
         <Link

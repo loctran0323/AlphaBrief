@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { SiteFooter } from "@/components/site-footer";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -107,9 +109,9 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--foreground)" }}>
       {/* ── Navbar ── */}
-      <header className="sticky top-0 z-20 border-b border-gray-100 bg-white/90 backdrop-blur-sm">
+      <header className="sticky top-0 z-20 backdrop-blur-sm" style={{ borderBottom: "1px solid var(--nav-border)", background: "var(--nav-bg)" }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link href={signedIn ? "/home" : "/"} className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
@@ -117,29 +119,34 @@ export default async function HomePage() {
                 <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
               </svg>
             </div>
-            <span className="text-base font-bold text-gray-900">AlphaBrief</span>
+            <span className="text-base font-bold text-gray-900 dark:text-white">AlphaBrief</span>
           </Link>
 
           <nav className="flex items-center gap-2 text-sm">
             {configured ? (
               signedIn ? (
-                <Link
-                  href="/home"
-                  className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700"
-                >
-                  Open app
-                </Link>
+                <>
+                  <ThemeToggle />
+                  <Link
+                    href="/home"
+                    className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+                  >
+                    Open app
+                  </Link>
+                </>
               ) : (
                 <>
-                  <Link href="#pricing" className="px-3 py-2 text-gray-600 transition hover:text-gray-900">
+                  <Link href="#pricing" className="px-3 py-2 transition" style={{ color: "var(--nav-text)" }}
+                    onMouseEnter={undefined} onMouseLeave={undefined}>
                     Pricing
                   </Link>
-                  <Link href="/login" className="px-3 py-2 text-gray-600 transition hover:text-gray-900">
+                  <Link href="/login" className="px-3 py-2 transition" style={{ color: "var(--nav-text)" }}>
                     Log in
                   </Link>
+                  <ThemeToggle />
                   <Link
                     href="/signup"
-                    className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700"
+                    className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
                   >
                     Sign up free
                   </Link>
@@ -562,26 +569,7 @@ export default async function HomePage() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-gray-100 bg-gray-900 py-8">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
-              <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
-              </svg>
-            </div>
-            <span className="font-bold text-white">AlphaBrief</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link href="#pricing" className="text-sm text-gray-400 transition hover:text-white">
-              Pricing
-            </Link>
-            <Link href="/legal" className="text-sm text-gray-400 transition hover:text-white">
-              Privacy and terms
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
