@@ -139,13 +139,12 @@ function DashboardSlide() {
       <div className="border-b border-gray-100 pb-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6C5CE7]">Dashboard</p>
         <h1 className="mt-1 text-xl font-bold tracking-tight text-gray-900">Wednesday, Apr 16</h1>
-        <div className="mt-2 flex gap-3">
-          {[{ val: "12", label: "events" }, { val: "38", label: "headlines" }, { val: "5", label: "tickers" }].map((c) => (
-            <div key={c.label} className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5">
-              <p className="text-base font-black tabular-nums text-gray-900">{c.val}</p>
-              <p className="text-[10px] text-gray-400">{c.label}</p>
-            </div>
-          ))}
+        <div className="mt-1.5 flex items-center gap-2 text-xs text-gray-400">
+          <span><span className="font-semibold text-gray-700">12</span> events</span>
+          <span className="text-gray-300">·</span>
+          <span><span className="font-semibold text-gray-700">38</span> headlines</span>
+          <span className="text-gray-300">·</span>
+          <span><span className="font-semibold text-gray-700">5</span> tickers</span>
         </div>
       </div>
 
@@ -387,13 +386,112 @@ function ArchiveSlide() {
   );
 }
 
+// ── Slide 5: News Briefing ────────────────────────────────────────────────────
+
+function NewsBriefingSlide() {
+  const tabs = ["All (38)", "Tickers (6)", "Markets", "Economics", "Policy"];
+  const articles = [
+    {
+      bar: "bg-emerald-500", badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      impact: "bullish", source: "Bloomberg", ticker: "NVDA",
+      title: "Blackwell shipments ahead of schedule, suppliers confirm",
+      summary: "Supply chain checks show NVIDIA's GB200 NVL72 racks shipping 3–4 weeks early, boosting near-term revenue confidence.",
+      rationale: "Earlier-than-expected supply eases the bear case on execution risk.",
+    },
+    {
+      bar: "bg-rose-500", badge: "border-rose-200 bg-rose-50 text-rose-700",
+      impact: "bearish", source: "Reuters", ticker: null,
+      title: "Treasury yields spike as auction demand disappoints",
+      summary: "10-year yield climbs to 4.72% after soft 20-year bond auction, raising the discount rate on growth stocks.",
+      rationale: "Higher long-end yields pressure tech valuations and reduce risk appetite.",
+    },
+    {
+      bar: "bg-amber-400", badge: "border-amber-200 bg-amber-50 text-amber-700",
+      impact: "neutral", source: "WSJ", ticker: "AAPL",
+      title: "Apple expands India manufacturing as China tensions persist",
+      summary: "Foxconn and Tata ramp iPhone 16 assembly in Chennai; Apple aims for 25% India share by 2026.",
+      rationale: "Positive long-term diversification, limited near-term earnings impact.",
+    },
+    {
+      bar: "bg-emerald-500", badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      impact: "bullish", source: "CNBC", ticker: "META",
+      title: "Meta's Llama 4 adoption accelerates across enterprise clients",
+      summary: "Fortune 500 companies are rapidly deploying Meta's open-source models, signaling strong platform moat growth.",
+      rationale: "Enterprise lock-in supports long-term ad and AI revenue diversification.",
+    },
+    {
+      bar: "bg-rose-500", badge: "border-rose-200 bg-rose-50 text-rose-700",
+      impact: "bearish", source: "FT", ticker: null,
+      title: "Fed officials signal no rush to cut rates amid sticky inflation",
+      summary: "Three Fed governors reiterated data-dependence this week; futures markets pushed back first cut expectations to September.",
+      rationale: "Higher-for-longer rates weigh on rate-sensitive sectors like utilities and real estate.",
+    },
+    {
+      bar: "bg-amber-400", badge: "border-amber-200 bg-amber-50 text-amber-700",
+      impact: "neutral", source: "MarketWatch", ticker: "TSLA",
+      title: "Tesla cuts Model Y prices in Europe for second time this quarter",
+      summary: "Price reductions in Germany and France aim to boost demand amid softening EV appetite across the continent.",
+      rationale: "Margin pressure offset by volume recovery potential — net effect unclear near term.",
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="border-b border-gray-100 pb-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6C5CE7]">Dashboard</p>
+        <h1 className="mt-1 text-xl font-bold tracking-tight text-gray-900">News Briefing</h1>
+        <p className="mt-0.5 text-xs text-gray-400">Updated 9:32 AM ET · AI-tagged headlines from 12 sources</p>
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex flex-wrap gap-1.5">
+        {tabs.map((tab, i) => (
+          <span
+            key={tab}
+            className={`rounded-lg border px-2.5 py-1 text-xs font-semibold ${
+              i === 0
+                ? "border-[#6C5CE7] bg-[#6C5CE7]/10 text-gray-900"
+                : "border-gray-200 bg-gray-50 text-gray-500"
+            }`}
+          >
+            {tab}
+          </span>
+        ))}
+      </div>
+
+      {/* Articles */}
+      <div className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white px-4">
+        {articles.map((a) => (
+          <article key={a.title} className="flex gap-3 py-4 first:pt-4 last:pb-4">
+            <div className={`mt-1 w-1 shrink-0 rounded-full ${a.bar}`} />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-gray-400">
+                <span>{a.source}</span>
+                {a.ticker && (
+                  <span className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-semibold text-gray-700">{a.ticker}</span>
+                )}
+                <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase ${a.badge}`}>{a.impact}</span>
+              </div>
+              <h3 className="mt-1 text-xs font-semibold leading-snug text-gray-900">{a.title}</h3>
+              <p className="mt-0.5 text-[10px] leading-relaxed text-gray-500">{a.summary}</p>
+              <p className="mt-0.5 text-[10px] italic text-gray-400">{a.rationale}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Slideshow shell ───────────────────────────────────────────────────────────
 
 const SLIDES = [
-  { id: "home",      label: "Home",      component: HomeSlide },
-  { id: "dashboard", label: "Dashboard", component: DashboardSlide },
-  { id: "research",  label: "Research",  component: ResearchSlide },
-  { id: "archive",   label: "Archive",   component: ArchiveSlide },
+  { id: "home",      label: "Home",          component: HomeSlide },
+  { id: "dashboard", label: "Dashboard",     component: DashboardSlide },
+  { id: "news",      label: "News Briefing", component: NewsBriefingSlide },
+  { id: "research",  label: "Research",      component: ResearchSlide },
+  { id: "archive",   label: "Archive",       component: ArchiveSlide },
 ];
 
 export function DemoSlideshow() {
@@ -402,31 +500,21 @@ export function DemoSlideshow() {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-2xl shadow-gray-200/60">
-      {/* Browser chrome */}
-      <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3">
-        <span className="h-3 w-3 rounded-full bg-red-400" />
-        <span className="h-3 w-3 rounded-full bg-yellow-400" />
-        <span className="h-3 w-3 rounded-full bg-green-400" />
-        <div className="mx-3 flex max-w-xs flex-1 items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-1 text-xs text-gray-400">
-          <svg className="h-3 w-3 shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
-          alphabrief.net/{SLIDES[active].id === "home" ? "home" : SLIDES[active].id === "dashboard" ? "dashboard" : "dashboard/research/NVDA"}
-        </div>
-        {/* Slide tabs */}
-        <div className="ml-auto flex gap-1">
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => setActive(i)}
-              className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
-                active === i
-                  ? "bg-[#6C5CE7] text-white"
-                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+      {/* Tab bar */}
+      <div className="flex items-center justify-end gap-1 border-b border-gray-200 bg-gray-50 px-4 py-2.5">
+        {SLIDES.map((s, i) => (
+          <button
+            key={s.id}
+            onClick={() => setActive(i)}
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+              active === i
+                ? "bg-[#6C5CE7] text-white"
+                : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
       </div>
 
       {/* Slide content */}
