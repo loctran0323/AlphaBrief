@@ -15,10 +15,12 @@ export function LedgerMasthead({
   eyebrow,
   title,
   dek,
+  dekStyle,
 }: {
   eyebrow: string;
   title: React.ReactNode;
   dek?: string;
+  dekStyle?: React.CSSProperties;
 }) {
   return (
     <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 20, marginBottom: 28 }}>
@@ -33,6 +35,7 @@ export function LedgerMasthead({
       {dek && <p style={{
         fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17, lineHeight: 1.5,
         color: "var(--ab-muted)", marginTop: 12, maxWidth: 720, marginBottom: 0,
+        ...dekStyle,
       }}>{dek}</p>}
     </div>
   );

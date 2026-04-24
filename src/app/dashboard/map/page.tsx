@@ -83,6 +83,7 @@ export default async function MarketMapPage() {
         eyebrow={`Cartography · ${timeStr}`}
         title="The map, in one glance"
         dek="Area encodes market capitalization; tint encodes the day's move. Click any tile to pull up headlines and a brief."
+        dekStyle={{ maxWidth: "none", whiteSpace: "nowrap" }}
       />
 
       {/* ── Byline ── */}
