@@ -18,10 +18,10 @@ export async function POST() {
   }
 
   const stripe = getStripe();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3003";
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
-    return_url: `${siteUrl}/dashboard/settings`,
+    return_url: `${siteUrl}/dashboard/subscription`,
   });
 
   return NextResponse.json({ url: session.url });
