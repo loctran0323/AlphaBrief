@@ -10,12 +10,6 @@ const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
 const ACCENT  = "#6C5CE7";
 
-function isAdminEmail(email?: string | null): boolean {
-  if (!email) return false;
-  const admins = (process.env.ADMIN_EMAILS ?? "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
-  return admins.includes(email.toLowerCase());
-}
-
 const planRows = [
   { label: "Home market view",          free: true,         pro: true },
   { label: "Dashboard & news briefing", free: true,         pro: true },
@@ -32,7 +26,6 @@ export default async function SubscriptionPage() {
   const { data: { user } } = await supabase.auth.getUser();
   const tier = user ? await getUserTier(supabase, user.id, user.email) : "free";
   const isPro = tier === "pro";
-  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <div style={{ maxWidth: 680, fontFamily: SANS_L }}>
@@ -91,17 +84,15 @@ export default async function SubscriptionPage() {
 
       {/* Upgrade / Billing */}
       {isPro ? (
-        !isAdmin && (
           <div style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 24, marginBottom: 32 }}>
             <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, marginBottom: 6, color: "var(--ab-fg)" }}>
               Billing &amp; cancellation
             </div>
             <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)", marginBottom: 20 }}>
-              Update your payment method, download invoices, or cancel from the Stripe billing portal.
+              Update your payment method, download invoices, or cancel your subscription from the Stripe billing portal.
             </p>
             <ManageBillingButton />
           </div>
-        )
       ) : (
         <div style={{ border: `1px solid ${ACCENT}`, padding: "24px 28px", marginBottom: 32 }}>
           <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 8 }}>
