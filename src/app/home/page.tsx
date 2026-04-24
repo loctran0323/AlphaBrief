@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChatRoom } from "@/components/chat-room";
 import { WatchlistRowLedger } from "@/components/watchlist-row";
+import { BenchmarkCard, MoverColClient } from "@/components/home-hover-links";
 import { AddTickerForm } from "@/components/add-ticker-form";
 import { LedgerMasthead, LedgerRuleLabel } from "@/components/ledger-ui";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -37,42 +38,6 @@ function signedPct(pct: number): string {
   return `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
 }
 
-/** Flat mover column — matches L_MoverCol from reference */
-function MoverCol({ label, rows }: { label: string; rows: MarketMover[] }) {
-  return (
-    <div>
-      <div style={{
-        fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase" as const,
-        color: "var(--ab-faint)", fontWeight: 700, marginBottom: 10,
-        fontFamily: SANS_L,
-      }}>{label}</div>
-      <div>
-        {rows.map((r) => (
-          <Link
-            key={r.symbol}
-            href={`/dashboard/research/${r.symbol}`}
-            className="flex items-baseline justify-between"
-            style={{ padding: "8px 0", borderBottom: "1px solid var(--ab-border)", display: "flex", textDecoration: "none" }}
-          >
-            <div>
-              <div style={{ fontFamily: SERIF_L, fontWeight: 600, fontSize: 15, color: "var(--ab-fg)" }}>{r.symbol}</div>
-              <div style={{ fontSize: 11, color: "var(--ab-muted)", marginTop: 1, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {r.name}
-              </div>
-            </div>
-            <div style={{ textAlign: "right" as const, fontVariantNumeric: "tabular-nums", flexShrink: 0, marginLeft: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--ab-fg)" }}>{formatPrice(r.price, r.symbol)}</div>
-              <div style={{ fontSize: 11, color: pctColor(r.changePct), fontWeight: 600 }}>{signedPct(r.changePct)}</div>
-              {r.volume != null && (
-                <div style={{ fontSize: 10, color: "var(--ab-faint)", marginTop: 1 }}>{compact.format(r.volume)}</div>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default async function HomePage() {
   const data = await fetchMarketHomeData();
@@ -140,30 +105,16 @@ export default async function HomePage() {
       {/* ── Benchmarks — flat 4-column quote strip ── */}
       <LedgerRuleLabel>Benchmarks</LedgerRuleLabel>
       <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "18px 32px" }}>
-        {data.benchmarks.map((b) => {
-          const isIndex = b.symbol.startsWith("^");
-          const inner = (
-            <>
-              <div style={{ fontSize: 11, color: "var(--ab-muted)", letterSpacing: ".04em" }}>{b.label}</div>
-              <div className="flex items-baseline justify-between" style={{ marginTop: 6 }}>
-                <div style={{ fontFamily: SERIF_L, fontSize: 22, fontWeight: 600, fontVariantNumeric: "tabular-nums", color: "var(--ab-fg)" }}>
-                  {formatPrice(b.price, b.symbol)}
-                </div>
-                <div style={{ fontSize: 13, color: pctColor(b.changePct), fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>
-                  {signedPct(b.changePct)}
-                </div>
-              </div>
-              <div style={{ fontSize: 10, color: "var(--ab-faint)", letterSpacing: ".08em", marginTop: 2 }}>{b.symbol}</div>
-            </>
-          );
-          return isIndex ? (
-            <div key={b.symbol} style={{ paddingBottom: 10, borderBottom: "1px solid var(--ab-border)" }}>{inner}</div>
-          ) : (
-            <Link key={b.symbol} href={`/dashboard/research/${b.symbol}`} style={{ paddingBottom: 10, borderBottom: "1px solid var(--ab-border)", display: "block", textDecoration: "none" }}>
-              {inner}
-            </Link>
-          );
-        })}
+        {data.benchmarks.map((b) => (
+          <BenchmarkCard
+            key={b.symbol}
+            symbol={b.symbol}
+            label={b.label}
+            price={b.price}
+            changePct={b.changePct}
+            isIndex={b.symbol.startsWith("^")}
+          />
+        ))}
       </div>
 
       {/* ── Watchlist ── */}
@@ -201,14 +152,14 @@ export default async function HomePage() {
             </Link>
           )}
         </div>
-        <MoverCol label="Gainers" rows={data.gainers.slice(0, 6)} />
-        <MoverCol label="Losers"  rows={data.losers.slice(0, 6)} />
+        <MoverColClient label="Gainers" rows={data.gainers.slice(0, 6)} />
+        <MoverColClient label="Losers"  rows={data.losers.slice(0, 6)} />
       </div>
 
       {/* ── Most active + Largest cap ── */}
       <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 32, marginTop: 28 }}>
-        <MoverCol label="Most active" rows={data.mostActives.slice(0, 6)} />
-        <MoverCol label="Largest cap" rows={data.largestByCap.slice(0, 6)} />
+        <MoverColClient label="Most active" rows={data.mostActives.slice(0, 6)} />
+        <MoverColClient label="Largest cap" rows={data.largestByCap.slice(0, 6)} />
       </div>
 
       {/* End-of-section rule */}
