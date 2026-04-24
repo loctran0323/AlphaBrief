@@ -157,3 +157,61 @@ body {
 /* bg-gray-900 buttons (Sign up, Log in CTA) — invert in dark */
 .dark .bg-gray-900.text-white { background-color: #F1F5F9 !important; color: #111827 !important; }
 .dark .hover\:bg-gray-700:hover { background-color: #D1D5DB !important; }
+
+/* ── Mobile responsive overrides (≤640px) ───────────────────────────────── */
+@media (max-width: 640px) {
+
+  /* Nav — hide tagline + text links, keep logo + controls */
+  .ab-nav-tagline    { display: none !important; }
+  .ab-nav-links      { display: none !important; }
+  .ab-nav-upgrade    { display: none !important; }
+  .ab-nav-wrap       { padding: 12px 16px !important; }
+  .ab-mobile-signup  { display: inline-block !important; }
+  /* Show hamburger on mobile */
+  .ab-hamburger      { display: flex !important; }
+
+  /* Splash hero */
+  .ab-hero-h1        { font-size: clamp(48px, 13vw, 72px) !important; line-height: 1 !important; }
+  .ab-hero-pad       { padding: 40px 20px 24px !important; }
+  .ab-section-pad    { padding: 32px 20px !important; }
+  .ab-preview-pad    { padding: 32px 20px 48px !important; }
+  .ab-splash-nav-pad { padding: 14px 20px !important; }
+  .ab-splash-links   { display: none !important; }
+
+  /* Grids → single column */
+  .ab-grid-4  { grid-template-columns: repeat(2, 1fr) !important; gap: 12px 20px !important; }
+  .ab-grid-3  { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .ab-grid-2  { grid-template-columns: 1fr !important; gap: 24px !important; }
+  .ab-grid-preview-news { grid-template-columns: 1fr !important; gap: 10px !important; }
+
+  /* Home page movers layout */
+  .ab-movers-grid    { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .ab-movers-2col    { grid-template-columns: 1fr !important; gap: 32px !important; }
+
+  /* Watchlist 9-col → 3-col */
+  .ab-watchlist-grid { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* Dashboard layout */
+  .ab-dash-pad       { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* Research subtitle no-wrap */
+  .ab-nowrap-mob     { white-space: normal !important; }
+
+  /* Calendar 140px day col → smaller */
+  .ab-cal-day-col    { width: 72px !important; }
+
+  /* Ledger masthead font size */
+  .ab-masthead-h1    { font-size: clamp(28px, 8vw, 46px) !important; }
+
+  /* Features grid — 1 col on mobile */
+  .ab-features-grid  { grid-template-columns: 1fr !important; gap: 20px 0 !important; }
+
+  /* Pricing grid — stack */
+  .ab-pricing-grid   { grid-template-columns: 1fr !important; }
+
+  /* Kicker 4-col → 2-col */
+  .ab-kicker-grid    { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Prevent text overflow on nowrap elements */
+  .ab-dek-nowrap     { white-space: normal !important; font-size: 15px !important; }
+}

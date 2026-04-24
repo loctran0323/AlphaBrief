@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
+import { MobileNav } from "./mobile-nav";
 
 const SERIF = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -198,6 +199,7 @@ export function AppNav({
       }}
     >
       <div
+        className="ab-nav-wrap"
         style={{
           maxWidth: 1180,
           margin: "0 auto",
@@ -208,8 +210,10 @@ export function AppNav({
           gap: 16,
         }}
       >
-        {/* Left: Logo + edition tagline */}
+        {/* Left: Hamburger (mobile) + Logo + edition tagline */}
         <div className="flex items-center gap-4 shrink-0">
+          {/* Mobile hamburger — MobileNav renders both the button and the panel */}
+          <MobileNav signedIn={signedIn} tier={tier} email={email} />
           <Link href="/home" className="flex items-center gap-2 shrink-0">
             <div
               style={{
@@ -231,14 +235,16 @@ export function AppNav({
               AlphaBrief
             </span>
           </Link>
-          <span style={{ color: "var(--ab-faint)" }}>·</span>
-          <EditionTagline />
+          <span className="ab-nav-tagline" style={{ color: "var(--ab-faint)" }}>·</span>
+          <span className="ab-nav-tagline"><EditionTagline /></span>
         </div>
 
         {/* Right: nav links + controls */}
-        <nav className="flex items-center gap-5" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
+        <div className="flex items-center gap-5" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
+
+          {/* Text navigation links — hidden on mobile */}
           {signedIn ? (
-            <>
+            <nav className="ab-nav-links flex items-center gap-5">
               {[
                 { href: "/home",               label: "Market"   },
                 { href: "/dashboard",          label: "Briefing" },
@@ -306,12 +312,9 @@ export function AppNav({
                   Upgrade
                 </Link>
               )}
-
-              <ThemeToggle />
-              <UserMenu email={email} tier={tier} />
-            </>
+            </nav>
           ) : (
-            <>
+            <nav className="ab-nav-links flex items-center gap-4">
               <Link
                 href="/login?next=/home"
                 style={{ color: "var(--ab-muted)", fontWeight: 500, transition: "color .15s" }}
@@ -334,10 +337,13 @@ export function AppNav({
               >
                 Sign up free
               </Link>
-              <ThemeToggle />
-            </>
+            </nav>
           )}
-        </nav>
+
+          {/* Controls — always visible on all screen sizes */}
+          <ThemeToggle />
+          {signedIn && <UserMenu email={email} tier={tier} />}
+        </div>
       </div>
     </header>
   );

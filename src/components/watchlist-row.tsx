@@ -182,7 +182,7 @@ export function WatchlistRowLedger({
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 18 }}>
+    <div className="ab-watchlist-grid" style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 18 }}>
       {sorted.map((item) => {
         const q = quoteBySymbol.get(item.ticker.toUpperCase());
         const pct = q?.changePct ?? 0;

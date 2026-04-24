@@ -104,7 +104,7 @@ export default async function HomePage() {
 
       {/* ── Benchmarks — flat 4-column quote strip ── */}
       <LedgerRuleLabel>Benchmarks</LedgerRuleLabel>
-      <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "18px 32px" }}>
+      <div className="grid ab-grid-4" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: "18px 32px" }}>
         {data.benchmarks.map((b) => (
           <BenchmarkCard
             key={b.symbol}
@@ -134,7 +134,7 @@ export default async function HomePage() {
 
       {/* ── Movers of the day — 3-column editorial ── */}
       <LedgerRuleLabel>Movers of the day</LedgerRuleLabel>
-      <div className="grid" style={{ gridTemplateColumns: "1.2fr 1fr 1fr", gap: 32 }}>
+      <div className="grid ab-movers-grid" style={{ gridTemplateColumns: "1.2fr 1fr 1fr", gap: 32 }}>
         {/* Editorial lede */}
         <div>
           <div style={{ fontFamily: SERIF_L, fontSize: 14, fontStyle: "italic", color: "var(--ab-muted)", marginBottom: 6 }}>
@@ -157,7 +157,7 @@ export default async function HomePage() {
       </div>
 
       {/* ── Most active + Largest cap ── */}
-      <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 32, marginTop: 28 }}>
+      <div className="grid ab-movers-2col" style={{ gridTemplateColumns: "1fr 1fr", gap: 32, marginTop: 28 }}>
         <MoverColClient label="Most active" rows={data.mostActives.slice(0, 6)} />
         <MoverColClient label="Largest cap" rows={data.largestByCap.slice(0, 6)} />
       </div>

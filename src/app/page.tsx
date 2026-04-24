@@ -73,7 +73,7 @@ export default async function SplashPage() {
     <div style={{ background: "var(--ab-bg)", color: "var(--ab-fg)", fontFamily: SANS_L, minHeight: "100vh" }}>
 
       {/* ── Marketing nav ── */}
-      <div style={{
+      <div className="ab-splash-nav-pad" style={{
         padding: "18px 48px", display: "flex", alignItems: "center",
         justifyContent: "space-between", borderBottom: "1px solid var(--ab-border)",
         background: "var(--ab-bg)", position: "sticky", top: 0, zIndex: 20,
@@ -83,49 +83,44 @@ export default async function SplashPage() {
             <ABLogo size={22} />
             <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "var(--ab-fg)" }}>AlphaBrief</span>
           </Link>
-          <span style={{ color: "var(--ab-faint)" }}>·</span>
-          <SplashEditionTagline />
+          <span className="ab-nav-tagline" style={{ color: "var(--ab-faint)" }}>·</span>
+          <span className="ab-nav-tagline"><SplashEditionTagline /></span>
         </div>
-        <div className="flex items-center gap-5" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
-          {configured ? (
-            signedIn ? (
-              <>
-                <ThemeToggle />
-                <Link href="/home" style={{
-                  padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
-                  fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
-                  letterSpacing: ".08em", textTransform: "uppercase",
-                }}>Open app</Link>
-              </>
-            ) : (
-              <>
-                <Link href="#pricing" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Pricing</Link>
-                <Link href="/login" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Log in</Link>
-                <ThemeToggle />
-                <Link href="/signup" style={{
-                  padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
-                  fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
-                  letterSpacing: ".08em", textTransform: "uppercase",
-                }}>Sign up free</Link>
-              </>
-            )
-          ) : (
-            <>
-              <ThemeToggle />
-              <span className="text-xs text-amber-600">Add keys in <code className="rounded bg-amber-50 px-1">.env.local</code></span>
-            </>
+        <div className="flex items-center gap-4" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
+          {/* Text links — hidden on mobile */}
+          {configured && !signedIn && (
+            <nav className="ab-splash-links flex items-center gap-5">
+              <Link href="#pricing" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Pricing</Link>
+              <Link href="/login" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Log in</Link>
+            </nav>
+          )}
+          {/* Always-visible controls */}
+          <ThemeToggle />
+          {configured && signedIn && (
+            <Link href="/home" style={{
+              padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+              fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
+              letterSpacing: ".08em", textTransform: "uppercase",
+            }}>Open app</Link>
+          )}
+          {configured && !signedIn && (
+            <Link href="/signup" style={{
+              padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+              fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
+              letterSpacing: ".08em", textTransform: "uppercase",
+            }}>Sign up free</Link>
           )}
         </div>
       </div>
 
       {/* ── Hero — editorial ── */}
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "72px 40px 40px" }}>
+      <div className="ab-hero-pad" style={{ maxWidth: 1120, margin: "0 auto", padding: "72px 40px 40px" }}>
         <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 28, marginBottom: 28 }}>
           <div style={{
             fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
             color: ACCENT, fontWeight: 700, marginBottom: 14,
           }}>Beta · Actively building</div>
-          <h1 style={{
+          <h1 className="ab-hero-h1" style={{
             fontFamily: SERIF_L, fontSize: 104, lineHeight: 0.95,
             letterSpacing: "-.04em", fontWeight: 600, margin: 0,
           }}>
@@ -183,7 +178,7 @@ export default async function SplashPage() {
       </div>
 
       {/* ── Product preview ── */}
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "40px 40px 80px" }}>
+      <div className="ab-preview-pad" style={{ maxWidth: 1120, margin: "0 auto", padding: "40px 40px 80px" }}>
         <SplashRuleLabel>Product preview</SplashRuleLabel>
         <h2 style={{
           fontFamily: SERIF_L, fontSize: 44, fontWeight: 600,
@@ -279,7 +274,7 @@ export default async function SplashPage() {
                 fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 10,
                 fontFamily: SANS_L,
               }}>From the wire</div>
-              <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="grid ab-grid-preview-news" style={{ gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 {[
                   { tag: "BULLISH", src: "WSJ",  title: "URI surges 20.8% after raising full-year guidance above consensus" },
                   { tag: "BEARISH", src: "CNBC", title: "NOW −16.9% as cloud growth misses estimates by widest margin since 2022" },
@@ -316,7 +311,7 @@ export default async function SplashPage() {
       </div>
 
       {/* ── Features ── */}
-      <div style={{
+      <div className="ab-section-pad" style={{
         background: "var(--ab-surface)",
         borderTop: "1px solid var(--ab-border)",
         borderBottom: "1px solid var(--ab-border)",
@@ -337,7 +332,7 @@ export default async function SplashPage() {
           }}>
             Everything you need to stay ahead of the market — with more on the way.
           </p>
-          <div className="grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: "32px 40px", marginTop: 32 }}>
+          <div className="grid ab-features-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: "32px 40px", marginTop: 32 }}>
             {features.map(({ num, title, body }) => (
               <div key={title} style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 14 }}>
                 <div style={{
@@ -360,7 +355,7 @@ export default async function SplashPage() {
 
       {/* ── Pricing ── */}
       {configured && !signedIn && (
-        <div id="pricing" style={{ maxWidth: 1000, margin: "0 auto", padding: "72px 40px" }}>
+        <div id="pricing" className="ab-section-pad" style={{ maxWidth: 1000, margin: "0 auto", padding: "72px 40px" }}>
           <div style={{
             fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
             color: ACCENT, fontWeight: 700, marginBottom: 10, textAlign: "center",
@@ -375,7 +370,7 @@ export default async function SplashPage() {
           }}>
             Start free. Upgrade when you want more. Beta prices are locked in for early supporters.
           </p>
-          <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
+          <div className="grid ab-pricing-grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
             {/* Free */}
             <div style={{ border: "1px solid var(--ab-border)", padding: "28px 30px", background: "var(--ab-card)", position: "relative" }}>
               <div style={{ fontSize: 11, letterSpacing: ".22em", fontWeight: 700, color: "var(--ab-faint)", textTransform: "uppercase" }}>FREE</div>

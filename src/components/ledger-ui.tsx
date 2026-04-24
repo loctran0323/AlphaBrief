@@ -28,7 +28,7 @@ export function LedgerMasthead({
         fontFamily: SANS_L, fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
         color: ACCENT, fontWeight: 700, marginBottom: 10,
       }}>{eyebrow}</div>
-      <h1 style={{
+      <h1 className="ab-masthead-h1" style={{
         fontFamily: SERIF_L, fontSize: 46, lineHeight: 1.02, letterSpacing: "-.02em",
         fontWeight: 600, color: "var(--ab-fg)", margin: 0,
       }}>{title}</h1>

@@ -52,7 +52,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen">
       <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
+      <div className="ab-dash-pad" style={{ maxWidth: 1040, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
     </div>
   );
 }
