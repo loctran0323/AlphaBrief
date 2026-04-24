@@ -4,9 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 import { updatePassword } from "./actions";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Account" };
+export const metadata: Metadata = { title: "Account — AlphaBrief" };
 
-const inputCls = "w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]";
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
+const inputStyle: React.CSSProperties = {
+  width: "100%", fontFamily: SERIF_L, fontSize: 15,
+  padding: "6px 0", border: "none",
+  borderBottom: "1px solid var(--ab-fg)",
+  background: "transparent", color: "var(--ab-fg)",
+  outline: "none", boxSizing: "border-box",
+};
 
 export default async function AccountPage({
   searchParams,
@@ -22,55 +32,75 @@ export default async function AccountPage({
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <div className="mx-auto max-w-2xl pb-16">
-      <header className="border-b border-[var(--border)] pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Account</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
+    <div style={{ maxWidth: 680, fontFamily: SANS_L }}>
+
+      {/* Masthead */}
+      <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 20, marginBottom: 32 }}>
+        <div style={{ fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: ACCENT, fontWeight: 700, marginBottom: 10 }}>
+          Account
+        </div>
+        <h1 style={{ fontFamily: SERIF_L, fontSize: 42, fontWeight: 600, letterSpacing: "-.02em", lineHeight: 1.05, margin: 0, color: "var(--ab-fg)" }}>
           Account settings
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-          Signed in as{" "}
-          <span className="font-medium text-[var(--foreground)]">{user?.email ?? "—"}</span>
+        <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 16, color: "var(--ab-muted)", marginTop: 10, marginBottom: 0 }}>
+          Signed in as <strong style={{ fontStyle: "normal", color: "var(--ab-fg)" }}>{user?.email ?? "—"}</strong>
         </p>
-      </header>
+      </div>
 
       {error && (
-        <div className="mt-6 rounded-xl border border-red-400/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div style={{ border: "1px solid var(--ab-down)", padding: "12px 16px", marginBottom: 24, fontFamily: SANS_L, fontSize: 13, color: "var(--ab-down)" }}>
           {error}
         </div>
       )}
-{passwordChanged && (
-        <div className="mt-6 rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+      {passwordChanged && (
+        <div style={{ border: "1px solid var(--ab-up)", padding: "12px 16px", marginBottom: 24, fontFamily: SANS_L, fontSize: 13, color: "var(--ab-up)" }}>
           Password updated successfully.
         </div>
       )}
 
-      <section className="mt-10 space-y-6">
-        {/* Password */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">Change password</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Enter your current password to confirm, then choose a new one.
-          </p>
-          <form action={updatePassword} className="mt-5 space-y-3">
-            <input type="password" name="current" required placeholder="Current password" className={inputCls} />
-            <input type="password" name="password" required minLength={8} placeholder="New password" className={inputCls} />
-            <input type="password" name="confirm" required placeholder="Confirm new password" className={inputCls} />
-            <button
-              type="submit"
-              className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-700"
-            >
+      {/* Change password */}
+      <div style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 24, marginBottom: 32 }}>
+        <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, marginBottom: 6, color: "var(--ab-fg)" }}>
+          Change password
+        </div>
+        <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)", marginBottom: 24 }}>
+          Enter your current password to confirm, then choose a new one.
+        </p>
+        <form action={updatePassword} style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+          <div>
+            <label style={{ fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--ab-faint)", display: "block", marginBottom: 6 }}>
+              Current password
+            </label>
+            <input type="password" name="current" required placeholder="Current password" style={inputStyle} />
+          </div>
+          <div>
+            <label style={{ fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--ab-faint)", display: "block", marginBottom: 6 }}>
+              New password
+            </label>
+            <input type="password" name="password" required minLength={8} placeholder="At least 8 characters" style={inputStyle} />
+          </div>
+          <div>
+            <label style={{ fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--ab-faint)", display: "block", marginBottom: 6 }}>
+              Confirm new password
+            </label>
+            <input type="password" name="confirm" required placeholder="Confirm new password" style={inputStyle} />
+          </div>
+          <div>
+            <button type="submit" style={{
+              fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+              letterSpacing: ".08em", textTransform: "uppercase",
+              color: "#fff", background: "var(--ab-fg)", border: "none",
+              padding: "9px 20px", cursor: "pointer",
+            }}>
               Update password
             </button>
-          </form>
-        </div>
-      </section>
+          </div>
+        </form>
+      </div>
 
-      <p className="mt-10">
-        <Link href="/dashboard" className="text-sm font-medium text-[var(--accent)] hover:underline">
-          ← Back to Dashboard
-        </Link>
-      </p>
+      <Link href="/dashboard" style={{ fontFamily: SANS_L, fontSize: 11, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ab-muted)", textDecoration: "none" }}>
+        ← Back to Dashboard
+      </Link>
     </div>
   );
 }

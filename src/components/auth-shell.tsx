@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
 export function AuthShell({
   children,
   title,
@@ -11,30 +15,56 @@ export function AuthShell({
   subtitle?: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <header className="backdrop-blur-sm" style={{ borderBottom: "1px solid var(--nav-border)", background: "var(--nav-bg)" }}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
-              <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <div style={{ minHeight: "100vh", background: "var(--ab-bg)", fontFamily: SANS_L }}>
+      {/* Nav — matches AppNav */}
+      <header style={{
+        borderBottom: "1px solid var(--ab-border)",
+        background: "var(--ab-bg)",
+        position: "sticky", top: 0, zIndex: 20,
+      }}>
+        <div style={{
+          maxWidth: 1180, margin: "0 auto",
+          padding: "14px 40px 12px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <div style={{
+              width: 26, height: 26, borderRadius: 6, background: ACCENT,
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
                 <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
               </svg>
             </div>
-            <span className="text-base font-bold text-gray-900 dark:text-white">AlphaBrief</span>
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "var(--ab-fg)" }}>
+              AlphaBrief
+            </span>
           </Link>
           <ThemeToggle />
         </div>
       </header>
 
-      <div className="flex min-h-[calc(100vh-65px)] items-center justify-center px-6 py-16">
-        <div className="w-full max-w-md">
-          <div className="rounded-2xl p-8 shadow-sm" style={{ border: "1px solid var(--border)", background: "var(--card)" }}>
-            <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>{title}</h1>
+      {/* Centered form */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        minHeight: "calc(100vh - 57px)", padding: "48px 24px",
+      }}>
+        <div style={{ width: "100%", maxWidth: 420 }}>
+          {/* Masthead */}
+          <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 20, marginBottom: 28 }}>
+            <h1 style={{
+              fontFamily: SERIF_L, fontSize: 36, fontWeight: 600,
+              letterSpacing: "-.02em", lineHeight: 1.05, margin: 0, color: "var(--ab-fg)",
+            }}>{title}</h1>
             {subtitle && (
-              <div className="mt-2 text-sm" style={{ color: "var(--muted)" }}>{subtitle}</div>
+              <div style={{
+                fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15,
+                color: "var(--ab-muted)", marginTop: 8,
+              }}>{subtitle}</div>
             )}
-            <div className="mt-6">{children}</div>
           </div>
+
+          {children}
         </div>
       </div>
     </div>

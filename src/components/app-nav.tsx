@@ -11,6 +11,7 @@ const ACCENT_NAV = "#6C5CE7";
 const MENU_ITEMS = [
   { href: "/dashboard/settings",     label: "Digest" },
   { href: "/dashboard/subscription", label: "Subscription" },
+  { href: "/dashboard/contact",      label: "Contact" },
 ] as const;
 
 function menuItemStyle(hover = false): React.CSSProperties {

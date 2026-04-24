@@ -3,6 +3,18 @@
 import { useActionState } from "react";
 import { sendContactMessage } from "./actions";
 
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
+const inputStyle: React.CSSProperties = {
+  width: "100%", fontFamily: SERIF_L, fontSize: 15,
+  padding: "6px 0", border: "none",
+  borderBottom: "1px solid var(--ab-fg)",
+  background: "transparent", color: "var(--ab-fg)",
+  outline: "none", boxSizing: "border-box",
+};
+
 const initial = { ok: false as boolean | undefined, error: undefined as string | undefined };
 
 export function ContactForm({ defaultEmail = "" }: { defaultEmail?: string }) {
@@ -16,78 +28,62 @@ export function ContactForm({ defaultEmail = "" }: { defaultEmail?: string }) {
 
   if (state.ok === true) {
     return (
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-8 text-center">
-        <svg className="mx-auto h-10 w-10 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h2 className="mt-4 text-lg font-semibold text-emerald-800">Message sent!</h2>
-        <p className="mt-1 text-sm text-emerald-700">We got your message and will reply to your email shortly.</p>
+      <div style={{ border: "1px solid var(--ab-up)", padding: "28px 24px", textAlign: "center" }}>
+        <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 8 }}>
+          Message sent.
+        </div>
+        <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15, color: "var(--ab-muted)", margin: 0 }}>
+          We got your message and will reply shortly.
+        </p>
       </div>
     );
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       {state.error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div style={{ border: "1px solid var(--ab-down)", padding: "10px 14px", fontFamily: SANS_L, fontSize: 13, color: "var(--ab-down)" }}>
           {state.error}
         </div>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">
+          <label style={{ fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase" as const, color: "var(--ab-faint)", display: "block", marginBottom: 6 }}>
             Name
           </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            autoComplete="name"
-            placeholder="Your name"
-            className="w-full rounded-lg border border-[var(--border)] bg-white px-4 py-2.5 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
-          />
+          <input type="text" name="name" required autoComplete="name" placeholder="Your name" style={inputStyle} />
         </div>
-
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">
+          <label style={{ fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase" as const, color: "var(--ab-faint)", display: "block", marginBottom: 6 }}>
             Email
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            defaultValue={defaultEmail}
-            placeholder="you@example.com"
-            className="w-full rounded-lg border border-[var(--border)] bg-white px-4 py-2.5 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
-          />
+          <input type="email" name="email" required autoComplete="email" defaultValue={defaultEmail} placeholder="you@example.com" style={inputStyle} />
         </div>
       </div>
 
       <div>
-        <label htmlFor="message" className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">
+        <label style={{ fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase" as const, color: "var(--ab-faint)", display: "block", marginBottom: 6 }}>
           Message
         </label>
         <textarea
-          id="message"
-          name="message"
-          rows={6}
-          required
-          placeholder="What's on your mind? Questions, feature requests, or anything else..."
-          className="w-full rounded-lg border border-[var(--border)] bg-white px-4 py-2.5 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 resize-none"
+          name="message" rows={6} required
+          placeholder="Questions, feature requests, or anything else…"
+          style={{ ...inputStyle, resize: "none" as const, paddingTop: 4 }}
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-lg bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 disabled:opacity-50 sm:w-auto"
-      >
-        {pending ? "Sending…" : "Send message"}
-      </button>
+      <div>
+        <button type="submit" disabled={pending} style={{
+          fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+          letterSpacing: ".08em", textTransform: "uppercase" as const,
+          color: "#fff", background: ACCENT, border: "none",
+          padding: "9px 20px", cursor: pending ? "not-allowed" : "pointer",
+          opacity: pending ? 0.6 : 1,
+        }}>
+          {pending ? "Sending…" : "Send message"}
+        </button>
+      </div>
     </form>
   );
 }
