@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 
+const SANS_L = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT = "#6C5CE7";
+
 export function UpgradeButton() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]     = useState<string | null>(null);
 
   async function handleClick() {
     setLoading(true);
@@ -25,16 +28,23 @@ export function UpgradeButton() {
   }
 
   return (
-    <div className="space-y-2">
+    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">
+        <p style={{ fontFamily: SANS_L, fontSize: 13, color: "var(--ab-down)", border: "1px solid var(--ab-down)", padding: "8px 14px", margin: 0 }}>
           {error}
         </p>
       )}
       <button
         onClick={handleClick}
         disabled={loading}
-        className="rounded-xl bg-[var(--accent)] px-10 py-4 text-base font-bold text-white shadow-lg shadow-[var(--accent)]/25 transition hover:bg-[var(--accent-muted)] hover:scale-[1.02] disabled:opacity-60"
+        style={{
+          fontFamily: SANS_L, fontSize: 12, fontWeight: 700,
+          letterSpacing: ".1em", textTransform: "uppercase",
+          color: "#fff", background: ACCENT, border: "none",
+          padding: "14px 36px", cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.6 : 1,
+          transition: "opacity .15s",
+        }}
       >
         {loading ? "Redirecting to Stripe…" : "Upgrade to Pro — $9/month"}
       </button>
