@@ -10,7 +10,11 @@ export function ManageBillingButton() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ origin: window.location.origin }),
+      });
       const data = (await res.json()) as { url?: string; error?: string };
       if (data.url) {
         window.location.href = data.url;
@@ -25,16 +29,24 @@ export function ManageBillingButton() {
   }
 
   return (
-    <div className="mt-4 space-y-2">
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">
+        <p style={{ fontFamily: `-apple-system,'Inter',system-ui,sans-serif`, fontSize: 13, color: "var(--ab-down)", border: "1px solid var(--ab-down)", padding: "8px 12px", margin: 0 }}>
           {error}
         </p>
       )}
       <button
         onClick={handleClick}
         disabled={loading}
-        className="rounded-lg border border-[var(--border)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+        style={{
+          fontFamily: `-apple-system,'Inter',system-ui,sans-serif`,
+          fontSize: 11, fontWeight: 600,
+          letterSpacing: ".08em", textTransform: "uppercase",
+          color: "var(--ab-fg)", background: "transparent",
+          border: "1px solid var(--ab-border)",
+          padding: "9px 20px", cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.6 : 1, alignSelf: "flex-start",
+        }}
       >
         {loading ? "Opening portal…" : "Manage billing & cancel"}
       </button>
