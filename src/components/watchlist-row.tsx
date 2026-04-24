@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { removeTicker } from "@/app/dashboard/actions";
 import { AddTickerForm } from "@/components/add-ticker-form";
 import type { WatchlistItem } from "@/types/database";
@@ -95,6 +96,67 @@ export function WatchlistRow({
   );
 }
 
+function WatchlistTickerCard({ item, q, pct, pctColor, pctStr }: {
+  item: WatchlistItem;
+  q: QuoteRow | undefined;
+  pct: number;
+  pctColor: string;
+  pctStr: string;
+}) {
+  const [hov, setHov] = useState(false);
+  const ACCENT = "#6C5CE7";
+
+  return (
+    <div style={{ position: "relative" }}>
+      <Link
+        href={`/dashboard/research/${item.ticker}`}
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
+        style={{
+          textDecoration: "none", display: "block", padding: "6px 8px",
+          border: hov ? `1px solid ${ACCENT}` : "1px solid transparent",
+          transition: "border-color .12s",
+        }}
+      >
+        <div style={{ fontFamily: SERIF_L, fontWeight: 600, fontSize: 13, color: hov ? ACCENT : "var(--ab-fg)", transition: "color .12s" }}>
+          {item.ticker}
+        </div>
+        <div style={{ fontSize: 14, fontVariantNumeric: "tabular-nums", marginTop: 2, color: "var(--ab-fg)" }}>
+          {q?.price != null ? `$${q.price.toFixed(2)}` : "—"}
+        </div>
+        <div style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", color: pctColor, marginTop: 1 }}>
+          {pctStr}
+        </div>
+        <svg width="80" height="16" viewBox="0 0 80 16" style={{ marginTop: 4, display: "block" }}>
+          <polyline
+            points={Array.from({ length: 10 }, (_, i) => {
+              const seed = item.ticker.charCodeAt(0) + i;
+              const y = 8 + Math.sin(seed * 0.8) * (pct >= 0 ? -3 : 3) + (i * (pct >= 0 ? -0.3 : 0.3));
+              return `${i * 8.9},${Math.max(1, Math.min(15, y))}`;
+            }).join(" ")}
+            fill="none"
+            stroke={pct >= 0 ? "var(--ab-up)" : "var(--ab-down)"}
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </Link>
+      {/* Remove button */}
+      <form action={removeTicker} style={{ position: "absolute", top: 0, right: 0 }}>
+        <input type="hidden" name="item_id" value={item.id} />
+        <button
+          type="submit"
+          aria-label={`Remove ${item.ticker}`}
+          style={{
+            fontSize: 13, color: "var(--ab-faint)", background: "none",
+            border: "none", cursor: "pointer", padding: "0 2px", lineHeight: 1,
+          }}
+        >×</button>
+      </form>
+    </div>
+  );
+}
+
 /**
  * Ledger-style watchlist: flat 9-col grid, no card wrapper.
  * ticker (serif bold) · price · pct · mini sparkline
@@ -127,48 +189,7 @@ export function WatchlistRowLedger({
         const pctColor = pct > 0.005 ? "var(--ab-up)" : pct < -0.005 ? "var(--ab-down)" : "var(--ab-faint)";
         const pctStr = q ? `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%` : "—";
         return (
-          <div key={item.id} style={{ position: "relative" }}>
-            <Link
-              href={`/dashboard/research/${item.ticker}`}
-              style={{ textDecoration: "none", display: "block" }}
-            >
-              <div style={{ fontFamily: SERIF_L, fontWeight: 600, fontSize: 13, color: "var(--ab-fg)" }}>
-                {item.ticker}
-              </div>
-              <div style={{ fontSize: 14, fontVariantNumeric: "tabular-nums", marginTop: 2, color: "var(--ab-fg)" }}>
-                {q?.price != null ? `$${q.price.toFixed(2)}` : "—"}
-              </div>
-              <div style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", color: pctColor, marginTop: 1 }}>
-                {pctStr}
-              </div>
-              {/* Mini sparkline placeholder */}
-              <svg width="80" height="16" viewBox="0 0 80 16" style={{ marginTop: 4, display: "block" }}>
-                <polyline
-                  points={Array.from({ length: 10 }, (_, i) => {
-                    const seed = item.ticker.charCodeAt(0) + i;
-                    const y = 8 + Math.sin(seed * 0.8) * (pct >= 0 ? -3 : 3) + (i * (pct >= 0 ? -0.3 : 0.3));
-                    return `${i * 8.9},${Math.max(1, Math.min(15, y))}`;
-                  }).join(" ")}
-                  fill="none"
-                  stroke={pct >= 0 ? "var(--ab-up)" : "var(--ab-down)"}
-                  strokeWidth="1.5"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Link>
-            {/* Remove button */}
-            <form action={removeTicker} style={{ position: "absolute", top: 0, right: 0 }}>
-              <input type="hidden" name="item_id" value={item.id} />
-              <button
-                type="submit"
-                aria-label={`Remove ${item.ticker}`}
-                style={{
-                  fontSize: 13, color: "var(--ab-faint)", background: "none",
-                  border: "none", cursor: "pointer", padding: "0 2px", lineHeight: 1,
-                }}
-              >×</button>
-            </form>
-          </div>
+          <WatchlistTickerCard key={item.id} item={item} q={q} pct={pct} pctColor={pctColor} pctStr={pctStr} />
         );
       })}
     </div>
