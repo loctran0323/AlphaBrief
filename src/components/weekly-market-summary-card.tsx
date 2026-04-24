@@ -83,7 +83,7 @@ export function WeeklyMarketSummaryCard({
             fontStyle: "italic", fontSize: 18, lineHeight: 1.35,
             color: "var(--ab-fg)",
           }}>
-            "{pullQuote}"
+            &ldquo;{pullQuote}&rdquo;
           </div>
         )}
       </div>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SiteFooter } from "@/components/site-footer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SplashEditionTagline } from "@/components/splash-edition-tagline";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -230,7 +229,7 @@ export default async function SplashPage() {
                   quities closed mixed as tech pulled back from recent highs, with the Nasdaq shedding 0.4% while energy and financials led the advance across the tape.
                 </p>
                 <p style={{ color: "var(--ab-muted)", margin: 0, fontSize: 14 }}>
-                  Options flow suggests institutional accumulation in beaten-down names. The Fed's next meeting looms as the primary near-term catalyst — consensus leans toward a hold.
+                  Options flow suggests institutional accumulation in beaten-down names. The Fed&apos;s next meeting looms as the primary near-term catalyst — consensus leans toward a hold.
                 </p>
               </div>
             </div>

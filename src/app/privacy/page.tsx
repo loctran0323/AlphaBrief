@@ -133,7 +133,7 @@ export default function PrivacyPage() {
           </p>
           <p style={{ margin: 0 }}>
             <strong style={{ color: "var(--ab-fg)" }}>Limitation of liability.</strong>{" "}
-            AlphaBrief is provided "as is." We are not liable for any financial losses, data loss, or
+            AlphaBrief is provided &ldquo;as is.&rdquo; We are not liable for any financial losses, data loss, or
             consequential damages arising from use of the service. The service may be interrupted for
             maintenance without notice.
           </p>

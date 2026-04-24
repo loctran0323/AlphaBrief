@@ -61,7 +61,7 @@ function DashboardLedeContent({ summary }: { summary: string }) {
             fontStyle: "italic", color: "var(--ab-fg)",
             marginBottom: 20,
           }}>
-            "{pullQuote}"
+            &ldquo;{pullQuote}&rdquo;
           </div>
         )}
         {keyPoints.length > 0 && (
@@ -102,7 +102,7 @@ async function DashboardLedeInner() {
 function DashboardLedeUnavailable() {
   return (
     <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15, color: "var(--ab-muted)", marginBottom: 8 }}>
-      Today's market summary is temporarily unavailable. Check back shortly.
+      Today&apos;s market summary is temporarily unavailable. Check back shortly.
     </p>
   );
 }
