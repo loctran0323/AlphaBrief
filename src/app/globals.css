@@ -4,13 +4,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #F9FAFB;
+  --background: #FCFCFB;
   --foreground: #111827;
   --muted: #6B7280;
   --faint: #9CA3AF;
   --card: #FFFFFF;
   --border: #E5E7EB;
-  --surface: #F3F4F6;
+  --surface: #F5F5F3;
   --surface-highlight: #EDE9FE;
   --accent: #6C5CE7;
   --accent-muted: #5B4FD4;
@@ -18,6 +18,20 @@
   --warning: #D97706;
   --brand: #6C5CE7;
   --brand-light: #EDE9FE;
+  /* Ledger editorial typography */
+  --font-serif: var(--font-source-serif), 'Georgia', 'Times New Roman', serif;
+  /* --ab-* aliases so reference-design inline styles work verbatim */
+  --ab-bg: var(--background);
+  --ab-fg: var(--foreground);
+  --ab-muted: var(--muted);
+  --ab-faint: var(--faint);
+  --ab-card: var(--card);
+  --ab-border: var(--border);
+  --ab-surface: var(--surface);
+  --ab-surface-hi: var(--surface-highlight);
+  --ab-up: var(--success);
+  --ab-down: #DC2626;
+  --ab-accent: #6C5CE7;
   /* Nav-specific (overridden in dark) */
   --nav-bg: rgba(255,255,255,0.92);
   --nav-border: #F3F4F6;
@@ -31,19 +45,19 @@
 }
 
 html.dark {
-  --background: #0F1117;
+  --background: #0E1015;
   --foreground: #F1F5F9;
   --muted: #94A3B8;
   --faint: #64748B;
-  --card: #1A1D2B;
-  --border: #2A2D3E;
-  --surface: #161827;
+  --card: #14171F;
+  --border: #262A36;
+  --surface: #1A1D26;
   --surface-highlight: #221E4A;
-  --accent: #7C6FF0;
-  --accent-muted: #6C5CE7;
+  --accent: #6C5CE7;
+  --accent-muted: #5B4FD4;
   --success: #10B981;
   --warning: #F59E0B;
-  --brand: #7C6FF0;
+  --brand: #6C5CE7;
   --brand-light: #221E4A;
   --nav-bg: rgba(15,17,23,0.92);
   --nav-border: #2A2D3E;
@@ -54,6 +68,8 @@ html.dark {
   --nav-dropdown-bg: #1A1D2B;
   --nav-dropdown-border: #2A2D3E;
   --nav-item-hover: #1E2235;
+  --ab-down: #F43F5E;
+  --ab-accent: #6C5CE7;
 }
 
 @theme inline {
@@ -61,6 +77,36 @@ html.dark {
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-source-serif), 'Georgia', serif;
+}
+
+/* Ledger editorial utilities */
+.ledger-serif {
+  font-family: var(--font-serif);
+}
+.ledger-masthead-title {
+  font-family: var(--font-serif);
+  font-size: 46px;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+.ledger-rule-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 700;
+  margin: 24px 0 12px;
+}
+.ledger-rule-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 body {

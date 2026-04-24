@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import type { NewsArticle } from "@/types/news";
 import { formatEtTimeShort } from "@/lib/date-utils";
 
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
 const CATEGORIES = ["economics", "markets", "consumers", "companies", "policy"] as const;
 type Category = (typeof CATEGORIES)[number];
 type Tab = "all" | "tickers" | Category;
@@ -16,16 +20,10 @@ const categoryLabel: Record<Category, string> = {
   policy: "Policy",
 };
 
-function impactBarClass(impact: NewsArticle["marketImpact"]): string {
-  if (impact === "bullish") return "bg-emerald-500";
-  if (impact === "bearish") return "bg-rose-500";
-  return "bg-amber-400";
-}
-
-function impactBadgeClass(impact: NewsArticle["marketImpact"]): string {
-  if (impact === "bullish") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (impact === "bearish") return "border-rose-200 bg-rose-50 text-rose-700";
-  return "border-amber-200 bg-amber-50 text-amber-700";
+function tagStyle(impact: NewsArticle["marketImpact"]): React.CSSProperties {
+  if (impact === "bullish") return { background: "rgba(16,185,129,.12)", color: "var(--ab-up)" };
+  if (impact === "bearish") return { background: "rgba(244,63,94,.12)", color: "var(--ab-down)" };
+  return { background: "var(--ab-surface)", color: "var(--ab-muted)" };
 }
 
 /** Normalise text for comparison. */
@@ -63,73 +61,95 @@ function ArticleCard({ article }: { article: NewsArticle }) {
   const [expanded, setExpanded] = useState(false);
   const hasKeyPoints = Array.isArray(article.keyPoints) && article.keyPoints.length > 0;
   const description = pickDescription(article);
+  const timeStr = article.publishedAt
+    ? new Date(article.publishedAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+    : null;
 
   return (
-    <article className="flex gap-0 py-5">
-      <div
-        className={`w-1 shrink-0 rounded-full ${impactBarClass(article.marketImpact)}`}
-        aria-hidden
-      />
-      <div className="min-w-0 flex-1 pl-4 sm:pl-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--faint)]">
-          {article.publishedAt ? (
-            <time dateTime={article.publishedAt}>
-              {new Date(article.publishedAt).toLocaleString(undefined, {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
-            </time>
-          ) : null}
-          <span className="text-[var(--muted)]">{article.source}</span>
-          {article.matchedTicker ? (
-            <span className="rounded-md border border-[var(--border)] bg-[var(--surface-highlight)] px-2 py-0.5 font-semibold text-[var(--foreground)]">
-              {article.matchedTicker}
-            </span>
-          ) : null}
-          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${impactBadgeClass(article.marketImpact)}`}>
-            {article.marketImpact}
+    <article style={{ padding: "16px 0", borderBottom: "1px solid var(--ab-border)" }}>
+      {/* Metadata row: source · time · tag(s) */}
+      <div style={{
+        display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6,
+        fontFamily: SANS_L, fontSize: 10, letterSpacing: ".12em",
+        textTransform: "uppercase", color: "var(--ab-faint)", fontWeight: 700,
+        marginBottom: 6,
+      }}>
+        <span>{article.source}</span>
+        {timeStr && <><span>·</span><span>{timeStr}</span></>}
+        {article.matchedTicker && (
+          <span style={{ padding: "1px 6px", background: "var(--ab-surface-hi)", color: ACCENT }}>
+            {article.matchedTicker}
           </span>
-        </div>
-
-        <h3 className="mt-3 text-base font-semibold leading-snug text-[var(--foreground)]">
-          {article.title}
-        </h3>
-
-        {description && (
-          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{description}</p>
         )}
-
-        {hasKeyPoints && (
-          <div className="mt-2">
-            <button
-              type="button"
-              onClick={() => setExpanded((v) => !v)}
-              className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-muted)]"
-            >
-              {expanded ? "Hide key points ▴" : "Key points ▾"}
-            </button>
-            {expanded && (
-              <ul className="mt-2 space-y-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
-                {article.keyPoints!.map((point, i) => (
-                  <li key={i} className="flex gap-2 text-sm leading-relaxed text-[var(--foreground)]">
-                    <span className="mt-0.5 shrink-0 text-[var(--accent)]">•</span>
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
-
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 inline-flex text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-muted)]"
-        >
-          Open →
-        </a>
+        <span style={{ padding: "1px 6px", ...tagStyle(article.marketImpact) }}>
+          {article.marketImpact?.toUpperCase()}
+        </span>
       </div>
+
+      {/* Headline */}
+      <h3 style={{
+        fontFamily: SERIF_L, fontSize: 19, fontWeight: 600,
+        lineHeight: 1.2, letterSpacing: "-.01em", color: "var(--ab-fg)",
+        margin: 0,
+      }}>
+        <a href={article.url} target="_blank" rel="noreferrer"
+          style={{ color: "inherit", textDecoration: "none" }}>
+          {article.title}
+        </a>
+      </h3>
+
+      {/* Body / description */}
+      {description && (
+        <p style={{
+          fontFamily: SERIF_L, fontSize: 14, color: "var(--ab-muted)",
+          marginTop: 6, lineHeight: 1.55,
+        }}>{description}</p>
+      )}
+
+      {/* Key points (expandable) */}
+      {hasKeyPoints && (
+        <div style={{ marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            style={{
+              fontFamily: SANS_L, fontSize: 11, color: ACCENT,
+              background: "none", border: "none", cursor: "pointer",
+              padding: 0, letterSpacing: ".04em",
+            }}
+          >
+            {expanded ? "Hide key points ▴" : "Key points ▾"}
+          </button>
+          {expanded && (
+            <ul style={{ marginTop: 8, paddingLeft: 0, listStyle: "none" }}>
+              {article.keyPoints!.map((point, i) => (
+                <li key={i} style={{
+                  display: "flex", gap: 8, fontSize: 13,
+                  fontFamily: SERIF_L, color: "var(--ab-fg)",
+                  lineHeight: 1.55, padding: "3px 0",
+                }}>
+                  <span style={{ color: ACCENT, flexShrink: 0 }}>•</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Read link */}
+      <a
+        href={article.url}
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          display: "inline-block", marginTop: 8,
+          fontFamily: SANS_L, fontSize: 11, color: ACCENT,
+          letterSpacing: ".04em", textDecoration: "none",
+        }}
+      >
+        Read full story →
+      </a>
     </article>
   );
 }
@@ -178,17 +198,12 @@ export function NewsBriefing({
   const tabIds: Tab[] = ["all", "tickers", ...CATEGORIES];
 
   return (
-    <div className="space-y-5">
-      <div>
-        <h2 className="text-base font-semibold text-[var(--foreground)]">{title}</h2>
-        {dataFetchedAt ? (
-          <p className="mt-1 text-xs text-[var(--faint)]">
-            Updated {formatEtTimeShort(new Date(dataFetchedAt))}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-wrap gap-2">
+    <div>
+      {/* Category tabs — serif text with accent underline on active */}
+      <div style={{
+        display: "flex", flexWrap: "wrap", gap: "0 24px", marginBottom: 16,
+        fontFamily: SERIF_L, fontSize: 14,
+      }}>
         {tabIds.map((id) => {
           const label =
             id === "all" ? "All"
@@ -199,60 +214,83 @@ export function NewsBriefing({
             : id === "tickers"
               ? articles.filter((a) => a.matchedTicker && watchlistSet.has(a.matchedTicker.toUpperCase())).length
             : articles.filter((a) => a.category === id).length;
+          const active = tab === id;
           return (
             <button
               key={id}
               type="button"
               onClick={() => setTab(id)}
-              className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition sm:text-sm ${
-                tab === id
-                  ? "border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--foreground)]"
-                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--accent)]/35 hover:text-[var(--foreground)]"
-              }`}
+              style={{
+                background: "none", border: "none", cursor: "pointer", padding: "0 0 2px",
+                fontFamily: SERIF_L, fontSize: 14,
+                color: active ? "var(--ab-fg)" : "var(--ab-muted)",
+                fontWeight: active ? 600 : 400,
+                borderBottom: active ? `2px solid ${ACCENT}` : "2px solid transparent",
+              }}
             >
-              {label} ({count})
+              {label} <span style={{ color: "var(--ab-faint)" }}>({count})</span>
             </button>
           );
         })}
       </div>
 
+      {dataFetchedAt && (
+        <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-faint)", marginBottom: 8 }}>
+          Updated {formatEtTimeShort(new Date(dataFetchedAt))}
+        </p>
+      )}
+
       {slice.length === 0 ? (
-        <p className="text-sm leading-relaxed text-[var(--muted)]">
+        <p style={{ fontFamily: SERIF_L, fontSize: 14, color: "var(--ab-muted)", lineHeight: 1.55 }}>
           {tab === "tickers" && emptyHintTickers
             ? emptyHintTickers
             : "Nothing here yet — try another tab or check back after the next refresh."}
         </p>
       ) : (
-        <div className="space-y-0">
-          <div className="divide-y divide-[var(--border)]">
+        <>
+          {/* 2-column grid matching the reference */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0 32px" }}>
             {slice.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
           </div>
-          {pageCount > 1 ? (
-            <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[var(--border)] pt-4">
+
+          {pageCount > 1 && (
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8,
+              marginTop: 16, paddingTop: 12, borderTop: "1px solid var(--ab-border)",
+            }}>
               <button
                 type="button"
                 disabled={safePage <= 0}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] transition enabled:hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                ← Prev
-              </button>
-              <span className="text-xs text-[var(--faint)]">
+                style={{
+                  fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+                  letterSpacing: ".06em", textTransform: "uppercase",
+                  padding: "5px 14px", border: "1px solid var(--ab-border)",
+                  background: "transparent", color: "var(--ab-muted)",
+                  cursor: safePage <= 0 ? "not-allowed" : "pointer", opacity: safePage <= 0 ? 0.4 : 1,
+                }}
+              >← Prev</button>
+              <span style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-faint)" }}>
                 {safePage + 1} / {pageCount}
               </span>
               <button
                 type="button"
                 disabled={safePage >= pageCount - 1}
                 onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] transition enabled:hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Next →
-              </button>
+                style={{
+                  fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+                  letterSpacing: ".06em", textTransform: "uppercase",
+                  padding: "5px 14px", border: "1px solid var(--ab-border)",
+                  background: "transparent", color: "var(--ab-muted)",
+                  cursor: safePage >= pageCount - 1 ? "not-allowed" : "pointer",
+                  opacity: safePage >= pageCount - 1 ? 0.4 : 1,
+                }}
+              >Next →</button>
             </div>
-          ) : null}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

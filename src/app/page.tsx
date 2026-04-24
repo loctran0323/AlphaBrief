@@ -1,118 +1,67 @@
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { DemoSlideshow } from "@/components/demo-slideshow";
+import { SplashEditionTagline } from "@/components/splash-edition-tagline";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
 const features = [
-  {
-    title: "Home market view",
-    body: "ETFs, indices, top movers and screeners. Save a watchlist of the companies you track.",
-  },
-  {
-    title: "AI market summary",
-    body: "Daily briefing powered by Groq — structured sections covering market direction, key drivers, top movers, and what to watch. Refreshes every 6 hours.",
-  },
-  {
-    title: "Dashboard",
-    body: "Watchlist, upcoming catalysts, and a curated news briefing. Your main workspace after login.",
-  },
-  {
-    title: "Market map",
-    body: 'Clickable sector heat map. Click any company for headlines and a "why it\'s moving" brief.',
-  },
-  {
-    title: "News briefing",
-    body: "Headlines with AI summaries and bullish / bearish / neutral tags for faster context.",
-  },
-  {
-    title: "Weekly recap",
-    body: "AI-written weekly market recap in the archive — covers the week's arc, key themes, a standout market signal, and catalysts to watch ahead.",
-  },
-  {
-    title: "Archive",
-    body: "Past timeline and headlines older than three days — never lose track of what moved the market.",
-  },
-  {
-    title: "More coming soon",
-    body: "We ship fast. Earnings models, price alerts, and deeper AI analysis are on the roadmap.",
-  },
+  { num: "I.",    title: "Home market view",  body: "ETFs, indices, top movers and screeners. Save a watchlist of the companies you track." },
+  { num: "II.",   title: "AI market summary", body: "Structured sections covering market direction, key drivers, top movers, what to watch. Refreshes every 6 hours." },
+  { num: "III.",  title: "Dashboard",         body: "Watchlist, upcoming catalysts, and a curated news briefing. Your main workspace after login." },
+  { num: "IV.",   title: "Market map",        body: "Clickable sector heat map. Click any company for headlines and a 'why it's moving' brief." },
+  { num: "V.",    title: "News briefing",     body: "Headlines with AI summaries and bullish / bearish / neutral tags for faster context." },
+  { num: "VI.",   title: "Weekly recap",      body: "AI-written weekly market recap covering the week's arc, themes, a standout signal, and catalysts ahead." },
+  { num: "VII.",  title: "Archive",           body: "Past timeline and headlines older than three days — never lose track of what moved the market." },
+  { num: "VIII.", title: "More coming soon",  body: "Earnings models, price alerts, and deeper AI analysis are on the roadmap." },
 ] as const;
+
+const planRows: { label: string; free: boolean | string; pro: boolean | string }[] = [
+  { label: "Home market view",          free: true,         pro: true },
+  { label: "Dashboard & news briefing", free: true,         pro: true },
+  { label: "Market map lookups",        free: "3 / day",    pro: "Unlimited" },
+  { label: "Research news per ticker",  free: "3 articles", pro: "Full feed" },
+  { label: "Price alerts via email",    free: false,        pro: true },
+  { label: "Email digest",              free: false,        pro: true },
+  { label: "Archive (past timeline)",   free: false,        pro: true },
+  { label: "Community chat",            free: true,         pro: true },
+];
 
 export const dynamic = "force-dynamic";
 
-function Sparkle({ className }: { className?: string }) {
+function ABLogo({ size = 24 }: { size?: number }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 0 13.854 9.374 24 12 13.854 14.626 12 24 10.146 14.626 0 12 10.146 9.374z" />
-    </svg>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-    </svg>
-  );
-}
-
-function PixelDecoration() {
-  const cells: Array<{ top: number; right: number; size: number; color: string; opacity: number }> = [
-    { top: 0,   right: 0,   size: 32, color: "#4C1D95", opacity: 0.9 },
-    { top: 0,   right: 36,  size: 24, color: "#7C3AED", opacity: 0.85 },
-    { top: 0,   right: 64,  size: 40, color: "#6C5CE7", opacity: 0.8 },
-    { top: 0,   right: 108, size: 16, color: "#A78BFA", opacity: 0.7 },
-    { top: 36,  right: 0,   size: 16, color: "#8B5CF6", opacity: 0.75 },
-    { top: 36,  right: 20,  size: 40, color: "#DDD6FE", opacity: 0.6 },
-    { top: 36,  right: 64,  size: 24, color: "#6C5CE7", opacity: 0.5 },
-    { top: 36,  right: 92,  size: 32, color: "#4C1D95", opacity: 0.85 },
-    { top: 72,  right: 0,   size: 48, color: "#7C3AED", opacity: 0.7 },
-    { top: 72,  right: 52,  size: 16, color: "#C4B5FD", opacity: 0.5 },
-    { top: 72,  right: 72,  size: 32, color: "#5B21B6", opacity: 0.65 },
-    { top: 124, right: 0,   size: 20, color: "#A78BFA", opacity: 0.4 },
-    { top: 124, right: 24,  size: 36, color: "#6C5CE7", opacity: 0.55 },
-    { top: 124, right: 64,  size: 20, color: "#DDD6FE", opacity: 0.35 },
-    { top: 148, right: 44,  size: 28, color: "#8B5CF6", opacity: 0.3 },
-    { top: 180, right: 0,   size: 16, color: "#C4B5FD", opacity: 0.2 },
-    { top: 180, right: 20,  size: 20, color: "#7C3AED", opacity: 0.25 },
-  ];
-  return (
-    <div className="pointer-events-none absolute right-0 top-0 h-64 w-56 overflow-hidden">
-      {cells.map((c, i) => (
-        <div
-          key={i}
-          className="absolute rounded-sm"
-          style={{ top: c.top, right: c.right, width: c.size, height: c.size, backgroundColor: c.color, opacity: c.opacity }}
-        />
-      ))}
+    <div style={{
+      width: size + 2, height: size + 2, borderRadius: 6,
+      background: ACCENT,
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+    }}>
+      <svg width={Math.round(size * 0.6)} height={Math.round(size * 0.6)} viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+        <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+      </svg>
     </div>
   );
 }
 
-const planRows: { label: string; free: boolean | string; pro: boolean | string }[] = [
-  { label: "Home market view", free: true, pro: true },
-  { label: "Dashboard & news briefing", free: true, pro: true },
-  { label: "Market map lookups", free: "3 / day", pro: "Unlimited" },
-  { label: "Research news per ticker", free: "3 articles", pro: "Full feed" },
-  { label: "Price alerts via email", free: false, pro: true },
-  { label: "Email digest", free: false, pro: true },
-  { label: "Archive (past timeline)", free: false, pro: true },
-  { label: "Community chat", free: true, pro: true },
-  { label: "Priority new features", free: false, pro: true },
-  { label: "Support the mission", free: false, pro: true },
-];
+function SplashRuleLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10,
+      fontFamily: SANS_L, fontSize: 10, letterSpacing: ".22em",
+      textTransform: "uppercase" as const, color: "var(--ab-faint)", fontWeight: 700,
+      margin: "24px 0 12px",
+    }}>
+      <span>{children}</span>
+      <span style={{ flex: 1, height: 1, background: "var(--ab-border)" }} />
+    </div>
+  );
+}
 
-export default async function HomePage() {
+export default async function SplashPage() {
   const configured = isSupabaseConfigured();
   let signedIn = false;
   if (configured) {
@@ -122,299 +71,421 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--background)", color: "var(--foreground)" }}>
-      {/* ── Navbar ── */}
-      <header className="sticky top-0 z-20 backdrop-blur-sm" style={{ borderBottom: "1px solid var(--nav-border)", background: "var(--nav-bg)" }}>
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href={signedIn ? "/home" : "/"} className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
-              <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
-              </svg>
-            </div>
-            <span className="text-base font-bold text-gray-900 dark:text-white">AlphaBrief</span>
-          </Link>
+    <div style={{ background: "var(--ab-bg)", color: "var(--ab-fg)", fontFamily: SANS_L, minHeight: "100vh" }}>
 
-          <nav className="flex items-center gap-2 text-sm">
+      {/* ── Marketing nav ── */}
+      <div style={{
+        padding: "18px 48px", display: "flex", alignItems: "center",
+        justifyContent: "space-between", borderBottom: "1px solid var(--ab-border)",
+        background: "var(--ab-bg)", position: "sticky", top: 0, zIndex: 20,
+      }}>
+        <div className="flex items-center gap-4">
+          <Link href={signedIn ? "/home" : "/"} className="flex items-center gap-2">
+            <ABLogo size={22} />
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "var(--ab-fg)" }}>AlphaBrief</span>
+          </Link>
+          <span style={{ color: "var(--ab-faint)" }}>·</span>
+          <SplashEditionTagline />
+        </div>
+        <div className="flex items-center gap-5" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
+          {configured ? (
+            signedIn ? (
+              <>
+                <ThemeToggle />
+                <Link href="/home" style={{
+                  padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+                  fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
+                  letterSpacing: ".08em", textTransform: "uppercase",
+                }}>Open app</Link>
+              </>
+            ) : (
+              <>
+                <Link href="#pricing" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Pricing</Link>
+                <Link href="/login" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Log in</Link>
+                <ThemeToggle />
+                <Link href="/signup" style={{
+                  padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+                  fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
+                  letterSpacing: ".08em", textTransform: "uppercase",
+                }}>Sign up free</Link>
+              </>
+            )
+          ) : (
+            <>
+              <ThemeToggle />
+              <span className="text-xs text-amber-600">Add keys in <code className="rounded bg-amber-50 px-1">.env.local</code></span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Hero — editorial ── */}
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "72px 40px 40px" }}>
+        <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 28, marginBottom: 28 }}>
+          <div style={{
+            fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
+            color: ACCENT, fontWeight: 700, marginBottom: 14,
+          }}>Beta · Actively building</div>
+          <h1 style={{
+            fontFamily: SERIF_L, fontSize: 104, lineHeight: 0.95,
+            letterSpacing: "-.04em", fontWeight: 600, margin: 0,
+          }}>
+            Signal first,<br />
+            <span style={{ color: "var(--ab-muted)", fontStyle: "italic" }}>noise last.</span>
+          </h1>
+          <p style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 22,
+            color: "var(--ab-muted)", marginTop: 18, maxWidth: 680, marginBottom: 0,
+          }}>
+            An AI-written daily briefing, a clickable market map, and a feed that flags bullish or bearish in one glance. Your alpha, briefly.
+          </p>
+          <div className="flex items-center gap-3" style={{ marginTop: 26 }}>
             {configured ? (
               signedIn ? (
-                <>
-                  <ThemeToggle />
-                  <Link
-                    href="/home"
-                    className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-                  >
-                    Open app
-                  </Link>
-                </>
+                <Link href="/home" style={{
+                  padding: "12px 22px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+                  fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                }}>Open dashboard →</Link>
               ) : (
                 <>
-                  <Link href="#pricing" className="px-3 py-2 transition" style={{ color: "var(--nav-text)" }}
-                    onMouseEnter={undefined} onMouseLeave={undefined}>
-                    Pricing
-                  </Link>
-                  <Link href="/login" className="px-3 py-2 transition" style={{ color: "var(--nav-text)" }}>
-                    Log in
-                  </Link>
-                  <ThemeToggle />
-                  <Link
-                    href="/signup"
-                    className="rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-                  >
-                    Sign up free
-                  </Link>
+                  <Link href="/signup" style={{
+                    padding: "12px 22px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+                    fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                  }}>Start for free →</Link>
+                  <Link href="#pricing" style={{
+                    padding: "12px 22px", border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
+                    fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                    background: "transparent",
+                  }}>Compare plans</Link>
                 </>
               )
-            ) : (
-              <span className="text-xs text-amber-600">
-                Add keys in <code className="rounded bg-amber-50 px-1">.env.local</code>
-              </span>
-            )}
-          </nav>
+            ) : null}
+          </div>
+          <div style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13,
+            color: "var(--ab-faint)", marginTop: 14,
+          }}>
+            No credit card · 1-minute setup · cancel anytime
+          </div>
         </div>
-      </header>
 
-      <main>
-        {/* ── Hero ── */}
-        <section className="relative overflow-hidden px-6 pb-24 pt-20">
-          <PixelDecoration />
-          <div className="mx-auto max-w-6xl">
-            <div className="max-w-2xl">
-              {/* Beta badge */}
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#6C5CE7]/30 bg-[#EDE9FE] px-3 py-1 text-xs font-semibold text-[#6C5CE7]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#6C5CE7]" />
-                Beta — actively building
-              </span>
-              <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#6C5CE7]">
-                Markets · Timeline · News
-              </p>
-              <h1 className="mt-3 inline-flex items-center gap-3 text-6xl font-black leading-[1.05] tracking-tight text-gray-900 md:text-7xl">
-                AlphaBrief
-                <Sparkle className="h-10 w-10 shrink-0 text-[#6C5CE7] md:h-12 md:w-12" />
-              </h1>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-gray-500">
-                Signal first, noise last. Your alpha, briefly.
-              </p>
+        {/* Live tape */}
+        <div className="flex items-center gap-5 overflow-hidden" style={{
+          fontFamily: SANS_L, fontSize: 12, color: "var(--ab-muted)",
+          padding: "12px 0", borderBottom: "1px solid var(--ab-border)",
+        }}>
+          {[["S&P 500","+0.09%",true],["QQQ","+0.07%",true],["NVDA","−0.06%",false],["AAPL","+0.18%",true],["TSLA","−2.59%",false],["MSFT","−2.44%",false],["META","−0.87%",false],["URI","+20.82%",true]].map(([s,p,up], i) => (
+            <span key={i} style={{ whiteSpace: "nowrap" as const }}>
+              <span>{s as string}</span>{" "}
+              <span style={{ color: (up as boolean) ? "var(--ab-up)" : "var(--ab-down)", fontWeight: 600 }}>{p as string}</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
-              {configured ? (
-                signedIn ? (
-                  <div className="mt-8 flex gap-3">
-                    <Link
-                      href="/home"
-                      className="rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-gray-700"
-                    >
-                      Open dashboard
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="mt-8 flex flex-wrap items-center gap-3">
-                    <Link
-                      href="/signup"
-                      className="rounded-lg bg-gray-900 px-6 py-3 font-semibold text-white transition hover:bg-gray-700"
-                    >
-                      Start for free
-                    </Link>
-                    <Link
-                      href="#pricing"
-                      className="rounded-lg border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-900 transition hover:border-gray-400"
-                    >
-                      Compare plans
-                    </Link>
-                    <p className="w-full text-xs text-gray-400">
-                      Already have an account?{" "}
-                      <Link href="/login" className="text-[#6C5CE7] hover:underline">
-                        Log in
-                      </Link>
-                    </p>
-                  </div>
-                )
-              ) : (
-                <div className="mt-8 max-w-sm rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-700">
-                  Copy{" "}
-                  <code className="rounded bg-amber-100 px-1 text-xs">.env.example</code> to{" "}
-                  <code className="rounded bg-amber-100 px-1 text-xs">.env.local</code> with your
-                  Supabase URL and anon key, then restart the dev server.
-                </div>
-              )}
+      {/* ── Product preview ── */}
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "40px 40px 80px" }}>
+        <SplashRuleLabel>Product preview</SplashRuleLabel>
+        <h2 style={{
+          fontFamily: SERIF_L, fontSize: 44, fontWeight: 600,
+          letterSpacing: "-.02em", marginBottom: 10, marginTop: 0,
+        }}>See it in action</h2>
+        <p style={{
+          fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-muted)",
+          fontSize: 17, marginTop: 0, marginBottom: 24,
+        }}>
+          Your briefing — AI-written market summary, upcoming catalyst calendar, and a tagged news feed.
+        </p>
 
-              <p className="mt-5 text-xs text-gray-400">
-                We are in beta — new features ship every week. Your feedback shapes the roadmap.
-              </p>
-            </div>
+        {/* Browser-chrome preview card */}
+        <div style={{ border: "1px solid var(--ab-border)", padding: "10px 10px 24px", background: "var(--ab-card)" }}>
+          {/* Browser chrome bar */}
+          <div style={{
+            padding: "6px 10px", borderBottom: "1px solid var(--ab-border)",
+            display: "flex", alignItems: "center", gap: 6,
+            fontSize: 10, color: "var(--ab-muted)",
+          }}>
+            <span style={{ width: 9, height: 9, borderRadius: 99, background: "#FF5F57", display: "inline-block" }} />
+            <span style={{ width: 9, height: 9, borderRadius: 99, background: "#FEBC2E", display: "inline-block" }} />
+            <span style={{ width: 9, height: 9, borderRadius: 99, background: "#28C840", display: "inline-block" }} />
+            <span style={{ marginLeft: "auto", fontFamily: "ui-monospace, Menlo, monospace" }}>alphabrief.ai/dashboard</span>
           </div>
-        </section>
+          {/* Dashboard content */}
+          <div style={{ padding: 24 }}>
 
-        {/* ── Demo ── */}
-        <section className="border-t border-gray-100 px-6 py-20">
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-10 text-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#6C5CE7]/30 bg-[#EDE9FE] px-3 py-1 text-xs font-semibold text-[#6C5CE7]">
-                Product preview
-              </span>
-              <h2 className="mt-4 text-4xl font-bold text-gray-900">See it in action</h2>
-              <p className="mt-3 text-lg text-gray-500">
-                Your dashboard — AI market summary, watchlist, catalysts, and tagged headlines.
-              </p>
-            </div>
-
-            <DemoSlideshow />
-
-            <p className="mt-5 text-center text-sm text-gray-400">
-              Sample data for illustration.{" "}
-              <Link href="/signup" className="text-[#6C5CE7] hover:underline">
-                Sign up free
-              </Link>{" "}
-              to see live markets.
-            </p>
-          </div>
-        </section>
-
-        {/* ── Features ── */}
-        <section className="border-t border-gray-100 bg-gray-50 px-6 py-24">
-          <div className="mx-auto max-w-6xl">
-            <div className="mb-14 text-center">
-              <h2 className="text-4xl font-bold text-gray-900">What&apos;s inside AlphaBrief</h2>
-              <p className="mt-3 text-lg text-gray-500">
-                Everything you need to stay ahead of the market — with more on the way.
-              </p>
-            </div>
-            <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {features.map((f) => (
-                <li key={f.title} className="rounded-xl border border-gray-200 bg-white p-6 text-left">
-                  <h3 className="font-semibold text-gray-900">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-500">{f.body}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        {/* ── Pricing ── */}
-        {configured && !signedIn && (
-          <section id="pricing" className="border-t border-gray-100 px-6 py-24">
-            <div className="mx-auto max-w-5xl">
-              <div className="mb-14 text-center">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#6C5CE7]/30 bg-[#EDE9FE] px-3 py-1 text-xs font-semibold text-[#6C5CE7]">
-                  Beta pricing
-                </span>
-                <h2 className="mt-4 text-4xl font-bold text-gray-900">Compare our plans</h2>
-                <p className="mt-3 text-lg text-gray-500">
-                  Start free. Upgrade when you want more. Beta prices are locked in for early supporters.
+            {/* ① AI market summary — drop-cap lede */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                fontSize: 10, letterSpacing: ".22em", color: ACCENT,
+                fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 12,
+                fontFamily: SANS_L,
+              }}>AI market summary</div>
+              <div style={{ fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.6, color: "var(--ab-fg)" }}>
+                <p style={{ marginBottom: 10, overflow: "hidden" }}>
+                  <span style={{
+                    float: "left", fontFamily: SERIF_L,
+                    fontSize: 46, lineHeight: 0.9, paddingTop: 4, paddingRight: 8,
+                    color: ACCENT, fontWeight: 700,
+                  }}>E</span>
+                  quities closed mixed as tech pulled back from recent highs, with the Nasdaq shedding 0.4% while energy and financials led the advance across the tape.
+                </p>
+                <p style={{ color: "var(--ab-muted)", margin: 0, fontSize: 14 }}>
+                  Options flow suggests institutional accumulation in beaten-down names. The Fed's next meeting looms as the primary near-term catalyst — consensus leans toward a hold.
                 </p>
               </div>
+            </div>
 
-              <div className="grid gap-6 sm:grid-cols-2 lg:gap-8">
-                {/* Free plan */}
-                <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-8">
-                  <div>
-                    <p className="text-sm font-semibold uppercase tracking-widest text-gray-500">Free</p>
-                    <div className="mt-3 flex items-end gap-1">
-                      <span className="text-5xl font-black text-gray-900">$0</span>
-                      <span className="mb-1.5 text-sm text-gray-400">/month</span>
-                    </div>
-                    <p className="mt-2 text-sm text-gray-500">No credit card. No expiry.</p>
-                  </div>
+            <div style={{ borderTop: "1px solid var(--ab-border)", margin: "20px 0" }} />
 
-                  <ul className="mt-8 space-y-3 flex-1">
-                    {planRows.map((row) => (
-                      <li key={row.label} className="flex items-start gap-3 text-sm">
-                        {row.free === false ? (
-                          <XIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-300" />
-                        ) : (
-                          <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                        )}
-                        <span className={row.free === false ? "text-gray-400" : "text-gray-700"}>
-                          {row.label}
-                          {typeof row.free === "string" && (
-                            <span className="ml-1 font-medium text-gray-900">({row.free})</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href="/signup"
-                    className="mt-8 block rounded-lg border border-gray-300 px-6 py-3 text-center text-sm font-semibold text-gray-900 transition hover:border-gray-400"
-                  >
-                    Get started free
-                  </Link>
+            {/* ② Upcoming catalysts — 140 px day-column row */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{
+                fontSize: 10, letterSpacing: ".22em", color: ACCENT,
+                fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 10,
+                fontFamily: SANS_L,
+              }}>Upcoming catalysts</div>
+              <div style={{ display: "flex", alignItems: "flex-start", paddingTop: 10, paddingBottom: 10, borderBottom: "1px solid var(--ab-border)" }}>
+                {/* Left — 140 px date column */}
+                <div style={{ width: 140, flexShrink: 0, borderRight: "1px solid var(--ab-border)", paddingRight: 16 }}>
+                  <div style={{ fontFamily: SERIF_L, fontSize: 22, fontWeight: 600, lineHeight: 1, color: "var(--ab-fg)" }}>28</div>
+                  <div style={{ fontFamily: SANS_L, fontSize: 10, color: "var(--ab-faint)", marginTop: 3, letterSpacing: ".04em" }}>Apr · 8:30 AM</div>
                 </div>
-
-                {/* Pro plan */}
-                <div className="flex flex-col rounded-2xl border-2 border-[#6C5CE7] bg-white p-8 shadow-lg shadow-[#6C5CE7]/10">
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold uppercase tracking-widest text-[#6C5CE7]">Pro</p>
-                      <span className="rounded-full bg-[#EDE9FE] px-2.5 py-0.5 text-xs font-semibold text-[#6C5CE7]">
-                        Beta price
-                      </span>
-                    </div>
-                    <div className="mt-3 flex items-end gap-1">
-                      <span className="text-5xl font-black text-gray-900">$9</span>
-                      <span className="mb-1.5 text-sm text-gray-400">/month</span>
-                    </div>
-                    <p className="mt-2 text-sm text-gray-500">Locked in for early supporters.</p>
+                {/* Right — event body */}
+                <div style={{ flex: 1, paddingLeft: 16 }}>
+                  <div style={{ fontFamily: SERIF_L, fontSize: 14, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 3 }}>
+                    Q1 GDP Advance Estimate
                   </div>
-
-                  <ul className="mt-8 space-y-3 flex-1">
-                    {planRows.map((row) => (
-                      <li key={row.label} className="flex items-start gap-3 text-sm">
-                        <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#6C5CE7]" />
-                        <span className="text-gray-700">
-                          {row.label}
-                          {typeof row.pro === "string" && (
-                            <span className="ml-1 font-medium text-gray-900">({row.pro})</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href="/signup?next=/dashboard/upgrade"
-                    className="mt-8 block rounded-lg bg-[#6C5CE7] px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#5B4FD4]"
-                  >
-                    Start with Pro
-                  </Link>
+                  <div style={{ fontFamily: SERIF_L, fontSize: 13, color: "var(--ab-muted)", lineHeight: 1.4 }}>
+                    Bureau of Economic Analysis — first read on Q1 growth. Street consensus 1.8%.
+                  </div>
+                </div>
+                {/* Badge */}
+                <div style={{ flexShrink: 0, paddingLeft: 16, alignSelf: "center" }}>
+                  <span style={{
+                    fontSize: 9, letterSpacing: ".12em", fontWeight: 700,
+                    textTransform: "uppercase" as const,
+                    color: ACCENT, border: `1px solid ${ACCENT}`, padding: "2px 6px",
+                    fontFamily: SANS_L,
+                  }}>ECON</span>
                 </div>
               </div>
-
-              <p className="mt-8 text-center text-xs text-gray-400">
-                We are in early beta — prices and features may change. Early supporters will always
-                keep their rate. Questions?{" "}
-                <Link href="/signup" className="text-[#6C5CE7] hover:underline">
-                  Sign up
-                </Link>{" "}
-                then reach us from the Contact tab.
-              </p>
             </div>
-          </section>
-        )}
 
-        {/* ── Bottom CTA ── */}
-        {configured && !signedIn && (
-          <section className="border-t border-gray-100 bg-gray-50 px-6 py-24">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-4xl font-bold text-gray-900">Ready to cut through the noise?</h2>
-              <p className="mt-4 text-lg text-gray-500">
-                Join AlphaBrief — free to start, no credit card required.
-              </p>
-              <div className="mt-8 flex justify-center gap-3">
-                <Link
-                  href="/signup"
-                  className="rounded-lg bg-gray-900 px-7 py-3 font-semibold text-white transition hover:bg-gray-700"
-                >
-                  Create free account
-                </Link>
+            <div style={{ borderTop: "1px solid var(--ab-border)", margin: "0 0 20px" }} />
+
+            {/* ③ From the wire — 2-col news grid */}
+            <div>
+              <div style={{
+                fontSize: 10, letterSpacing: ".22em", color: ACCENT,
+                fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 10,
+                fontFamily: SANS_L,
+              }}>From the wire</div>
+              <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                {[
+                  { tag: "BULLISH", src: "WSJ",  title: "URI surges 20.8% after raising full-year guidance above consensus" },
+                  { tag: "BEARISH", src: "CNBC", title: "NOW −16.9% as cloud growth misses estimates by widest margin since 2022" },
+                ].map((n, i) => (
+                  <div key={i} style={{ paddingBottom: 12, borderBottom: "1px solid var(--ab-border)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+                      <span style={{
+                        fontSize: 9, letterSpacing: ".12em", fontWeight: 700,
+                        textTransform: "uppercase" as const,
+                        color: n.tag === "BULLISH" ? "var(--ab-up)" : "var(--ab-down)",
+                        fontFamily: SANS_L,
+                      }}>{n.tag}</span>
+                      <span style={{ fontSize: 10, color: "var(--ab-faint)", fontFamily: SANS_L }}>{n.src}</span>
+                    </div>
+                    <div style={{ fontFamily: SERIF_L, fontSize: 14, fontWeight: 600, color: "var(--ab-fg)", lineHeight: 1.3 }}>
+                      {n.title}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </section>
-        )}
-      </main>
+
+          </div>
+        </div>
+        <p style={{
+          marginTop: 14, textAlign: "center" as const,
+          fontFamily: SERIF_L, fontStyle: "italic",
+          color: "var(--ab-faint)", fontSize: 12,
+        }}>
+          Sample data for illustration.{" "}
+          <Link href="/signup" style={{ color: ACCENT }}>Sign up free</Link>
+          {" "}to see live markets.
+        </p>
+      </div>
+
+      {/* ── Features ── */}
+      <div style={{
+        background: "var(--ab-surface)",
+        borderTop: "1px solid var(--ab-border)",
+        borderBottom: "1px solid var(--ab-border)",
+        padding: "60px 40px",
+      }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+          <div style={{
+            fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
+            color: ACCENT, fontWeight: 700, marginBottom: 10,
+          }}>Inside the paper</div>
+          <h2 style={{
+            fontFamily: SERIF_L, fontSize: 42, fontWeight: 600,
+            letterSpacing: "-.02em", margin: 0,
+          }}>What&apos;s inside AlphaBrief</h2>
+          <p style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
+            color: "var(--ab-muted)", marginTop: 8, maxWidth: 640, marginBottom: 0,
+          }}>
+            Everything you need to stay ahead of the market — with more on the way.
+          </p>
+          <div className="grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: "32px 40px", marginTop: 32 }}>
+            {features.map(({ num, title, body }) => (
+              <div key={title} style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 14 }}>
+                <div style={{
+                  fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15,
+                  color: ACCENT, fontWeight: 600, marginBottom: 4,
+                }}>{num}</div>
+                <div style={{
+                  fontFamily: SERIF_L, fontSize: 20, fontWeight: 600,
+                  marginBottom: 6, color: "var(--ab-fg)",
+                }}>{title}</div>
+                <p style={{
+                  fontFamily: SERIF_L, fontSize: 14,
+                  color: "var(--ab-muted)", lineHeight: 1.55, margin: 0,
+                }}>{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Pricing ── */}
+      {configured && !signedIn && (
+        <div id="pricing" style={{ maxWidth: 1000, margin: "0 auto", padding: "72px 40px" }}>
+          <div style={{
+            fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
+            color: ACCENT, fontWeight: 700, marginBottom: 10, textAlign: "center",
+          }}>Beta pricing</div>
+          <h2 style={{
+            fontFamily: SERIF_L, fontSize: 44, fontWeight: 600,
+            letterSpacing: "-.02em", textAlign: "center", margin: 0,
+          }}>Compare our plans</h2>
+          <p style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
+            color: "var(--ab-muted)", marginTop: 8, textAlign: "center",
+          }}>
+            Start free. Upgrade when you want more. Beta prices are locked in for early supporters.
+          </p>
+          <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
+            {/* Free */}
+            <div style={{ border: "1px solid var(--ab-border)", padding: "28px 30px", background: "var(--ab-card)", position: "relative" }}>
+              <div style={{ fontSize: 11, letterSpacing: ".22em", fontWeight: 700, color: "var(--ab-faint)", textTransform: "uppercase" }}>FREE</div>
+              <div className="flex items-baseline gap-2" style={{ marginTop: 10 }}>
+                <span style={{ fontFamily: SERIF_L, fontSize: 64, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, color: "var(--ab-fg)" }}>$0</span>
+                <span style={{ fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-muted)", fontSize: 15 }}>/ month</span>
+              </div>
+              <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", marginTop: 4 }}>No credit card. No expiry.</p>
+              <ul style={{ marginTop: 18, listStyle: "none", padding: 0 }}>
+                {planRows.map((row, i) => (
+                  <li key={row.label} className="flex items-center gap-2" style={{
+                    padding: "6px 0", fontFamily: SERIF_L, fontSize: 14,
+                    color: row.free === false ? "var(--ab-faint)" : "var(--ab-fg)",
+                    borderBottom: i < planRows.length - 1 ? "1px solid var(--ab-border)" : "none",
+                  }}>
+                    <span style={{ color: row.free === false ? "var(--ab-faint)" : ACCENT, fontWeight: 700, width: 14, flexShrink: 0 }}>
+                      {row.free === false ? "—" : "✓"}
+                    </span>
+                    <span>{row.label}{typeof row.free === "string" && <span style={{ color: "var(--ab-muted)", marginLeft: 4 }}>({row.free})</span>}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" style={{
+                display: "block", marginTop: 22, padding: "12px", textAlign: "center",
+                border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
+                background: "transparent", fontSize: 12, fontWeight: 600,
+                letterSpacing: ".1em", textTransform: "uppercase",
+              }}>Get started free</Link>
+            </div>
+            {/* Pro */}
+            <div style={{
+              border: `2px solid ${ACCENT}`, padding: "28px 30px",
+              background: "var(--ab-surface-hi)", position: "relative",
+            }}>
+              <span style={{
+                position: "absolute", top: 18, right: 18,
+                fontSize: 10, background: ACCENT, color: "#fff",
+                padding: "2px 8px", letterSpacing: ".12em", fontWeight: 700,
+              }}>Beta price</span>
+              <div style={{ fontSize: 11, letterSpacing: ".22em", fontWeight: 700, color: ACCENT, textTransform: "uppercase" }}>PRO</div>
+              <div className="flex items-baseline gap-2" style={{ marginTop: 10 }}>
+                <span style={{ fontFamily: SERIF_L, fontSize: 64, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, color: "var(--ab-fg)" }}>$9</span>
+                <span style={{ fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-muted)", fontSize: 15 }}>/ month</span>
+              </div>
+              <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", marginTop: 4 }}>Locked in for early supporters.</p>
+              <ul style={{ marginTop: 18, listStyle: "none", padding: 0 }}>
+                {planRows.map((row, i) => (
+                  <li key={row.label} className="flex items-center gap-2" style={{
+                    padding: "6px 0", fontFamily: SERIF_L, fontSize: 14,
+                    color: "var(--ab-fg)",
+                    borderBottom: i < planRows.length - 1 ? "1px solid var(--ab-border)" : "none",
+                  }}>
+                    <span style={{ color: ACCENT, fontWeight: 700, width: 14, flexShrink: 0 }}>✓</span>
+                    <span>{row.label}{typeof row.pro === "string" && <span style={{ color: "var(--ab-muted)", marginLeft: 4 }}>({row.pro})</span>}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup?next=/dashboard/upgrade" style={{
+                display: "block", marginTop: 22, padding: "12px", textAlign: "center",
+                background: ACCENT, color: "#fff",
+                fontSize: 12, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase",
+              }}>Start with Pro</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Bottom CTA ── */}
+      {configured && !signedIn && (
+        <div style={{
+          background: "var(--ab-surface)",
+          borderTop: "1px solid var(--ab-border)",
+          padding: "72px 40px", textAlign: "center",
+        }}>
+          <h2 style={{
+            fontFamily: SERIF_L, fontSize: 46, fontWeight: 600,
+            letterSpacing: "-.02em", color: "var(--ab-fg)", margin: 0,
+          }}>Ready to cut through the noise?</h2>
+          <p style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
+            color: "var(--ab-muted)", marginTop: 10,
+          }}>
+            Join AlphaBrief — free to start, no credit card required.
+          </p>
+          <Link href="/signup" style={{
+            display: "inline-block", marginTop: 22, padding: "14px 26px",
+            background: "var(--ab-fg)", color: "var(--ab-bg)",
+            fontSize: 13, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase",
+          }}>Create free account</Link>
+        </div>
+      )}
 
       {/* ── Footer ── */}
-      <SiteFooter />
+      <div style={{
+        padding: "22px 48px", background: "var(--ab-bg)",
+        borderTop: "1px solid var(--ab-border)",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div className="flex items-center gap-3">
+          <ABLogo size={18} />
+          <span style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-muted)" }}>
+            AlphaBrief · est. 2026
+          </span>
+        </div>
+        <div style={{ fontSize: 12, color: "var(--ab-muted)", display: "flex", gap: 16 }}>
+          <Link href="#pricing" style={{ color: "var(--ab-muted)" }}>Pricing</Link>
+          <Link href="/privacy" style={{ color: "var(--ab-muted)" }}>Privacy &amp; terms</Link>
+        </div>
+      </div>
     </div>
   );
 }

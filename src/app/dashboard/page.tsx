@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
+import { DashboardLedeSection } from "@/components/dashboard-lede-section";
 import { DashboardTimelineTabs } from "@/components/dashboard-timeline-tabs";
 import { LocalDateHeading } from "@/components/local-date-heading";
-import { MarketSummarySection } from "@/components/market-summary-section";
+import { LedgerMasthead, LedgerByline, LedgerRuleLabel } from "@/components/ledger-ui";
 import { NewsBriefing } from "@/components/news-briefing";
-import { WatchlistPanel } from "@/components/watchlist-panel";
 import { fetchMergedDashboardEvents } from "@/lib/events";
 import { getNewsBriefing } from "@/lib/news";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   const watchlist = watchlists?.[0];
   if (!watchlist) {
     return (
-      <p className="text-[var(--muted)]">
+      <p style={{ color: "var(--ab-muted)" }}>
         No watchlist found. Try signing out and back in, or run the database migration.
       </p>
     );
@@ -51,67 +51,52 @@ export default async function DashboardPage() {
   const news = await getNewsBriefing({ tickers, limit: 200 });
   const serverFetchedAt = new Date().toISOString();
   const todayHeading = formatDateHeading(new Date());
+  const upcomingCount = events.filter(e => new Date(e.event_date) >= new Date()).length;
 
   return (
-    <div className="mx-auto max-w-4xl pb-16">
+    <div style={{ paddingBottom: 64 }}>
       <AutoRefresh everyMs={300000} />
 
-      {/* ── Header ── */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
-            <LocalDateHeading fallback={todayHeading} />
-          </h1>
-          <div className="mt-1.5 flex items-center gap-3 text-sm text-[var(--muted)]">
-            <span><span className="font-semibold text-[var(--foreground)]">{events.length}</span> events</span>
-            <span className="text-[var(--faint)]">·</span>
-            <span><span className="font-semibold text-[var(--foreground)]">{news.length}</span> headlines</span>
-            <span className="text-[var(--faint)]">·</span>
-            <span><span className="font-semibold text-[var(--foreground)]">{items?.length ?? 0}</span> tickers</span>
-          </div>
-        </div>
-        <Link
-          href="/dashboard/archive"
-          className="rounded-lg px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
-          style={{ border: "1px solid var(--border)" }}
-        >
-          Archive →
-        </Link>
-      </div>
+      {/* ── Masthead ── */}
+      <LedgerMasthead
+        eyebrow={`Daily Briefing · ${todayHeading}`}
+        title={<LocalDateHeading fallback={todayHeading} />}
+        dek="Markets compiled by AlphaBrief AI — your watchlist, upcoming catalysts, and the wire."
+      />
 
-      {/* ── Watchlist ── */}
-      <div className="mb-8 overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
-        <div className="flex items-center justify-between border-b px-5 py-3.5" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">Watchlist</p>
-        </div>
-        <div className="bg-[var(--card)] px-5 py-4">
-          <WatchlistPanel watchlistId={watchlist.id} items={items ?? []} />
-        </div>
-      </div>
+      {/* ── Byline bar ── */}
+      <LedgerByline
+        left={`Compiled by AlphaBrief AI · ${news.length} headlines · ${upcomingCount} events · confidence moderate`}
+        right={
+          <Link href="/dashboard/archive" style={{
+            fontSize: 11, border: "1px solid var(--ab-border)",
+            padding: "4px 10px", color: "var(--ab-muted)", textDecoration: "none",
+          }}>
+            Archive →
+          </Link>
+        }
+      />
 
-      {/* ── AI Market Summary ── */}
-      <div className="mb-8">
-        <MarketSummarySection />
-      </div>
+      {/* ── Lede + pull-quote (AI summary in editorial prose format) ── */}
+      <DashboardLedeSection />
 
-      {/* ── Timeline ── */}
-      <div className="mb-8 overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
-        <div className="px-5 py-5">
-          <DashboardTimelineTabs
-            events={events}
-            watchlistItems={items ?? []}
-            perPage={3}
-            dataFetchedAt={serverFetchedAt}
-          />
-        </div>
-      </div>
+      {/* ── Calendar ── */}
+      <LedgerRuleLabel>The week ahead · Calendar</LedgerRuleLabel>
+      <DashboardTimelineTabs
+        events={events}
+        watchlistItems={items ?? []}
+        perPage={3}
+        dataFetchedAt={serverFetchedAt}
+      />
 
       {/* ── News briefing ── */}
-      <div className="overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
-        <div className="px-5 py-5">
-          <NewsBriefing articles={news} watchlistTickers={tickers} itemsPerPage={4} dataFetchedAt={serverFetchedAt} />
-        </div>
-      </div>
+      <LedgerRuleLabel>From the wire</LedgerRuleLabel>
+      <NewsBriefing
+        articles={news}
+        watchlistTickers={tickers}
+        itemsPerPage={6}
+        dataFetchedAt={serverFetchedAt}
+      />
     </div>
   );
 }

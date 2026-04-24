@@ -3,60 +3,58 @@
 import { useState } from "react";
 import type { MarketEvent } from "@/types/database";
 
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
 type EventType = MarketEvent["event_type"];
 
-const typeStyles: Record<
-  EventType,
-  { bar: string; badge: string; label: string }
-> = {
+const typeConfig: Record<EventType, { label: string; color: string; bg: string }> = {
   macro: {
-    bar: "bg-sky-500",
-    badge: "border-sky-200 bg-sky-50 text-sky-700",
     label: "Macro",
+    color: "#0284C7",
+    bg: "rgba(2,132,199,.10)",
   },
   earnings: {
-    bar: "bg-violet-500",
-    badge: "border-violet-200 bg-violet-50 text-violet-700",
     label: "Earnings",
+    color: ACCENT,
+    bg: "rgba(108,92,231,.10)",
   },
   catalyst: {
-    bar: "bg-amber-500",
-    badge: "border-amber-200 bg-amber-50 text-amber-700",
     label: "Key event",
+    color: "#D97706",
+    bg: "rgba(217,119,6,.10)",
   },
 };
 
-function formatEventWhen(iso: string): string {
+function formatCalendarDate(iso: string): { day: string; monthTime: string } {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "TBD";
-  return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  if (isNaN(d.getTime())) return { day: "?", monthTime: "TBD" };
+  const day = String(d.getDate());
+  const month = d.toLocaleDateString("en-US", { month: "short" });
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return { day, monthTime: `${month} · ${time}` };
 }
 
 type Props = {
   event: MarketEvent;
   showTickerBadge?: boolean;
   readMoreUrl?: string | null;
-  /** Show "What happened?" AI summary button for past events */
   archiveMode?: boolean;
 };
 
 export function EventCard({ event, showTickerBadge = true, readMoreUrl, archiveMode = false }: Props) {
-  const styles = typeStyles[event.event_type];
+  const cfg = typeConfig[event.event_type];
   const ticker = event.ticker?.trim();
+  const { day, monthTime } = formatCalendarDate(event.event_date);
 
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiShown, setAiShown] = useState(false);
 
   const loadAiSummary = async () => {
-    if (aiShown) {
-      setAiShown(false);
-      return;
-    }
-    if (aiSummary) {
-      setAiShown(true);
-      return;
-    }
+    if (aiShown) { setAiShown(false); return; }
+    if (aiSummary) { setAiShown(true); return; }
     setAiLoading(true);
     setAiShown(true);
     try {
@@ -77,65 +75,96 @@ export function EventCard({ event, showTickerBadge = true, readMoreUrl, archiveM
   };
 
   return (
-    <article className="flex gap-0 py-5">
-      <div className={`w-1 shrink-0 rounded-full ${styles.bar}`} aria-hidden />
-      <div className="min-w-0 flex-1 pl-4 sm:pl-5">
-        <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--faint)]">
-          <span className="font-mono tabular-nums">{formatEventWhen(event.event_date)}</span>
-          <span
-            className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}
-          >
-            {styles.label}
-          </span>
-          {showTickerBadge && ticker ? (
-            <span className="rounded-md border border-[var(--border)] bg-[var(--surface-highlight)] px-2 py-0.5 font-semibold text-[var(--foreground)]">
-              {ticker}
-            </span>
-          ) : null}
+    <div style={{ display: "flex", padding: "14px 0", borderBottom: "1px solid var(--ab-border)" }}>
+      {/* ── Left date column ── */}
+      <div style={{ width: 140, flexShrink: 0 }}>
+        <div style={{
+          fontFamily: SERIF_L, fontSize: 22, fontWeight: 600,
+          color: "var(--ab-fg)", lineHeight: 1,
+        }}>
+          {day}
         </div>
-        <h3 className="mt-3 text-lg font-semibold leading-snug text-[var(--foreground)]">
-          {event.title}
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">{event.why_it_matters}</p>
-        <p className="mt-3 text-sm leading-relaxed text-[var(--foreground)]/90">
-          <span className="font-medium text-[var(--foreground)]">Watch for: </span>
-          {event.watch_for}
-        </p>
+        <div style={{ fontFamily: SANS_L, fontSize: 11, color: "var(--ab-muted)", marginTop: 4 }}>
+          {monthTime}
+        </div>
+        <div style={{
+          display: "inline-block", marginTop: 8,
+          fontFamily: SANS_L, fontSize: 10, fontWeight: 700,
+          letterSpacing: ".14em", textTransform: "uppercase",
+          color: cfg.color, background: cfg.bg, padding: "2px 7px",
+        }}>
+          {cfg.label}
+        </div>
+        {showTickerBadge && ticker && (
+          <div style={{
+            display: "inline-block", marginTop: 4, marginLeft: 4,
+            fontFamily: SANS_L, fontSize: 10, fontWeight: 700,
+            color: "var(--ab-fg)", border: "1px solid var(--ab-border)",
+            background: "var(--ab-surface)", padding: "2px 7px",
+          }}>
+            {ticker}
+          </div>
+        )}
+      </div>
 
-        {/* AI summary for archive mode */}
+      {/* ── Right content ── */}
+      <div style={{ flex: 1 }}>
+        <div style={{
+          fontFamily: SERIF_L, fontSize: 19, fontWeight: 600,
+          lineHeight: 1.25, letterSpacing: "-.01em",
+          color: "var(--ab-fg)", marginBottom: 6,
+        }}>
+          {event.title}
+        </div>
+        <div style={{ fontFamily: SERIF_L, fontSize: 13, color: "var(--ab-muted)", lineHeight: 1.55, marginBottom: 6 }}>
+          {event.why_it_matters}
+        </div>
+        <div style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-faint)" }}>
+          Watch for: {event.watch_for}
+        </div>
+
+        {/* AI summary (archive mode) */}
         {archiveMode && aiShown && (
-          <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--faint)]">What happened</p>
+          <div style={{ marginTop: 14, borderTop: "1px solid var(--ab-border)", paddingTop: 12 }}>
+            <p style={{
+              fontFamily: SANS_L, fontSize: 10, fontWeight: 700,
+              letterSpacing: ".14em", textTransform: "uppercase",
+              color: "var(--ab-faint)", marginBottom: 6,
+            }}>What happened</p>
             {aiLoading ? (
-              <p className="text-sm text-[var(--muted)]">Loading…</p>
+              <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>Loading…</p>
             ) : (
-              <p className="text-sm leading-relaxed text-[var(--foreground)]">{aiSummary}</p>
+              <p style={{ fontFamily: SERIF_L, fontSize: 14, lineHeight: 1.6, color: "var(--ab-fg)" }}>{aiSummary}</p>
             )}
           </div>
         )}
 
-        <div className="mt-4 flex flex-wrap gap-3">
-          {readMoreUrl ? (
+        {/* Actions */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+          {readMoreUrl && (
             <a
               href={readMoreUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-muted)]"
+              style={{ fontFamily: SANS_L, fontSize: 11, color: ACCENT, letterSpacing: ".06em", textDecoration: "none" }}
             >
               Read coverage →
             </a>
-          ) : null}
+          )}
           {archiveMode && (
             <button
               type="button"
               onClick={loadAiSummary}
-              className="text-sm font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
+              style={{
+                fontFamily: SANS_L, fontSize: 11, color: "var(--ab-muted)",
+                background: "none", border: "none", cursor: "pointer", padding: 0, letterSpacing: ".04em",
+              }}
             >
               {aiShown ? "Hide AI summary" : "What happened? →"}
             </button>
           )}
         </div>
       </div>
-    </article>
+    </div>
   );
 }

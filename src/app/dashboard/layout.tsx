@@ -13,14 +13,12 @@ export default async function DashboardLayout({
 }) {
   if (!isSupabaseConfigured()) {
     return (
-      <div className="mx-auto max-w-lg px-6 py-20 text-center">
-        <p className="text-lg text-amber-400">Backend not connected</p>
-        <p className="mt-2 text-[var(--muted)]">
-          Accounts and data live in your Supabase project. Copy{" "}
-          <code className="text-[var(--foreground)]">.env.example</code> to{" "}
-          <code className="text-[var(--foreground)]">.env.local</code> and paste your
-          project URL and anon key from the Supabase dashboard, then restart{" "}
-          <code className="text-[var(--foreground)]">npm run dev</code>.
+      <div style={{ maxWidth: 560, margin: "80px auto", padding: "0 40px 80px", textAlign: "center" }}>
+        <p style={{ fontSize: 16, color: "#D97706" }}>Backend not connected</p>
+        <p style={{ marginTop: 8, fontSize: 14, color: "var(--ab-muted)" }}>
+          Copy <code style={{ color: "var(--ab-fg)" }}>.env.example</code> to{" "}
+          <code style={{ color: "var(--ab-fg)" }}>.env.local</code> and paste your Supabase
+          project URL and anon key, then restart <code style={{ color: "var(--ab-fg)" }}>npm run dev</code>.
         </p>
       </div>
     );
@@ -44,7 +42,7 @@ export default async function DashboardLayout({
     return (
       <div className="min-h-screen">
         <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-        <div className="mx-auto max-w-5xl px-6 py-10">
+        <div style={{ maxWidth: 1040, margin: "0 auto", padding: "36px 40px 60px" }}>
           <DashboardSetupError message={setup.message} />
         </div>
       </div>
@@ -54,7 +52,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen">
       <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-      <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
+      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
     </div>
   );
 }

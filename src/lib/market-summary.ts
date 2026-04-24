@@ -6,7 +6,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { generateMarketSummaryText, generateWeeklySummaryText } from "@/lib/gemini-summary";
+import { generateMarketSummaryText, generateWeeklySummaryText, generateTrendingQueriesText } from "@/lib/gemini-summary";
 
 export interface MarketSummaryResult {
   summary: string;
@@ -77,5 +77,50 @@ export async function getWeeklyMarketSummary(): Promise<MarketSummaryResult | nu
   } catch (err) {
     console.error("[market-summary/weekly] generation failed:", err);
     return cached ? { summary: cached.summary, generatedAt: cached.generated_at } : null;
+  }
+}
+
+// ── Trending queries ──────────────────────────────────────────────────────────
+
+export type TrendingQuery = { q: string; d: string };
+
+const FALLBACK_TRENDING: TrendingQuery[] = [
+  { q: "S&P 500 outlook this week",  d: "+94%"  },
+  { q: "Fed rate decision timeline",  d: "+71%"  },
+  { q: "Nasdaq earnings season",      d: "+58%"  },
+  { q: "Treasury yield impact stocks", d: "+43%" },
+];
+
+export async function getTrendingQueries(): Promise<TrendingQuery[]> {
+  const cached = await fetchCached("trending_queries");
+
+  if (cached) {
+    const ageHours = (Date.now() - new Date(cached.generated_at).getTime()) / 3_600_000;
+    if (ageHours < 1) {
+      try { return JSON.parse(cached.summary) as TrendingQuery[]; } catch { /* fall through */ }
+    }
+  }
+
+  if (!process.env.GROQ_API_KEY) {
+    if (cached) {
+      try { return JSON.parse(cached.summary) as TrendingQuery[]; } catch { /* fall through */ }
+    }
+    return FALLBACK_TRENDING;
+  }
+
+  try {
+    const raw = await generateTrendingQueriesText();
+    // Strip any markdown fences Groq might add
+    const json = raw.replace(/^```[a-z]*\n?/i, "").replace(/```$/,"").trim();
+    const parsed = JSON.parse(json) as TrendingQuery[];
+    const generatedAt = new Date().toISOString();
+    await writeSummary("trending_queries", JSON.stringify(parsed), generatedAt);
+    return parsed;
+  } catch (err) {
+    console.error("[market-summary/trending] generation failed:", err);
+    if (cached) {
+      try { return JSON.parse(cached.summary) as TrendingQuery[]; } catch { /* fall through */ }
+    }
+    return FALLBACK_TRENDING;
   }
 }

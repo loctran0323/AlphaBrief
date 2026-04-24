@@ -4,25 +4,59 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
 
-const MENU_ITEMS: { href: string; label: string; iconPath: string; multi?: boolean }[] = [
-  { href: "/dashboard/settings", label: "Digest", iconPath: "M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" },
-  { href: "/dashboard/contact", label: "Contact us", iconPath: "M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z", multi: true },
-  { href: "/dashboard/subscription", label: "Subscription", iconPath: "M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z", multi: true },
-];
+const SERIF = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT_NAV = "#6C5CE7";
 
-function MenuIcon({ item }: { item: typeof MENU_ITEMS[number] }) {
-  if (item.multi) {
-    const parts = item.iconPath.split(" M").map((p, i) => (i === 0 ? p : "M" + p));
-    return (
-      <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-        {parts.map((d, i) => <path key={i} d={d} />)}
-      </svg>
-    );
-  }
+const MENU_ITEMS = [
+  { href: "/dashboard/settings",     label: "Digest" },
+  { href: "/dashboard/subscription", label: "Subscription" },
+] as const;
+
+function menuItemStyle(hover = false): React.CSSProperties {
+  return {
+    display: "block",
+    width: "100%",
+    padding: "9px 20px",
+    fontFamily: SERIF,
+    fontSize: 14,
+    color: hover ? "var(--ab-fg)" : "var(--ab-muted)",
+    background: hover ? "var(--ab-surface)" : "transparent",
+    textDecoration: "none",
+    border: "none",
+    textAlign: "left" as const,
+    cursor: "pointer",
+    transition: "color .1s, background .1s",
+  };
+}
+
+function MenuItem({ href, label, onClick }: { href: string; label: string; onClick?: () => void }) {
+  const [hov, setHov] = useState(false);
   return (
-    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-      <path fillRule="evenodd" d={item.iconPath} clipRule="evenodd" />
-    </svg>
+    <Link
+      href={href}
+      onClick={onClick}
+      style={menuItemStyle(hov)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function MenuButton({ label, onClick }: { label: string; onClick?: () => void }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      type="submit"
+      style={menuItemStyle(hov)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      onClick={onClick}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -31,78 +65,115 @@ function UserMenu({ email, tier }: { email?: string; tier: "free" | "pro" }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
+    function handle(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
   }, []);
 
   const initials = email ? email[0].toUpperCase() : "?";
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} style={{ position: "relative" }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition"
-        style={{ background: "var(--nav-avatar-bg)", color: "var(--nav-avatar-text)" }}
         aria-label="Account menu"
+        style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: 26, height: 26,
+          background: "var(--ab-surface)",
+          fontFamily: SANS, fontWeight: 700, fontSize: 11,
+          color: "var(--ab-muted)",
+          border: "1px solid var(--ab-border)",
+          cursor: "pointer",
+        }}
       >
         {initials}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-50 w-52 rounded-xl py-1.5 shadow-lg" style={{ background: "var(--nav-dropdown-bg)", border: "1px solid var(--nav-dropdown-border)" }}>
+        <div style={{
+          position: "absolute", right: 0, top: "calc(100% + 6px)",
+          width: 200, zIndex: 50,
+          background: "var(--ab-card)",
+          border: "1px solid var(--ab-border)",
+        }}>
+          {/* Email + tier */}
           {email && (
-            <div className="px-4 py-2.5" style={{ borderBottom: "1px solid var(--nav-dropdown-border)" }}>
-              <p className="truncate text-xs font-medium" style={{ color: "var(--foreground)" }}>{email}</p>
+            <div style={{
+              padding: "10px 20px 8px",
+              borderBottom: "1px solid var(--ab-border)",
+            }}>
+              <p style={{
+                fontFamily: SANS, fontSize: 11, fontWeight: 600,
+                color: "var(--ab-fg)", overflow: "hidden",
+                textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0,
+              }}>{email}</p>
               {tier === "pro" ? (
-                <span className="mt-0.5 inline-block rounded-full bg-[#EDE9FE] px-2 py-0.5 text-[10px] font-semibold text-[#6C5CE7]">Pro</span>
+                <span style={{
+                  display: "inline-block", marginTop: 4,
+                  fontFamily: SANS, fontSize: 9, fontWeight: 700,
+                  letterSpacing: ".12em", textTransform: "uppercase",
+                  color: ACCENT_NAV, background: "rgba(108,92,231,.12)",
+                  padding: "2px 6px",
+                }}>Pro</span>
               ) : (
-                <span className="mt-0.5 inline-block text-[10px]" style={{ color: "var(--faint)" }}>Free plan</span>
+                <span style={{
+                  display: "inline-block", marginTop: 4,
+                  fontFamily: SANS, fontSize: 10, color: "var(--ab-faint)",
+                }}>Free plan</span>
               )}
             </div>
           )}
-          <div className="py-1">
+
+          {/* Main items */}
+          <div style={{ paddingTop: 4, paddingBottom: 4 }}>
             {MENU_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-2 text-sm transition"
-                style={{ color: "var(--nav-text)" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--nav-item-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--nav-text-hover)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; (e.currentTarget as HTMLElement).style.color = "var(--nav-text)"; }}
-              >
-                <MenuIcon item={item} />
-                {item.label}
-              </Link>
+              <MenuItem key={item.href} href={item.href} label={item.label} onClick={() => setOpen(false)} />
             ))}
           </div>
-          <div className="py-1" style={{ borderTop: "1px solid var(--nav-dropdown-border)" }}>
-            <Link href="/dashboard/account" onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-2 text-sm transition"
-              style={{ color: "var(--nav-text)" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--nav-item-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--nav-text-hover)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; (e.currentTarget as HTMLElement).style.color = "var(--nav-text)"; }}
-            >
-              <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
-              Account
-            </Link>
+
+          {/* Account */}
+          <div style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 4, paddingBottom: 4 }}>
+            <MenuItem href="/dashboard/account" label="Account" onClick={() => setOpen(false)} />
           </div>
-          <div className="py-1" style={{ borderTop: "1px solid var(--nav-dropdown-border)" }}>
+
+          {/* Sign out */}
+          <div style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 4, paddingBottom: 4 }}>
             <form action="/auth/signout" method="post">
-              <button type="submit"
-                className="flex w-full items-center gap-2.5 px-4 py-2 text-sm transition"
-                style={{ color: "var(--nav-text)" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--nav-item-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--nav-text-hover)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; (e.currentTarget as HTMLElement).style.color = "var(--nav-text)"; }}
-              >
-                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" /></svg>
-                Sign out
-              </button>
+              <MenuButton label="Sign out" />
             </form>
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+/** Ledger editorial edition tagline — computed client-side to avoid SSR mismatch */
+function EditionTagline() {
+  const [label, setLabel] = useState<string | null>(null);
+  useEffect(() => {
+    const now = new Date();
+    const dayName  = now.toLocaleDateString("en-US", { weekday: "long" });
+    const vol = now.getMonth() + 1;   // 1–12 (month)
+    const no  = now.getDate();         // 1–31 (day)
+    setLabel(`Vol. ${vol}, No. ${no} · ${dayName} edition`);
+  }, []);
+
+  if (!label) return null;
+  return (
+    <span
+      style={{
+        fontFamily: SERIF,
+        fontStyle: "italic",
+        color: "var(--ab-muted)",
+        fontSize: 13,
+      }}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -116,58 +187,121 @@ export function AppNav({
   tier?: "free" | "pro";
 }) {
   return (
-    <header className="sticky top-0 z-20 backdrop-blur-sm" style={{ borderBottom: "1px solid var(--nav-border)", background: "var(--nav-bg)" }}>
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3.5">
-        {/* Logo */}
-        <Link href="/home" className="flex items-center gap-2 shrink-0">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
-            <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
-            </svg>
-          </div>
-          <span className="text-base font-bold text-gray-900 dark:text-white">AlphaBrief</span>
-        </Link>
+    <header
+      style={{
+        borderBottom: "1px solid var(--ab-border)",
+        background: "var(--ab-bg)",
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1180,
+          margin: "0 auto",
+          padding: "14px 40px 12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
+        {/* Left: Logo + edition tagline */}
+        <div className="flex items-center gap-4 shrink-0">
+          <Link href="/home" className="flex items-center gap-2 shrink-0">
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                background: "#6C5CE7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+                <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+              </svg>
+            </div>
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "var(--ab-fg)" }}>
+              AlphaBrief
+            </span>
+          </Link>
+          <span style={{ color: "var(--ab-faint)" }}>·</span>
+          <EditionTagline />
+        </div>
 
-        {/* Primary nav */}
-        <nav className="flex items-center gap-1 text-sm">
+        {/* Right: nav links + controls */}
+        <nav className="flex items-center gap-5" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
           {signedIn ? (
             <>
               {[
-                { href: "/home", label: "Home" },
-                { href: "/dashboard", label: "Dashboard" },
-                { href: "/dashboard/map", label: "Map" },
+                { href: "/home",               label: "Market"   },
+                { href: "/dashboard",          label: "Briefing" },
+                { href: "/dashboard/map",      label: "Map"      },
                 { href: "/dashboard/research", label: "Research" },
               ].map(({ href, label }) => (
-                <Link key={href} href={href}
-                  className="rounded-md px-3 py-1.5 transition"
-                  style={{ color: "var(--nav-text)" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--nav-item-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--nav-text-hover)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; (e.currentTarget as HTMLElement).style.color = "var(--nav-text)"; }}
+                <Link
+                  key={href}
+                  href={href}
+                  style={{ color: "var(--ab-muted)", fontWeight: 500, transition: "color .15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
                 >
                   {label}
                 </Link>
               ))}
 
               {tier === "pro" ? (
-                <Link href="/dashboard/archive"
-                  className="rounded-md px-3 py-1.5 transition"
-                  style={{ color: "var(--nav-text)" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "var(--nav-item-hover)"; (e.currentTarget as HTMLElement).style.color = "var(--nav-text-hover)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ""; (e.currentTarget as HTMLElement).style.color = "var(--nav-text)"; }}
+                <Link
+                  href="/dashboard/archive"
+                  style={{ color: "var(--ab-muted)", fontWeight: 500, transition: "color .15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
                 >
                   Archive
                 </Link>
               ) : (
-                <Link href="/dashboard/upgrade" className="flex items-center gap-1 rounded-md px-3 py-1.5 transition hover:text-[#6C5CE7]" style={{ color: "var(--faint)" }}>
+                <Link
+                  href="/dashboard/upgrade"
+                  className="flex items-center gap-1"
+                  style={{ color: "var(--ab-faint)", fontWeight: 500 }}
+                >
                   Archive
-                  <span className="rounded bg-[#EDE9FE] px-1 py-0.5 text-[10px] font-semibold text-[#6C5CE7]">Pro</span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: ".1em",
+                      textTransform: "uppercase",
+                      color: "#6C5CE7",
+                      border: "1px solid #6C5CE7",
+                      padding: "1px 5px",
+                    }}
+                  >
+                    Pro
+                  </span>
                 </Link>
               )}
 
-              <span className="mx-1 h-4 w-px" style={{ background: "var(--border)" }} />
+              <span style={{ width: 1, height: 16, background: "var(--ab-border)", display: "inline-block" }} />
 
               {tier === "free" && (
-                <Link href="/dashboard/upgrade" className="rounded-md border border-[#6C5CE7]/30 bg-[#EDE9FE] px-3 py-1.5 text-xs font-semibold text-[#6C5CE7] transition hover:bg-[#6C5CE7] hover:text-white">
+                <Link
+                  href="/dashboard/upgrade"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: ".08em",
+                    textTransform: "uppercase",
+                    color: "#6C5CE7",
+                    border: "1px solid #6C5CE7",
+                    padding: "4px 10px",
+                  }}
+                >
                   Upgrade
                 </Link>
               )}
@@ -177,16 +311,27 @@ export function AppNav({
             </>
           ) : (
             <>
-              <Link href="/login?next=/home"
-                className="rounded-md px-3 py-1.5 transition"
-                style={{ color: "var(--nav-text)" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--nav-text-hover)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--nav-text)"; }}
+              <Link
+                href="/login?next=/home"
+                style={{ color: "var(--ab-muted)", fontWeight: 500, transition: "color .15s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
               >
                 Log in
               </Link>
-              <Link href="/signup?next=/home" className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200">
-                Sign up
+              <Link
+                href="/signup?next=/home"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: ".08em",
+                  textTransform: "uppercase",
+                  background: "var(--ab-fg)",
+                  color: "var(--ab-bg)",
+                  padding: "7px 14px",
+                }}
+              >
+                Sign up free
               </Link>
               <ThemeToggle />
             </>

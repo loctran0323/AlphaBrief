@@ -3,6 +3,7 @@ import { ArchiveDateToolbar } from "@/components/archive-date-toolbar";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
 import { DashboardTimelineTabs } from "@/components/dashboard-timeline-tabs";
+import { LedgerMasthead, LedgerByline, LedgerRuleLabel } from "@/components/ledger-ui";
 import { NewsBriefing } from "@/components/news-briefing";
 import {
   filterEventsByEventDateRange,
@@ -17,6 +18,8 @@ import { getUserTier } from "@/lib/subscription";
 import { WeeklyMarketSummarySection } from "@/components/weekly-market-summary-section";
 
 export const dynamic = "force-dynamic";
+
+const ACCENT = "#6C5CE7";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,21 +36,28 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
     const tier = await getUserTier(supabase, user.id, user.email);
     if (tier !== "pro") {
       return (
-        <div className="mx-auto max-w-2xl pb-16">
-          <div className="mb-8 flex items-start justify-between">
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Archive</h1>
-            <Link href="/dashboard" className="text-sm text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">
-              ← Dashboard
-            </Link>
-          </div>
-          <div className="rounded-xl p-8 text-center" style={{ border: "2px solid var(--accent)", background: "var(--surface-highlight)" }}>
-            <p className="text-2xl font-black text-[var(--foreground)]">Upgrade to Pro</p>
-            <p className="mt-2 text-sm text-[var(--muted)]">
+        <div style={{ maxWidth: 640, margin: "0 auto", paddingBottom: 64 }}>
+          <LedgerMasthead
+            eyebrow="The Archive · back issues"
+            title="Archive"
+            dek="Full access to past events and headlines requires a Pro subscription."
+          />
+          <div style={{
+            border: `2px solid ${ACCENT}`, background: "var(--ab-surface-hi)",
+            padding: "32px 40px", textAlign: "center",
+          }}>
+            <p style={{ fontSize: 22, fontWeight: 700, color: "var(--ab-fg)", marginBottom: 8 }}>Upgrade to Pro</p>
+            <p style={{ fontSize: 14, color: "var(--ab-muted)", marginBottom: 24 }}>
               Unlock the full archive, unlimited market map lookups, and priority access to new features.
             </p>
             <Link
               href="/dashboard/upgrade"
-              className="mt-6 inline-block rounded-lg bg-[var(--accent)] px-8 py-3 font-semibold text-white transition hover:bg-[var(--accent-muted)]"
+              style={{
+                display: "inline-block", padding: "10px 24px",
+                background: ACCENT, color: "#fff",
+                fontSize: 12, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                textDecoration: "none",
+              }}
             >
               See Pro plan
             </Link>
@@ -66,7 +76,7 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   const watchlist = watchlists?.[0];
   if (!watchlist) {
     return (
-      <p className="text-[var(--muted)]">
+      <p style={{ color: "var(--ab-muted)" }}>
         No watchlist found. Try signing out and back in, or run the database migration.
       </p>
     );
@@ -99,71 +109,62 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   });
 
   return (
-    <div className="mx-auto max-w-4xl pb-16">
+    <div style={{ paddingBottom: 64 }}>
       <AutoRefresh everyMs={300000} />
 
-      {/* ── Header ── */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">Past data</h1>
-          <div className="mt-1.5 flex items-center gap-3 text-sm text-[var(--muted)]">
-            <span><span className="font-semibold text-[var(--foreground)]">{pastEvents.length}</span> past events</span>
-            <span className="text-[var(--faint)]">·</span>
-            <span><span className="font-semibold text-[var(--foreground)]">{archivedNews.length}</span> archived headlines</span>
-          </div>
-        </div>
-        <Link
-          href="/dashboard"
-          className="rounded-lg px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
-          style={{ border: "1px solid var(--border)" }}
-        >
-          ← Dashboard
-        </Link>
-      </div>
+      {/* ── Masthead ── */}
+      <LedgerMasthead
+        eyebrow="The Archive · back issues"
+        title="Past data"
+        dek="Adjust the date ranges below to scope past events and archived headlines."
+      />
 
-      {/* ── Date range ── */}
-      <div className="mb-8 overflow-hidden rounded-xl" style={{ border: "1px solid var(--border)" }}>
-        <div className="bg-[var(--card)] px-5 py-5">
-          <ArchiveDateToolbar
-            key={`${bounds.eventsFromMs}-${bounds.eventsToMs}-${bounds.newsFromMs}-${bounds.newsToMs}`}
-            eventsFromYmd={toYmdUtc(bounds.eventsFromMs)}
-            eventsToYmd={toYmdUtc(bounds.eventsToMs)}
-            newsFromYmd={toYmdUtc(bounds.newsFromMs)}
-            newsToYmd={toYmdUtc(bounds.newsToMs)}
-          />
-        </div>
-      </div>
+      {/* ── Byline bar ── */}
+      <LedgerByline
+        left={`Compiled by AlphaBrief AI · ${pastEvents.length} past events · ${archivedNews.length} archived headlines`}
+        right={
+          <Link href="/dashboard" style={{
+            fontSize: 11, border: "1px solid var(--ab-border)",
+            padding: "4px 10px", color: "var(--ab-muted)", textDecoration: "none",
+          }}>
+            ← Back to briefing
+          </Link>
+        }
+      />
+
+      {/* ── Date ranges ── */}
+      <LedgerRuleLabel>Date ranges</LedgerRuleLabel>
+      <ArchiveDateToolbar
+        key={`${bounds.eventsFromMs}-${bounds.eventsToMs}-${bounds.newsFromMs}-${bounds.newsToMs}`}
+        eventsFromYmd={toYmdUtc(bounds.eventsFromMs)}
+        eventsToYmd={toYmdUtc(bounds.eventsToMs)}
+        newsFromYmd={toYmdUtc(bounds.newsFromMs)}
+        newsToYmd={toYmdUtc(bounds.newsToMs)}
+      />
 
       {/* ── Weekly AI Recap ── */}
-      <div className="mb-8">
-        <WeeklyMarketSummarySection />
-      </div>
+      <LedgerRuleLabel right="updated periodically">Weekly market recap · Pro</LedgerRuleLabel>
+      <WeeklyMarketSummarySection />
 
       {/* ── Past timeline ── */}
-      <div className="mb-8 overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
-        <div className="px-5 py-5">
-          <DashboardTimelineTabs
-            events={pastEvents}
-            watchlistItems={items ?? []}
-            perPage={2}
-            pastArchiveMode
-            sectionTitle="Past timeline"
-            readMoreUrlsByEventId={readMoreUrlsByEventId}
-          />
-        </div>
-      </div>
+      <LedgerRuleLabel>Past timeline</LedgerRuleLabel>
+      <DashboardTimelineTabs
+        events={pastEvents}
+        watchlistItems={items ?? []}
+        perPage={2}
+        pastArchiveMode
+        sectionTitle="Past timeline"
+        readMoreUrlsByEventId={readMoreUrlsByEventId}
+      />
 
       {/* ── Archived news ── */}
-      <div className="overflow-hidden rounded-xl bg-[var(--card)]" style={{ border: "1px solid var(--border)" }}>
-        <div className="px-5 py-5">
-          <NewsBriefing
-            title="Archived news"
-            articles={archivedNews}
-            itemsPerPage={4}
-            emptyHintTickers="No watchlist-tagged headlines in this range. Try All, widen dates, or check back later."
-          />
-        </div>
-      </div>
+      <LedgerRuleLabel>Archived news</LedgerRuleLabel>
+      <NewsBriefing
+        title="Archived news"
+        articles={archivedNews}
+        itemsPerPage={4}
+        emptyHintTickers="No watchlist-tagged headlines in this range. Try All, widen dates, or check back later."
+      />
     </div>
   );
 }

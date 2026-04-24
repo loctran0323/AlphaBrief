@@ -1,34 +1,35 @@
 "use client";
 
-/**
- * Renders structured summary text:
- * - **HEADER** lines → accent-colored section labels
- * - • or - bullet lines → indented bullet list items
- * - Plain text → normal paragraph
- */
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
 function FormattedSummary({ text }: { text: string }) {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
   return (
-    <div className="space-y-3">
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {lines.map((line, i) => {
         if (line.startsWith("**") && line.endsWith("**")) {
           return (
-            <p key={i} className="text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
+            <p key={i} style={{
+              fontFamily: SANS_L, fontSize: 10, fontWeight: 700,
+              letterSpacing: ".22em", textTransform: "uppercase", color: ACCENT, margin: 0,
+            }}>
               {line.slice(2, -2)}
             </p>
           );
         }
         if (line.startsWith("•") || line.startsWith("-")) {
           return (
-            <div key={i} className="flex gap-2 text-sm leading-relaxed text-[var(--foreground)]">
-              <span className="mt-0.5 shrink-0 text-[var(--accent)]">•</span>
+            <div key={i} style={{ display: "flex", gap: 8, fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.6, color: "var(--ab-fg)" }}>
+              <span style={{ color: ACCENT, flexShrink: 0 }}>•</span>
               <span>{line.replace(/^[•\-]\s*/, "")}</span>
             </div>
           );
         }
         return (
-          <p key={i} className="text-sm leading-relaxed text-[var(--foreground)]">
+          <p key={i} style={{ fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.65, color: "var(--ab-fg)", margin: 0 }}>
             {line}
           </p>
         );
@@ -39,41 +40,33 @@ function FormattedSummary({ text }: { text: string }) {
 
 export function MarketSummaryCard({
   summary,
+  generatedAt,
 }: {
   summary: string;
   generatedAt: string;
 }) {
+  const timeStr = generatedAt
+    ? new Date(generatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })
+    : null;
+
   return (
-    <div
-      className="overflow-hidden rounded-xl bg-[var(--card)]"
-      style={{ border: "1px solid var(--border)" }}
-    >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div
-        className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: "1px solid var(--border)" }}
-      >
-        <div className="flex items-center gap-2">
-          <svg className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" viewBox="0 0 24 24" fill="currentColor">
+    <div>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: 14, fontFamily: SANS_L, fontSize: 11, color: "var(--ab-faint)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <svg style={{ width: 12, height: 12, color: ACCENT, flexShrink: 0 }} viewBox="0 0 24 24" fill={ACCENT}>
             <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74z" />
           </svg>
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">
-            AI Market Summary
-          </span>
-          <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}
-          >
-            Groq
-          </span>
+          <span style={{ letterSpacing: ".12em", textTransform: "uppercase", fontWeight: 700 }}>AI Market Summary</span>
+          <span style={{ padding: "1px 6px", background: "rgba(108,92,231,.12)", color: ACCENT, fontWeight: 700, fontSize: 9 }}>Groq</span>
         </div>
-        <span className="text-xs text-[var(--faint)]">Updated every 6 hours</span>
+        {timeStr && (
+          <span style={{ fontFamily: SERIF_L, fontStyle: "italic" }}>Updated {timeStr}</span>
+        )}
       </div>
-
-      {/* ── Body ───────────────────────────────────────────────────────────── */}
-      <div className="px-5 py-4">
-        <FormattedSummary text={summary} />
-      </div>
+      <FormattedSummary text={summary} />
     </div>
   );
 }

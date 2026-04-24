@@ -91,6 +91,45 @@ Keep it tight and specific. Write clearly for a retail investor. Total length: 1
   return callGroq(prompt, 550);
 }
 
+// ── Trending queries ──────────────────────────────────────────────────────────
+
+export async function generateTrendingQueriesText(): Promise<string> {
+  const [data, articles] = await Promise.all([
+    fetchMarketHomeData(),
+    getNewsBriefing({ tickers: [], limit: 8, candidateCap: 12 }).catch(() => []),
+  ]);
+
+  const gainerText = data.gainers.slice(0, 5).map((g) => `${g.symbol} +${g.changePct.toFixed(1)}%`).join(", ");
+  const loserText  = data.losers.slice(0, 5).map((l) => `${l.symbol} ${l.changePct.toFixed(1)}%`).join(", ");
+  const headlineText = articles.length
+    ? articles.slice(0, 8).map((a) => `• ${a.title}`).join("\n")
+    : "No headlines.";
+
+  const prompt = `You are a financial data analyst. Based on today's market movers and headlines, generate exactly 4 trending investor research queries — the kinds of things that people are searching right now because of current market events.
+
+TODAY'S TOP GAINERS: ${gainerText}
+TODAY'S TOP LOSERS:  ${loserText}
+
+CURRENT HEADLINES:
+${headlineText}
+
+Return ONLY valid JSON — an array of 4 objects, no markdown, no explanation:
+[
+  { "q": "short search query tied to a current mover or theme", "d": "+NNN%" },
+  { "q": "...", "d": "+NN%" },
+  { "q": "...", "d": "+NN%" },
+  { "q": "...", "d": "+NN%" }
+]
+
+Rules:
+- Each query should be 3–6 words, specific, tied to today's news or movers
+- "d" is a simulated search-volume spike (e.g. "+187%"), ranging from +40% to +300%
+- Highest spike = most newsworthy topic today
+- No stock prices, no percentages in the query text itself`;
+
+  return callGroq(prompt, 200);
+}
+
 // ── Weekly recap ─────────────────────────────────────────────────────────────
 
 export async function generateWeeklySummaryText(): Promise<string> {

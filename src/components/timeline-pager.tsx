@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import type { MarketEvent } from "@/types/database";
 import { EventCard } from "@/components/event-card";
 
+const SANS_L = `-apple-system, 'Inter', system-ui, sans-serif`;
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+
 type Props = {
   events: MarketEvent[];
   perPage?: number;
@@ -31,15 +34,15 @@ export function TimelinePager({
 
   if (events.length === 0) {
     return (
-      <p className="text-sm leading-relaxed text-[var(--muted)]">
+      <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)" }}>
         Nothing in this tab for now. Try the other tab or refresh in a few minutes.
       </p>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="divide-y divide-[var(--border)]">
+    <div>
+      <div>
         {slice.map((event) => (
           <EventCard
             key={event.id}
@@ -50,29 +53,46 @@ export function TimelinePager({
           />
         ))}
       </div>
-      {pageCount > 1 ? (
-        <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[var(--border)] pt-4">
+      {pageCount > 1 && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "flex-end",
+          gap: 8, borderTop: "1px solid var(--ab-border)", paddingTop: 14, marginTop: 2,
+        }}>
           <button
             type="button"
             disabled={safePage <= 0}
             onClick={() => setPage((p) => Math.max(0, p - 1))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] transition enabled:hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              fontFamily: SANS_L, fontSize: 11, fontWeight: 700,
+              letterSpacing: ".12em", textTransform: "uppercase",
+              color: safePage <= 0 ? "var(--ab-faint)" : "var(--ab-fg)",
+              background: "none", border: "1px solid var(--ab-border)",
+              padding: "5px 12px", cursor: safePage <= 0 ? "not-allowed" : "pointer",
+              opacity: safePage <= 0 ? .4 : 1,
+            }}
           >
             ← Prev
           </button>
-          <span className="text-xs text-[var(--faint)]">
+          <span style={{ fontFamily: SANS_L, fontSize: 11, color: "var(--ab-faint)", fontVariantNumeric: "tabular-nums" }}>
             {safePage + 1} / {pageCount}
           </span>
           <button
             type="button"
             disabled={safePage >= pageCount - 1}
             onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-sm font-medium text-[var(--foreground)] transition enabled:hover:border-[var(--accent)]/40 disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              fontFamily: SANS_L, fontSize: 11, fontWeight: 700,
+              letterSpacing: ".12em", textTransform: "uppercase",
+              color: safePage >= pageCount - 1 ? "var(--ab-faint)" : "var(--ab-fg)",
+              background: "none", border: "1px solid var(--ab-border)",
+              padding: "5px 12px", cursor: safePage >= pageCount - 1 ? "not-allowed" : "pointer",
+              opacity: safePage >= pageCount - 1 ? .4 : 1,
+            }}
           >
             Next →
           </button>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

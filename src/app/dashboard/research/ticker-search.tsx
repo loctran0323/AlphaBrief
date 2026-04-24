@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function TickerSearch() {
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
+export function TickerSearch({ ledger = false }: { ledger?: boolean }) {
   const router = useRouter();
   const [value, setValue] = useState("");
 
@@ -13,22 +17,44 @@ export function TickerSearch() {
     if (ticker) router.push(`/dashboard/research/${ticker}`);
   }
 
+  if (ledger) {
+    return (
+      <form onSubmit={handleSubmit}>
+        <div className="flex items-center gap-2" style={{
+          borderBottom: "2px solid var(--ab-fg)", padding: "10px 2px",
+        }}>
+          <span style={{ color: "var(--ab-faint)", fontSize: 18 }}>⌕</span>
+          <input
+            autoFocus
+            value={value}
+            onChange={(e) => setValue(e.target.value.toUpperCase())}
+            placeholder="e.g. AAPL, MSFT, NVDA"
+            style={{
+              flex: 1, border: "none", outline: "none", background: "transparent",
+              fontFamily: SERIF_L, fontSize: 22, color: "var(--ab-fg)",
+            }}
+          />
+          <span style={{ fontFamily: SANS_L, fontSize: 10, color: "var(--ab-faint)", letterSpacing: ".12em", whiteSpace: "nowrap" }}>
+            RETURN ↵
+          </span>
+        </div>
+      </form>
+    );
+  }
+
+  // Standard (non-ledger) search used on the detail page search strip
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
       <input
         autoFocus
         value={value}
         onChange={(e) => setValue(e.target.value.toUpperCase())}
-        placeholder="e.g. AAPL, MSFT, NVDA"
-        className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 font-mono text-sm font-semibold uppercase tracking-widest text-[var(--foreground)] placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-[var(--faint)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
+        placeholder="Search ticker…"
+        style={{
+          flex: 1, border: "none", outline: "none", background: "transparent",
+          fontFamily: SERIF_L, fontSize: 16, color: "var(--ab-fg)",
+        }}
       />
-      <button
-        type="submit"
-        disabled={!value.trim()}
-        className="rounded-xl bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)] disabled:opacity-40"
-      >
-        Search
-      </button>
     </form>
   );
 }

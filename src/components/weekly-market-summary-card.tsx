@@ -1,74 +1,91 @@
 /**
- * Renders the weekly summary text, turning **bold** markers into styled section headers
- * and • lines into indented bullet points.
+ * Weekly market recap rendered as editorial prose — matches LP_Archive reference:
+ * h2 headline + 2-col grid (drop-cap lede | pull-quote).
+ * No headers, no bullet list, no "WEEKLY MARKET RECAP" chip.
  */
-function FormattedSummary({ text }: { text: string }) {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
 
-  return (
-    <div className="space-y-3">
-      {lines.map((line, i) => {
-        if (line.startsWith("**") && line.endsWith("**")) {
-          return (
-            <p key={i} className="text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
-              {line.slice(2, -2)}
-            </p>
-          );
-        }
-        if (line.startsWith("•") || line.startsWith("-")) {
-          return (
-            <div key={i} className="flex gap-2 text-sm leading-relaxed text-[var(--foreground)]">
-              <span className="mt-0.5 shrink-0 text-[var(--accent)]">•</span>
-              <span>{line.replace(/^[•\-]\s*/, "")}</span>
-            </div>
-          );
-        }
-        return (
-          <p key={i} className="text-sm leading-relaxed text-[var(--foreground)]">
-            {line}
-          </p>
-        );
-      })}
-    </div>
-  );
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
+/** Strip **HEADER** markers and bullet prefixes, return plain lines. */
+function parseWeeklySummary(text: string): string[] {
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .filter((l) => !(l.startsWith("**") && l.endsWith("**")))
+    .map((l) => l.replace(/^[•\-]\s*/, ""));
 }
 
 export function WeeklyMarketSummaryCard({
   summary,
+  generatedAt,
 }: {
   summary: string;
   generatedAt: string;
 }) {
-  return (
-    <div
-      className="overflow-hidden rounded-xl bg-[var(--card)]"
-      style={{ border: "1px solid var(--border)" }}
-    >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div
-        className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom: "1px solid var(--border)" }}
-      >
-        <div className="flex items-center gap-2">
-          <svg className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74z" />
-          </svg>
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--faint)]">
-            Weekly Market Recap
-          </span>
-          <span
-            className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}
-          >
-            Groq
-          </span>
-        </div>
-        <span className="text-xs text-[var(--faint)]">Updated every 24 hours</span>
-      </div>
+  const lines = parseWeeklySummary(summary);
+  if (lines.length === 0) return null;
 
-      {/* ── Body ───────────────────────────────────────────────────────────── */}
-      <div className="px-5 py-5">
-        <FormattedSummary text={summary} />
+  const headline  = lines[0] ?? "";
+  const ledeFirst = lines[1] ?? lines[0] ?? "";
+  const ledeRest  = lines.slice(2, 4);
+  const pullQuote = lines[4] ?? lines[3] ?? lines[2] ?? "";
+
+  const dropChar  = ledeFirst[0] ?? "T";
+  const afterDrop = ledeFirst.slice(1);
+
+  const timeStr = generatedAt
+    ? new Date(generatedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+    : null;
+
+  return (
+    <div style={{ fontFamily: SERIF_L, color: "var(--ab-fg)" }}>
+      {/* Headline */}
+      <h2 style={{
+        fontFamily: SERIF_L, fontSize: 28, fontWeight: 600,
+        letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: 12,
+      }}>
+        {headline}
+      </h2>
+
+      {timeStr && (
+        <p style={{ fontFamily: SANS_L, fontSize: 11, color: "var(--ab-faint)", marginBottom: 14 }}>
+          Updated {timeStr}
+        </p>
+      )}
+
+      {/* 2-col: lede | pull-quote */}
+      <div className="grid" style={{ gridTemplateColumns: "1.4fr 1fr", gap: 40 }}>
+        {/* Left — drop-cap lede */}
+        <div style={{ fontSize: 16, lineHeight: 1.7 }}>
+          <p style={{ marginBottom: 12 }}>
+            <span style={{
+              float: "left", fontFamily: SERIF_L,
+              fontSize: 52, lineHeight: 0.9, paddingTop: 4, paddingRight: 8,
+              color: ACCENT, fontWeight: 700,
+            }}>
+              {dropChar}
+            </span>
+            {afterDrop}
+          </p>
+          {ledeRest.map((line, i) => (
+            <p key={i} style={{ color: "var(--ab-muted)", marginBottom: 10 }}>{line}</p>
+          ))}
+        </div>
+
+        {/* Right — pull-quote */}
+        {pullQuote && (
+          <div style={{
+            borderLeft: `3px solid ${ACCENT}`,
+            padding: "4px 0 4px 18px",
+            fontStyle: "italic", fontSize: 18, lineHeight: 1.35,
+            color: "var(--ab-fg)",
+          }}>
+            "{pullQuote}"
+          </div>
+        )}
       </div>
     </div>
   );

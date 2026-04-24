@@ -4,15 +4,29 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const ACCENT  = "#6C5CE7";
+
+/** Serif underline date input — matches LP_Archive reference exactly. */
+const dateInputStyle: React.CSSProperties = {
+  width: "100%",
+  fontFamily: SERIF_L,
+  fontSize: 16,
+  padding: "4px 0",
+  border: "none",
+  borderBottom: "1px solid var(--ab-fg)",
+  background: "transparent",
+  color: "var(--ab-fg)",
+  outline: "none",
+};
+
 type Props = {
   eventsFromYmd: string;
   eventsToYmd: string;
   newsFromYmd: string;
   newsToYmd: string;
 };
-
-const inputClass =
-  "mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] shadow-inner focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/25";
 
 export function ArchiveDateToolbar({
   eventsFromYmd,
@@ -42,53 +56,79 @@ export function ArchiveDateToolbar({
     router.push(`/dashboard/archive?${q.toString()}`);
   }
 
+  const sections = [
+    {
+      label: "Past timeline",
+      from: ef, setFrom: setEf,
+      to: et,   setTo:   setEt,
+    },
+    {
+      label: "Archived news",
+      from: nf, setFrom: setNf,
+      to: nt,   setTo:   setNt,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--faint)]">Date ranges</p>
-        <p className="mt-1 text-sm text-[var(--muted)]">
-          Narrow events and news independently, then apply.
-        </p>
-      </div>
-      <div className="grid gap-8 sm:grid-cols-2 sm:gap-10">
-        <div className="min-w-0 space-y-3">
-          <p className="text-sm font-semibold text-[var(--foreground)]">Past timeline</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-[var(--faint)]">
-              From
-              <input type="date" value={ef} onChange={(e) => setEf(e.target.value)} className={inputClass} />
-            </label>
-            <label className="block text-xs font-medium text-[var(--faint)]">
-              To
-              <input type="date" value={et} onChange={(e) => setEt(e.target.value)} className={inputClass} />
-            </label>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 8 }}>
+      <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+        {sections.map((sec, si) => (
+          <div key={sec.label} style={si === 1 ? { borderLeft: "1px solid var(--ab-border)", paddingLeft: 32 } : undefined}>
+            <div style={{ fontFamily: SERIF_L, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>
+              {sec.label}
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em",
+                  textTransform: "uppercase", color: "var(--ab-faint)", marginBottom: 4,
+                }}>From</div>
+                <input
+                  type="date"
+                  value={sec.from}
+                  onChange={(e) => sec.setFrom(e.target.value)}
+                  style={dateInputStyle}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: SANS_L, fontSize: 10, letterSpacing: ".16em",
+                  textTransform: "uppercase", color: "var(--ab-faint)", marginBottom: 4,
+                }}>To</div>
+                <input
+                  type="date"
+                  value={sec.to}
+                  onChange={(e) => sec.setTo(e.target.value)}
+                  style={dateInputStyle}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="min-w-0 space-y-3 sm:border-l sm:border-[var(--border)] sm:pl-10">
-          <p className="text-sm font-semibold text-[var(--foreground)]">Archived news</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-xs font-medium text-[var(--faint)]">
-              From
-              <input type="date" value={nf} onChange={(e) => setNf(e.target.value)} className={inputClass} />
-            </label>
-            <label className="block text-xs font-medium text-[var(--faint)]">
-              To
-              <input type="date" value={nt} onChange={(e) => setNt(e.target.value)} className={inputClass} />
-            </label>
-          </div>
-        </div>
+        ))}
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+
+      {/* Actions */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <button
           type="button"
           onClick={apply}
-          className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
+          style={{
+            fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+            letterSpacing: ".08em", textTransform: "uppercase",
+            color: "#fff", background: ACCENT, border: "none",
+            padding: "6px 16px", cursor: "pointer",
+          }}
         >
           Apply ranges
         </button>
         <Link
           href="/dashboard/archive"
-          className="text-sm font-medium text-[var(--accent)] hover:text-[var(--accent-muted)]"
+          style={{
+            fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+            letterSpacing: ".08em", textTransform: "uppercase",
+            color: "var(--ab-fg)", border: "1px solid var(--ab-border)",
+            padding: "6px 16px", textDecoration: "none",
+          }}
         >
           Reset defaults
         </Link>

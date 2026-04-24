@@ -340,32 +340,35 @@ function MapTooltip({
 }) {
   if (!active || !payload?.[0]?.payload) return null;
   const p = payload[0].payload;
+  const ttStyle: React.CSSProperties = {
+    border: "1px solid var(--ab-border)", background: "var(--ab-card)",
+    padding: "8px 12px", fontSize: 12, color: "var(--ab-fg)",
+    fontFamily: `-apple-system, 'Inter', system-ui, sans-serif`,
+    maxWidth: 200,
+  };
   if (!p.symbol) {
     return (
-      <div className="max-w-xs rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--foreground)] shadow-lg">
-        <span className="font-semibold text-white/90">{p.name}</span>
-        <p className="mt-1 text-[var(--muted)]">Sector or industry group</p>
+      <div style={ttStyle}>
+        <span style={{ fontWeight: 700 }}>{p.name}</span>
+        <p style={{ color: "var(--ab-muted)", marginTop: 2 }}>Sector or industry group</p>
       </div>
     );
   }
   return (
-    <div className="max-w-xs rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs text-[var(--foreground)] shadow-lg">
-      <div className="font-semibold text-white/90">{p.shortName ?? p.symbol}</div>
-      <div className="text-[var(--muted)]">{p.symbol}</div>
-      <div className="mt-1 font-medium">
+    <div style={ttStyle}>
+      <div style={{ fontWeight: 700 }}>{p.shortName ?? p.symbol}</div>
+      <div style={{ color: "var(--ab-muted)" }}>{p.symbol}</div>
+      <div style={{ marginTop: 4, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
         {typeof p.changePct === "number" ? (
-          <>
-            {p.changePct >= 0 ? "+" : ""}
-            {p.changePct.toFixed(2)}%
-          </>
-        ) : (
-          "—"
-        )}
+          <span style={{ color: p.changePct >= 0 ? "var(--ab-up)" : "var(--ab-down)" }}>
+            {p.changePct >= 0 ? "+" : ""}{p.changePct.toFixed(2)}%
+          </span>
+        ) : "—"}
       </div>
       {p.price != null && (
-        <div className="text-[var(--muted)]">Last: ${p.price.toFixed(2)}</div>
+        <div style={{ color: "var(--ab-muted)" }}>Last: ${p.price.toFixed(2)}</div>
       )}
-      <div className="mt-1 text-[var(--muted)]">Click for headlines</div>
+      <div style={{ color: "var(--ab-faint)", marginTop: 4, fontStyle: "italic" }}>Click for headlines</div>
     </div>
   );
 }
@@ -375,6 +378,9 @@ const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 3.6;
 const ZOOM_STEP = 0.1;
 const BASE_CHART_PX = Math.round(560 * 2.35);
+
+const SANS_TB = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT_TB = "#6C5CE7";
 
 function MapViewToolbar({
   zoom,
@@ -391,47 +397,46 @@ function MapViewToolbar({
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
 }) {
+  const btnBase: React.CSSProperties = {
+    fontFamily: SANS_TB, fontSize: 11, fontWeight: 700,
+    letterSpacing: ".1em", textTransform: "uppercase" as const,
+    background: "none", border: "1px solid var(--ab-border)",
+    color: "var(--ab-muted)", padding: "4px 10px", cursor: "pointer",
+  };
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] pb-3">
-      <span className="text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
+    <div style={{
+      display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8,
+      borderBottom: "1px solid var(--ab-border)", paddingBottom: 10,
+    }}>
+      <span style={{ fontFamily: SANS_TB, fontSize: 10, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--ab-faint)" }}>
         Map view
       </span>
-      <div className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5">
+      <div style={{ display: "flex", alignItems: "center", border: "1px solid var(--ab-border)", background: "var(--ab-surface)" }}>
         <button
           type="button"
           aria-label="Zoom out"
           onClick={onZoomOut}
-          className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--border)] disabled:cursor-not-allowed disabled:opacity-35"
           disabled={zoom <= ZOOM_MIN + 0.01}
-        >
-          −
-        </button>
-        <span className="min-w-[3rem] text-center font-mono text-xs text-[var(--foreground)]">
+          style={{ ...btnBase, border: "none", borderRight: "1px solid var(--ab-border)", opacity: zoom <= ZOOM_MIN + 0.01 ? .35 : 1 }}
+        >−</button>
+        <span style={{ fontFamily: "ui-monospace, Menlo, monospace", fontSize: 11, color: "var(--ab-fg)", minWidth: 44, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>
           {Math.round(zoom * 100)}%
         </span>
         <button
           type="button"
           aria-label="Zoom in"
           onClick={onZoomIn}
-          className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--border)] disabled:cursor-not-allowed disabled:opacity-35"
           disabled={zoom >= ZOOM_MAX - 0.01}
-        >
-          +
-        </button>
+          style={{ ...btnBase, border: "none", borderLeft: "1px solid var(--ab-border)", opacity: zoom >= ZOOM_MAX - 0.01 ? .35 : 1 }}
+        >+</button>
       </div>
-      <button
-        type="button"
-        onClick={onResetZoom}
-        className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)]"
-      >
-        Reset
-      </button>
+      <button type="button" onClick={onResetZoom} style={btnBase}>Reset</button>
       <button
         type="button"
         onClick={onToggleFullscreen}
-        className="ml-auto rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--accent-muted)]"
+        style={{ ...btnBase, marginLeft: "auto", background: ACCENT_TB, color: "#fff", border: "none" }}
       >
-        {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        {isFullscreen ? "Exit fullscreen" : "Fullscreen ⛶"}
       </button>
     </div>
   );
@@ -598,165 +603,174 @@ export function MarketMapExplorer({
 
   const embedScrollMax = "min(92vh, 1680px)";
 
+  const SANS_MME  = `-apple-system, 'Inter', system-ui, sans-serif`;
+  const SERIF_MME = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+  const ACCENT_MME = "#6C5CE7";
+
   return (
-    <div className="space-y-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <AutoRefresh everyMs={900000} />
 
-      <header className="border-b border-[var(--border)] pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Map</p>
-        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
-            Market map
-          </h1>
-          {!isPro && (
-            <span className="mb-1 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs text-[var(--muted)]">
-              {limitHit ? (
-                <a href="/dashboard/upgrade" className="font-semibold text-[var(--accent)] hover:underline">
-                  Upgrade for unlimited lookups
-                </a>
-              ) : (
-                <>
-                  <span className="font-semibold text-[var(--foreground)]">{Math.max(0, lookupsLeft)}</span>
-                  {" "}of {maxLookups} free lookups left today
-                </>
-              )}
-            </span>
-          )}
-        </div>
-      </header>
-
+      {/* ── Limit hit banner ── */}
       {limitHit && (
-        <div className="rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-highlight)] p-6 text-center">
-          <p className="font-semibold text-[var(--foreground)]">Daily limit reached</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">
+        <div style={{
+          border: `2px solid ${ACCENT_MME}`, background: "var(--ab-surface-hi)",
+          padding: "24px 32px", textAlign: "center",
+        }}>
+          <p style={{ fontFamily: SERIF_MME, fontSize: 18, fontWeight: 600, color: "var(--ab-fg)", margin: 0 }}>
+            Daily limit reached
+          </p>
+          <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)", marginTop: 6 }}>
             Free members get {maxLookups} market map lookups per day. Upgrade to Pro for unlimited access.
           </p>
           <a
             href="/dashboard/upgrade"
-            className="mt-4 inline-block rounded-lg bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-muted)]"
+            style={{
+              display: "inline-block", marginTop: 14, padding: "8px 20px",
+              background: ACCENT_MME, color: "#fff",
+              fontFamily: SANS_MME, fontSize: 11, fontWeight: 600,
+              letterSpacing: ".1em", textTransform: "uppercase", textDecoration: "none",
+            }}
           >
             Upgrade to Pro
           </a>
         </div>
       )}
 
-      <div className="mt-8 space-y-4">
-        {!selected?.symbol ? (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-sm text-[var(--muted)]">
-            Click any stock in the map below to see recent headlines and a brief on why it might be moving.
+      {/* ── Selected stock panel ── */}
+      {!selected?.symbol ? (
+        <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)" }}>
+          Click any tile to pull up headlines and a brief on why it might be moving.
+        </p>
+      ) : (
+        <div style={{ border: "1px solid var(--ab-border)", background: "var(--ab-card)", padding: "20px 24px", minHeight: 140 }}>
+          {/* Header row */}
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "6px 12px", marginBottom: 12 }}>
+            <span style={{ fontFamily: SERIF_MME, fontSize: 20, fontWeight: 600, color: "var(--ab-fg)" }}>
+              {selected.shortName ?? selected.symbol}
+            </span>
+            <span style={{ fontFamily: SANS_MME, fontSize: 12, color: "var(--ab-muted)", fontVariantNumeric: "tabular-nums" }}>
+              {selected.symbol}
+            </span>
+            {selected.price != null && (
+              <span style={{ fontFamily: SERIF_MME, fontSize: 15, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                ${selected.price.toFixed(2)}
+              </span>
+            )}
+            {typeof selected.changePct === "number" && (
+              <span style={{
+                fontFamily: SANS_MME, fontSize: 13, fontWeight: 700,
+                fontVariantNumeric: "tabular-nums",
+                color: selected.changePct >= 0 ? "var(--ab-up)" : "var(--ab-down)",
+              }}>
+                {selected.changePct >= 0 ? "+" : ""}{selected.changePct.toFixed(2)}%
+              </span>
+            )}
           </div>
-        ) : (
-          <div className="min-h-[140px] max-w-full rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h2 className="text-xl font-semibold text-[var(--foreground)]">
-                {selected.shortName ?? selected.symbol}
-              </h2>
-              <span className="font-mono text-sm text-[var(--muted)]">{selected.symbol}</span>
-              <span className="text-sm text-[var(--muted)]">
-                {selected.price != null ? (
-                  <span className="font-medium text-[var(--foreground)]">${selected.price.toFixed(2)}</span>
-                ) : (
-                  <span>—</span>
-                )}
-              </span>
-              <span className={`text-sm font-semibold ${moveColor}`}>
-                {typeof selected.changePct === "number" ? (
-                  <>
-                    {selected.changePct >= 0 ? "+" : ""}
-                    {selected.changePct.toFixed(2)}%
-                  </>
-                ) : (
-                  "—"
-                )}
-                <span className="ml-1 text-xs font-normal text-[var(--muted)]">vs prior close</span>
-              </span>
-            </div>
-            {/* AI price summary */}
-            {aiLoading && (
-              <p className="mt-3 text-xs text-[var(--muted)]">Analysing move…</p>
-            )}
-            {!aiLoading && aiSummary?.summary && (
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-                {aiSummary.summary}
-              </p>
-            )}
 
-            {loading && (
-              <p className="mt-3 text-sm text-[var(--muted)]">Loading headlines…</p>
-            )}
-            {error && (
-              <p className="mt-3 text-sm text-red-600" role="alert">
-                {error}
-              </p>
-            )}
-            {!loading && news.length > 0 && (
-              <ul className="mt-4 max-h-[min(52vh,480px)] space-y-3 overflow-y-auto overflow-x-hidden pr-1">
-                {news.slice(0, 6).map((a) => (
-                  <li
-                    key={a.id}
-                    className="min-w-0 max-w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3"
-                  >
-                    <p className="line-clamp-2 break-words text-sm font-medium text-[var(--foreground)]">
-                      {a.title}
-                    </p>
-                    <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-[var(--muted)]">
+          {/* AI summary */}
+          {aiLoading && (
+            <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>
+              Analysing move…
+            </p>
+          )}
+          {!aiLoading && aiSummary?.summary && (
+            <p style={{ fontFamily: SERIF_MME, fontSize: 14, lineHeight: 1.6, color: "var(--ab-muted)", marginBottom: 14 }}>
+              {aiSummary.summary}
+            </p>
+          )}
+
+          {/* News */}
+          {loading && (
+            <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>
+              Loading headlines…
+            </p>
+          )}
+          {error && (
+            <p style={{ fontFamily: SANS_MME, fontSize: 12, color: "var(--ab-down)" }} role="alert">{error}</p>
+          )}
+          {!loading && news.length > 0 && (
+            <div style={{ maxHeight: "min(52vh, 480px)", overflowY: "auto" }}>
+              {news.slice(0, 6).map((a) => (
+                <div key={a.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--ab-border)" }}>
+                  <p style={{
+                    fontFamily: SERIF_MME, fontSize: 15, fontWeight: 600,
+                    lineHeight: 1.25, color: "var(--ab-fg)", marginBottom: 4,
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}>
+                    {a.title}
+                  </p>
+                  {a.summary && (
+                    <p style={{
+                      fontFamily: SERIF_MME, fontSize: 13, color: "var(--ab-muted)",
+                      lineHeight: 1.55, marginBottom: 6,
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}>
                       {a.summary}
                     </p>
-                    <a
-                      href={a.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-3 inline-block text-xs font-medium text-[var(--accent)] hover:underline"
-                    >
-                      Original article →
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {!loading && !error && news.length === 0 && (
-              <p className="mt-3 text-sm text-[var(--muted)]">
-                No headlines matched this symbol yet. Try again later.
-              </p>
-            )}
-          </div>
-        )}
+                  )}
+                  <a
+                    href={a.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontFamily: SANS_MME, fontSize: 11, color: ACCENT_MME, letterSpacing: ".04em", textDecoration: "none" }}
+                  >
+                    Original article →
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+          {!loading && !error && news.length === 0 && (
+            <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>
+              No headlines matched this symbol yet. Try again later.
+            </p>
+          )}
+        </div>
+      )}
 
+      {/* ── Map shell ── */}
+      <div
+        ref={mapShellRef}
+        style={isFullscreen ? {
+          display: "flex", flexDirection: "column",
+          height: "100dvh", maxHeight: "100dvh", width: "100%",
+          background: "var(--ab-bg)", padding: 16,
+        } : {
+          display: "flex", flexDirection: "column",
+          border: "1px solid var(--ab-border)", background: "var(--ab-card)", padding: 12,
+        }}
+      >
+        <MapViewToolbar
+          zoom={zoom}
+          onZoomOut={onZoomOut}
+          onZoomIn={onZoomIn}
+          onResetZoom={onResetZoom}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={toggleFullscreen}
+        />
         <div
-          ref={mapShellRef}
-          className={
-            isFullscreen
-              ? "flex h-screen max-h-[100dvh] min-h-0 w-full flex-col bg-[var(--background)] p-4"
-              : "flex flex-col rounded-xl border border-[var(--border)] bg-[var(--card)] p-3"
+          style={isFullscreen
+            ? { flex: 1, minHeight: 0, width: "100%", overflowAuto: "auto", marginTop: 12 } as React.CSSProperties
+            : { width: "100%", overflowY: "auto", marginTop: 12, maxHeight: embedScrollMax }
           }
         >
-          <MapViewToolbar
-            zoom={zoom}
-            onZoomOut={onZoomOut}
-            onZoomIn={onZoomIn}
-            onResetZoom={onResetZoom}
-            isFullscreen={isFullscreen}
-            onToggleFullscreen={toggleFullscreen}
-          />
-          <div
-            className={`min-h-0 w-full overflow-auto ${isFullscreen ? "mt-3 min-h-0 flex-1" : "mt-3"}`}
-            style={isFullscreen ? undefined : { maxHeight: embedScrollMax }}
-          >
-            <div className="w-full" style={{ height: chartHeight }}>
-              <ResponsiveContainer width="100%" height={chartHeight}>
-                <Treemap
-                  data={[tree]}
-                  dataKey="size"
-                  nameKey="name"
-                  aspectRatio={1.22}
-                  isAnimationActive={false}
-                  content={(props: TreemapNode) => <MapRect {...(props as TreemapNode & LeafPayload)} />}
-                  onClick={onTreemapClick}
-                >
-                  <Tooltip content={<MapTooltip />} />
-                </Treemap>
-              </ResponsiveContainer>
-            </div>
+          <div style={{ width: "100%", height: chartHeight }}>
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <Treemap
+                data={[tree]}
+                dataKey="size"
+                nameKey="name"
+                aspectRatio={1.22}
+                isAnimationActive={false}
+                content={(props: TreemapNode) => <MapRect {...(props as TreemapNode & LeafPayload)} />}
+                onClick={onTreemapClick}
+              >
+                <Tooltip content={<MapTooltip />} />
+              </Treemap>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>

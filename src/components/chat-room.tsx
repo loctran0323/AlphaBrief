@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
+
 type Message = {
   id: string;
   user: string;
@@ -12,23 +16,26 @@ type Message = {
   ts: number;
 };
 
-function colorFromEmail(email: string): string {
-  const colors = [
-    "bg-violet-500", "bg-indigo-500", "bg-blue-500", "bg-cyan-500",
-    "bg-teal-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500",
-  ];
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length]!;
+const AVATAR_COLORS = [
+  "#6C5CE7","#0284C7","#059669","#D97706","#DC2626","#7C3AED","#0891B2","#65A30D",
+];
+
+function avatarColor(email: string): string {
+  let h = 0;
+  for (let i = 0; i < email.length; i++) h = email.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]!;
 }
 
-function Avatar({ email }: { email: string }) {
-  const initial = email[0]?.toUpperCase() ?? "?";
+function Avatar({ email, size = 26 }: { email: string; size?: number }) {
   return (
-    <span
-      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${colorFromEmail(email)}`}
-    >
-      {initial}
+    <span style={{
+      display: "inline-flex", alignItems: "center", justifyContent: "center",
+      width: size, height: size, flexShrink: 0,
+      background: avatarColor(email),
+      fontFamily: SANS_L, fontSize: size * 0.42, fontWeight: 700, color: "#fff",
+      userSelect: "none",
+    }}>
+      {email[0]?.toUpperCase() ?? "?"}
     </span>
   );
 }
@@ -43,13 +50,14 @@ export function ChatRoom({
   email: string | null;
   isPro?: boolean;
 }) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [online, setOnline] = useState(0);
+  const [open, setOpen]           = useState(false);
+  const [messages, setMessages]   = useState<Message[]>([]);
+  const [input, setInput]         = useState("");
+  const [online, setOnline]       = useState(0);
   const [connected, setConnected] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const bottomRef  = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
-  const supabase = useRef(createClient());
+  const supabase   = useRef(createClient());
 
   useEffect(() => {
     const channel = supabase.current
@@ -61,8 +69,7 @@ export function ChatRoom({
         });
       })
       .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        setOnline(Object.keys(state).length);
+        setOnline(Object.keys(channel.presenceState()).length);
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
@@ -70,15 +77,14 @@ export function ChatRoom({
           if (email) await channel.track({ email, online_at: new Date().toISOString() });
         }
       });
-
     channelRef.current = channel;
     const sb = supabase.current;
     return () => { void sb.removeChannel(channel); };
   }, [email]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, open]);
 
   const send = useCallback(async () => {
     const text = input.trim();
@@ -87,9 +93,7 @@ export function ChatRoom({
     const msg: Message = {
       id: `${Date.now()}-${Math.random()}`,
       user: email.split("@")[0]!,
-      email,
-      isPro,
-      text,
+      email, isPro, text,
       ts: Date.now(),
     };
     await channelRef.current.send({ type: "broadcast", event: "msg", payload: msg });
@@ -99,83 +103,210 @@ export function ChatRoom({
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
   };
 
+  const unread = !open && messages.length > 0 ? messages.length : 0;
+
   return (
-    <div className="flex flex-col rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-[var(--foreground)]">Community chat</span>
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-emerald-400" : "bg-amber-400"}`}
-          />
-        </div>
-        {online > 0 && (
-          <span className="text-xs text-[var(--faint)]">
-            {online} online
-          </span>
+    <>
+      {/* ── Toggle tab — fixed right edge ── */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={open ? "Close community chat" : "Open community chat"}
+        style={{
+          position: "fixed",
+          right: open ? 340 : 0,
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 51,
+          background: "var(--ab-card)",
+          border: "1px solid var(--ab-border)",
+          borderRight: open ? "none" : undefined,
+          padding: "14px 7px",
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 6,
+          transition: "right .2s ease",
+        }}
+      >
+        <span style={{
+          display: "inline-block",
+          width: 6, height: 6, borderRadius: "50%",
+          background: connected ? "#10B981" : "#F59E0B",
+          flexShrink: 0,
+        }} />
+        <span style={{
+          fontFamily: SANS_L, fontSize: 9, fontWeight: 700,
+          letterSpacing: ".16em", textTransform: "uppercase",
+          color: "var(--ab-muted)",
+          writingMode: "vertical-rl",
+          textOrientation: "mixed",
+          whiteSpace: "nowrap",
+        }}>
+          {open ? "Close" : "Chat"}
+          {!open && online > 0 && ` · ${online}`}
+        </span>
+        {unread > 0 && !open && (
+          <span style={{
+            width: 14, height: 14, borderRadius: "50%",
+            background: ACCENT, color: "#fff",
+            fontFamily: SANS_L, fontSize: 8, fontWeight: 700,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>{unread > 9 ? "9+" : unread}</span>
         )}
-      </div>
+      </button>
 
-      {/* Messages */}
-      <div className="flex h-72 flex-col gap-3 overflow-y-auto p-4 [scrollbar-width:thin]">
-        {messages.length === 0 ? (
-          <p className="m-auto text-xs text-[var(--faint)]">
-            {email ? "No messages yet — say hello 👋" : "Sign in to join the chat."}
-          </p>
-        ) : (
-          messages.map((m) => (
-            <div key={m.id} className="flex items-start gap-2.5">
-              <Avatar email={m.email} />
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold text-[var(--foreground)]">{m.user}</span>
-                  {m.isPro && (
-                    <span className="rounded-full bg-[#EDE9FE] px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-[#6C5CE7]">
-                      Pro
-                    </span>
-                  )}
-                  <span className="text-[10px] text-[var(--faint)]">
-                    {new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-                <p className="mt-0.5 break-words text-sm leading-relaxed text-[var(--muted)]">{m.text}</p>
-              </div>
-            </div>
-          ))
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Input */}
-      <div className="border-t border-[var(--border)] p-3">
-        {email ? (
-          <div className="flex items-center gap-2">
-            <Avatar email={email} />
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKey}
-              maxLength={500}
-              placeholder="Message the room…"
-              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] placeholder-[var(--faint)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-            />
+      {/* ── Sidebar panel ── */}
+      <div
+        style={{
+          position: "fixed",
+          right: open ? 0 : -340,
+          top: 0,
+          bottom: 0,
+          width: 340,
+          background: "var(--ab-card)",
+          borderLeft: "1px solid var(--ab-border)",
+          zIndex: 50,
+          display: "flex",
+          flexDirection: "column",
+          transition: "right .2s ease",
+          pointerEvents: open ? "auto" : "none",
+        }}
+      >
+        {/* Panel header */}
+        <div style={{
+          padding: "14px 16px 12px",
+          borderBottom: "1px solid var(--ab-border)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{
+              fontFamily: SANS_L, fontSize: 10, fontWeight: 700,
+              letterSpacing: ".22em", textTransform: "uppercase", color: "var(--ab-muted)",
+            }}>Community chat</span>
+            <span style={{
+              width: 6, height: 6, borderRadius: "50%",
+              background: connected ? "#10B981" : "#F59E0B",
+              display: "inline-block",
+            }} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {online > 0 && (
+              <span style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-faint)" }}>
+                {online} online
+              </span>
+            )}
             <button
               type="button"
-              onClick={() => void send()}
-              disabled={!input.trim()}
-              className="rounded-lg bg-[var(--accent)] px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Send
-            </button>
+              onClick={() => setOpen(false)}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontFamily: SANS_L, fontSize: 18, color: "var(--ab-faint)",
+                lineHeight: 1, padding: "0 2px",
+              }}
+              aria-label="Close chat"
+            >×</button>
           </div>
-        ) : (
-          <p className="text-center text-xs text-[var(--faint)]">
-            <a href="/login" className="font-medium text-[var(--accent)] hover:underline">Sign in</a>{" "}
-            to join the conversation.
-          </p>
-        )}
+        </div>
+
+        {/* Messages */}
+        <div style={{
+          flex: 1, overflowY: "auto", padding: 16,
+          display: "flex", flexDirection: "column", gap: 16,
+          scrollbarWidth: "thin",
+        }}>
+          {messages.length === 0 ? (
+            <p style={{
+              margin: "auto 0",
+              fontFamily: SERIF_L, fontStyle: "italic",
+              fontSize: 13, color: "var(--ab-faint)", textAlign: "center",
+            }}>
+              {email ? "No messages yet — say hello 👋" : "Sign in to join the chat."}
+            </p>
+          ) : (
+            messages.map((m) => (
+              <div key={m.id} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <Avatar email={m.email} size={24} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <span style={{ fontFamily: SANS_L, fontSize: 11, fontWeight: 700, color: "var(--ab-fg)" }}>
+                      {m.user}
+                    </span>
+                    {m.isPro && (
+                      <span style={{
+                        fontFamily: SANS_L, fontSize: 9, fontWeight: 700,
+                        letterSpacing: ".1em", textTransform: "uppercase",
+                        color: ACCENT, background: "rgba(108,92,231,.12)",
+                        padding: "1px 5px",
+                      }}>Pro</span>
+                    )}
+                    <span style={{ fontFamily: SANS_L, fontSize: 10, color: "var(--ab-faint)" }}>
+                      {new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <p style={{
+                    fontFamily: SERIF_L, fontSize: 14, lineHeight: 1.55,
+                    color: "var(--ab-muted)", marginTop: 2, wordBreak: "break-word",
+                  }}>
+                    {m.text}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input */}
+        <div style={{
+          borderTop: "1px solid var(--ab-border)", padding: 12, flexShrink: 0,
+        }}>
+          {email ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Avatar email={email} size={22} />
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKey}
+                maxLength={500}
+                placeholder="Message the room…"
+                style={{
+                  flex: 1,
+                  fontFamily: SERIF_L, fontSize: 14, color: "var(--ab-fg)",
+                  background: "transparent", border: "none",
+                  borderBottom: "1px solid var(--ab-border)",
+                  padding: "4px 0", outline: "none",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => void send()}
+                disabled={!input.trim()}
+                style={{
+                  fontFamily: SANS_L, fontSize: 10, fontWeight: 700,
+                  letterSpacing: ".1em", textTransform: "uppercase",
+                  color: "#fff", background: ACCENT, border: "none",
+                  padding: "5px 10px", cursor: "pointer",
+                  opacity: input.trim() ? 1 : 0.4,
+                  flexShrink: 0,
+                }}
+              >Send</button>
+            </div>
+          ) : (
+            <p style={{
+              textAlign: "center",
+              fontFamily: SERIF_L, fontStyle: "italic",
+              fontSize: 13, color: "var(--ab-faint)",
+            }}>
+              <a href="/login" style={{ color: ACCENT, textDecoration: "none" }}>Sign in</a>
+              {" "}to join the conversation.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

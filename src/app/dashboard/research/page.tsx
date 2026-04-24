@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { TickerSearch } from "./ticker-search";
+import { LedgerRuleLabel } from "@/components/ledger-ui";
+import { ResearchTickerChips } from "@/components/research-ticker-chips";
 
-export const metadata: Metadata = {
-  title: "Research — AlphaBrief",
-};
-
+export const metadata: Metadata = { title: "Research — AlphaBrief" };
 export const dynamic = "force-dynamic";
 
-const POPULAR = ["AAPL", "MSFT", "NVDA", "GOOGL", "META", "AMZN", "TSLA", "SPY"];
+const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
+const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
+const ACCENT  = "#6C5CE7";
 
-function TickerChip({ ticker }: { ticker: string }) {
-  return (
-    <a
-      href={`/dashboard/research/${ticker}`}
-      className="rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-1.5 font-mono text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]/50 hover:text-[var(--accent)]"
-    >
-      {ticker}
-    </a>
-  );
-}
+const POPULAR = ["MSFT", "GOOGL", "META", "AMZN", "SPY"];
 
 export default async function ResearchPage() {
   const supabase = await createClient();
@@ -41,34 +33,38 @@ export default async function ResearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl py-16 text-center">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">Research</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--foreground)] sm:text-4xl">
-        Stock lookup
+    <div style={{ maxWidth: 920, margin: "0 auto", padding: "80px 0 60px", textAlign: "center", fontFamily: SANS_L }}>
+      {/* Eyebrow */}
+      <div style={{ fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase", color: ACCENT, fontWeight: 700, marginBottom: 14 }}>
+        Research · The desk
+      </div>
+
+      {/* Hero headline */}
+      <h1 style={{ fontFamily: SERIF_L, fontSize: 60, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, margin: "0 0 14px" }}>
+        Look up any ticker.
       </h1>
-      <p className="mt-3 text-sm text-[var(--muted)]">
-        Search any ticker for price, chart, key stats, and recent news.
+      <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 18, color: "var(--ab-muted)", margin: "0 auto", maxWidth: 540 }}>
+        Price, chart, valuation, and AI-summarized headlines — one page, one search.
       </p>
 
-      <div className="mt-8">
-        <TickerSearch />
+      {/* Underline-only search */}
+      <div style={{ maxWidth: 640, margin: "40px auto 0", textAlign: "left" }}>
+        <TickerSearch ledger />
       </div>
 
+      {/* Your tickers */}
       {savedTickers.length > 0 && (
-        <div className="mt-8">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">Your tickers</p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {savedTickers.map((t) => <TickerChip key={t} ticker={t} />)}
-          </div>
-        </div>
+        <>
+          <LedgerRuleLabel>Your tickers</LedgerRuleLabel>
+          <ResearchTickerChips tickers={savedTickers} />
+        </>
       )}
 
-      <div className="mt-6">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">Popular</p>
-        <div className="flex flex-wrap justify-center gap-2">
-          {POPULAR.filter((t) => !savedTickers.includes(t)).map((t) => <TickerChip key={t} ticker={t} />)}
-        </div>
-      </div>
+      {/* Popular */}
+      <LedgerRuleLabel>Popular</LedgerRuleLabel>
+      <ResearchTickerChips tickers={POPULAR.filter(t => !savedTickers.includes(t))} />
+
+
     </div>
   );
 }

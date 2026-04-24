@@ -11,7 +11,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     return (
       <div className="min-h-screen">
         <AppNav signedIn={false} />
-        <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
+        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
       </div>
     );
   }
@@ -35,7 +35,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     return (
       <div className="min-h-screen">
         <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-        <div className="mx-auto max-w-5xl px-6 py-10">
+        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>
           <DashboardSetupError message={setup.message} />
         </div>
       </div>
@@ -45,7 +45,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen">
       <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-      <div className="mx-auto max-w-5xl px-6 py-12">{children}</div>
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
     </div>
   );
 }
