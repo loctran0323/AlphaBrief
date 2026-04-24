@@ -43,7 +43,7 @@ export default async function ResearchPage() {
       <h1 style={{ fontFamily: SERIF_L, fontSize: 60, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, margin: "0 0 14px" }}>
         Look up any ticker.
       </h1>
-      <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 18, color: "var(--ab-muted)", margin: "0 auto", maxWidth: 540 }}>
+      <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 18, color: "var(--ab-muted)", margin: "0 auto", whiteSpace: "nowrap" }}>
         Price, chart, valuation, and AI-summarized headlines — one page, one search.
       </p>
 
