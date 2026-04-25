@@ -639,8 +639,8 @@ export function MarketMapExplorer({
 
       {/* ── Selected stock panel ── */}
       {!selected?.symbol ? (
-        <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          Click any tile to pull up headlines and a brief on why it might be moving.
+        <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 12, color: "var(--ab-muted)" }}>
+          Tap a tile to see headlines and why it&apos;s moving.
         </p>
       ) : (
         <div style={{ border: "1px solid var(--ab-border)", background: "var(--ab-card)", padding: "20px 24px", minHeight: 140 }}>
