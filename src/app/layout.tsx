@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
+const PRODUCTION_URL = "https://alphabrief.net";
+
 function siteMetadataBase(): URL {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
-  if (explicit) return new URL(explicit);
-  if (process.env.VERCEL_URL) return new URL(`https://${process.env.VERCEL_URL}`);
-  return new URL("http://localhost:3000");
+  // NEXT_PUBLIC_SITE_URL is the override (set this in Vercel env vars)
+  if (process.env.NEXT_PUBLIC_SITE_URL) return new URL(process.env.NEXT_PUBLIC_SITE_URL);
+  // In local dev only
+  if (process.env.NODE_ENV === "development") return new URL("http://localhost:3000");
+  // Production default — never use VERCEL_URL (it's the deployment URL, not the canonical domain)
+  return new URL(PRODUCTION_URL);
 }
 
 const geistSans = Geist({
@@ -34,6 +38,9 @@ export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
   applicationName: "AlphaBrief",
   title: "AlphaBrief — AI Market Summaries & Financial News",
+  alternates: {
+    canonical: PRODUCTION_URL,
+  },
   description: siteDescription,
   keywords: [
     "AlphaBrief",
