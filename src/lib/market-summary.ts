@@ -37,7 +37,7 @@ export async function getMarketSummary(): Promise<MarketSummaryResult | null> {
 
   if (cached) {
     const ageHours = (Date.now() - new Date(cached.generated_at).getTime()) / 3_600_000;
-    if (ageHours < 6) return { summary: cached.summary, generatedAt: cached.generated_at };
+    if (ageHours < 3) return { summary: cached.summary, generatedAt: cached.generated_at };
   }
 
   if (!process.env.GROQ_API_KEY) {

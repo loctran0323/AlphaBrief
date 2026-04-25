@@ -41,10 +41,34 @@ async function callGroq(prompt: string, maxTokens: number): Promise<string> {
 
 // ── Daily summary ────────────────────────────────────────────────────────────
 
+function getMarketSessionContext(): { isOpen: boolean; label: string } {
+  // US Eastern time
+  const now = new Date();
+  const etOffset = -5; // EST; DST not critical for this purpose
+  const etHour = (now.getUTCHours() + 24 + etOffset) % 24;
+  const day = now.getUTCDay(); // 0=Sun, 6=Sat
+  const isWeekend = day === 0 || day === 6;
+  const isMarketHours = !isWeekend && etHour >= 9 && etHour < 16;
+  const isAfterHours = !isWeekend && (etHour >= 16 || etHour < 9);
+
+  if (isMarketHours) return { isOpen: true, label: "during regular trading hours" };
+  if (isAfterHours) return { isOpen: false, label: "after market close" };
+  return { isOpen: false, label: "over the weekend" };
+}
+
 export async function generateMarketSummaryText(): Promise<string> {
-  const [data, articles] = await Promise.all([
+  const session = getMarketSessionContext();
+
+  const [data, articles, recentArticles] = await Promise.all([
     fetchMarketHomeData(),
-    getNewsBriefing({ tickers: [], limit: 6, candidateCap: 10 }).catch(() => []),
+    getNewsBriefing({ tickers: [], limit: 12, candidateCap: 20 }).catch(() => []),
+    // Pull last 3 hours of news separately to surface after-hours developments
+    getArchivedNewsBriefing({
+      tickers: [],
+      limit: 8,
+      publishedFromMs: Date.now() - 3 * 60 * 60 * 1000,
+      publishedToMs: Date.now(),
+    }).catch(() => []),
   ]);
 
   const benchmarkText = data.benchmarks
@@ -57,38 +81,55 @@ export async function generateMarketSummaryText(): Promise<string> {
 
   const gainerText = data.gainers.slice(0, 5).map((g) => `${g.symbol} +${g.changePct.toFixed(1)}%`).join(", ");
   const loserText = data.losers.slice(0, 5).map((l) => `${l.symbol} ${l.changePct.toFixed(1)}%`).join(", ");
-  const headlineText = articles.length
-    ? articles.slice(0, 6).map((a) => `• [${a.marketImpact}] ${a.title} (${a.source})`).join("\n")
+
+  // Merge recent + broader headlines, deduplicate
+  const allArticles = [...recentArticles, ...articles]
+    .filter((a, i, arr) => arr.findIndex((x) => x.title === a.title) === i)
+    .slice(0, 12);
+
+  const headlineText = allArticles.length
+    ? allArticles.map((a) => {
+        const age = a.publishedAt
+          ? `${Math.round((Date.now() - new Date(a.publishedAt).getTime()) / 60000)}m ago`
+          : "";
+        return `• [${a.marketImpact}] ${a.title} (${a.source}${age ? `, ${age}` : ""})`;
+      }).join("\n")
     : "No headlines available.";
 
-  const prompt = `You are a concise financial analyst writing a daily market briefing for everyday investors. Today is ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}.
+  const sessionNote = session.isOpen
+    ? "Markets are currently open."
+    : `Markets are closed (${session.label}). Use the most recent headlines to surface what happened after the bell, any geopolitical or macro developments, and what investors should watch when markets reopen. Do not focus on intraday % moves if markets are closed — instead focus on the news flow and what it means for the next session.`;
 
-MARKET BENCHMARKS (today):
+  const prompt = `You are a concise financial analyst writing a market briefing for everyday investors. Today is ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}.
+
+${sessionNote}
+
+MARKET BENCHMARKS (most recent close):
 ${benchmarkText}
 
-TOP GAINERS: ${gainerText}
-TOP LOSERS:  ${loserText}
+TOP GAINERS (last session): ${gainerText}
+TOP LOSERS (last session):  ${loserText}
 
-RECENT HEADLINES:
+RECENT HEADLINES (newest first):
 ${headlineText}
 
-Write a structured daily market summary using exactly these four bold section headers, followed by content:
+Write a structured market summary using exactly these four bold section headers:
 
 **MARKET SNAPSHOT**
-One sentence on overall market direction and the key index moves (S&P, Nasdaq, Dow with % changes).
+One sentence on where markets stand — if open, today's direction; if closed, how the last session ended and current futures/sentiment.
 
 **WHAT'S DRIVING IT**
-2–3 bullet points explaining the main themes or catalysts behind today's moves. Each bullet should name a specific reason tied to the headlines. Use tickers where relevant.
+2–3 bullet points on the main themes and catalysts. If after-hours or weekend, focus on geopolitical developments, macro announcements, earnings after the bell, or anything that could move markets at open. Be specific — name the event and why it matters.
 
 **KEY MOVERS**
-2–3 bullet points on the most notable individual stocks — who led, who lagged, and briefly why.
+2–3 bullet points on notable stocks or sectors. Include any after-hours movers, earnings reactions, or news-driven moves.
 
 **WATCH FOR**
-1–2 bullet points on the most important things to monitor going forward (upcoming data, earnings, macro events).
+1–2 bullet points on what to monitor next — upcoming economic data, Fed speakers, earnings, or geopolitical flashpoints that could set the tone for the next session.
 
 Keep it tight and specific. Write clearly for a retail investor. Total length: 180–250 words.`;
 
-  return callGroq(prompt, 550);
+  return callGroq(prompt, 600);
 }
 
 // ── Trending queries ──────────────────────────────────────────────────────────
