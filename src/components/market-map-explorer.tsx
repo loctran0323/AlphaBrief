@@ -405,10 +405,10 @@ function MapViewToolbar({
   };
   return (
     <div style={{
-      display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8,
+      display: "flex", flexWrap: "nowrap", alignItems: "center", gap: 6,
       borderBottom: "1px solid var(--ab-border)", paddingBottom: 10,
     }}>
-      <span style={{ fontFamily: SANS_TB, fontSize: 10, fontWeight: 700, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--ab-faint)" }}>
+      <span style={{ fontFamily: SANS_TB, fontSize: 9, fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--ab-faint)", whiteSpace: "nowrap" }}>
         Map view
       </span>
       <div style={{ display: "flex", alignItems: "center", border: "1px solid var(--ab-border)", background: "var(--ab-surface)" }}>
@@ -417,9 +417,9 @@ function MapViewToolbar({
           aria-label="Zoom out"
           onClick={onZoomOut}
           disabled={zoom <= ZOOM_MIN + 0.01}
-          style={{ ...btnBase, border: "none", borderRight: "1px solid var(--ab-border)", opacity: zoom <= ZOOM_MIN + 0.01 ? .35 : 1 }}
+          style={{ ...btnBase, fontSize: 10, padding: "3px 8px", border: "none", borderRight: "1px solid var(--ab-border)", opacity: zoom <= ZOOM_MIN + 0.01 ? .35 : 1 }}
         >−</button>
-        <span style={{ fontFamily: "ui-monospace, Menlo, monospace", fontSize: 11, color: "var(--ab-fg)", minWidth: 44, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontFamily: "ui-monospace, Menlo, monospace", fontSize: 10, color: "var(--ab-fg)", minWidth: 36, textAlign: "center", fontVariantNumeric: "tabular-nums" }}>
           {Math.round(zoom * 100)}%
         </span>
         <button
@@ -427,16 +427,16 @@ function MapViewToolbar({
           aria-label="Zoom in"
           onClick={onZoomIn}
           disabled={zoom >= ZOOM_MAX - 0.01}
-          style={{ ...btnBase, border: "none", borderLeft: "1px solid var(--ab-border)", opacity: zoom >= ZOOM_MAX - 0.01 ? .35 : 1 }}
+          style={{ ...btnBase, fontSize: 10, padding: "3px 8px", border: "none", borderLeft: "1px solid var(--ab-border)", opacity: zoom >= ZOOM_MAX - 0.01 ? .35 : 1 }}
         >+</button>
       </div>
-      <button type="button" onClick={onResetZoom} style={btnBase}>Reset</button>
+      <button type="button" onClick={onResetZoom} style={{ ...btnBase, fontSize: 10, padding: "3px 8px" }}>Reset</button>
       <button
         type="button"
         onClick={onToggleFullscreen}
-        style={{ ...btnBase, marginLeft: "auto", background: ACCENT_TB, color: "#fff", border: "none" }}
+        style={{ ...btnBase, fontSize: 10, padding: "3px 10px", marginLeft: "auto", background: ACCENT_TB, color: "#fff", border: "none", whiteSpace: "nowrap" }}
       >
-        {isFullscreen ? "Exit fullscreen" : "Fullscreen ⛶"}
+        {isFullscreen ? "Exit ⛶" : "Fullscreen ⛶"}
       </button>
     </div>
   );

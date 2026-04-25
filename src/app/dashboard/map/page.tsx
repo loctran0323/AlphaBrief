@@ -1,6 +1,7 @@
 import { MarketMapExplorer } from "@/components/market-map-explorer";
 import { LedgerMasthead, LedgerByline, LedgerRuleLabel } from "@/components/ledger-ui";
 import { fetchMarketMapTree } from "@/lib/market-map-data";
+import { getMarketStatus } from "@/lib/market-hours";
 import { createClient } from "@/lib/supabase/server";
 import { getUserTier, getMapLookupsToday, FREE_MAP_LOOKUPS_PER_DAY } from "@/lib/subscription";
 import type { MarketMapSector } from "@/lib/market-map-data";
@@ -73,6 +74,7 @@ export default async function MarketMapPage() {
   const now = new Date();
   const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const lookupsLeft = isPro ? "Unlimited" : `${FREE_MAP_LOOKUPS_PER_DAY - lookupsUsed} of ${FREE_MAP_LOOKUPS_PER_DAY} lookups today`;
+  const marketStatus = getMarketStatus(now);
 
   const kicker = deriveMapKicker(tree);
 
@@ -95,18 +97,38 @@ export default async function MarketMapPage() {
         }
       />
 
-      {/* ── Legend ── */}
-      <LedgerRuleLabel>Legend</LedgerRuleLabel>
-      <div className="flex items-center gap-4 flex-wrap" style={{ fontSize: 11, color: "var(--ab-muted)", marginBottom: 14 }}>
-        <div className="flex items-center gap-2" style={{ flexShrink: 0 }}>
-          <span>−10%</span>
-          <div style={{ width: 100, height: 6, background: "linear-gradient(90deg, rgba(244,63,94,.6), rgba(244,63,94,.15), rgba(16,185,129,.15), rgba(16,185,129,.6))" }} />
-          <span>+10%</span>
+      {/* ── Legend + market status — one line, always visible ── */}
+      <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
+      <div className="flex items-center justify-between" style={{ fontSize: 10, color: "var(--ab-faint)", marginBottom: 10, gap: 8 }}>
+        {/* Legend — hide extra text on mobile */}
+        <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+          <div className="flex items-center gap-1" style={{ flexShrink: 0 }}>
+            <span>−10%</span>
+            <div style={{ width: 50, height: 4, background: "linear-gradient(90deg, rgba(244,63,94,.6), rgba(244,63,94,.15), rgba(16,185,129,.15), rgba(16,185,129,.6))" }} />
+            <span>+10%</span>
+          </div>
+          <span className="hidden sm:inline" style={{ whiteSpace: "nowrap" }}>· area ∝ mkt cap · tap tile for headlines</span>
         </div>
-        <span style={{ color: "var(--ab-faint)" }}>·</span>
-        <span>area ∝ market cap</span>
-        <span style={{ color: "var(--ab-faint)" }}>·</span>
-        <span>tap tile for headlines</span>
+        {/* Market status — always visible */}
+        <div className="flex items-center gap-1" style={{ flexShrink: 0 }}>
+          <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }}>
+            {marketStatus.isOpen && (
+              <span style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: "#10B981", opacity: 0.5,
+                animation: "ping 1.5s cubic-bezier(0,0,.2,1) infinite",
+              }} />
+            )}
+            <span style={{
+              position: "relative", display: "inline-flex", width: 7, height: 7, borderRadius: "50%",
+              background: marketStatus.color === "green" ? "#10B981" : marketStatus.color === "yellow" ? "#F59E0B" : "#EF4444",
+            }} />
+          </span>
+          <span style={{ fontFamily: SANS_L, fontSize: 10, fontWeight: 600, color: "var(--ab-fg)", whiteSpace: "nowrap" }}>
+            {marketStatus.label}
+          </span>
+          <span style={{ whiteSpace: "nowrap" }}>· {marketStatus.reason}</span>
+        </div>
       </div>
 
       {/* ── Map ── */}
