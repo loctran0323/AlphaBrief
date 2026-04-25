@@ -67,6 +67,7 @@ export default async function DashboardPage() {
       {/* ── Byline bar ── */}
       <LedgerByline
         left={`Compiled by AlphaBrief AI · ${news.length} headlines · ${upcomingCount} events · confidence moderate`}
+        leftMobile={`${news.length} headlines · ${upcomingCount} events`}
         right={
           <Link href="/dashboard/archive" style={{
             fontSize: 11, border: "1px solid var(--ab-border)",

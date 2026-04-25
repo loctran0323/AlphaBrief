@@ -133,7 +133,7 @@ export default async function SplashPage() {
           }}>
             An AI-written daily briefing, a clickable market map, and a feed that flags bullish or bearish in one glance. Your alpha, briefly.
           </p>
-          <div className="flex items-center gap-3" style={{ marginTop: 26 }}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3" style={{ marginTop: 26 }}>
             {configured ? (
               signedIn ? (
                 <Link href="/home" style={{
@@ -145,11 +145,12 @@ export default async function SplashPage() {
                   <Link href="/signup" style={{
                     padding: "12px 22px", background: "var(--ab-fg)", color: "var(--ab-bg)",
                     fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                    whiteSpace: "nowrap",
                   }}>Start for free →</Link>
                   <Link href="#pricing" style={{
                     padding: "12px 22px", border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
                     fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
-                    background: "transparent",
+                    background: "transparent", whiteSpace: "nowrap",
                   }}>Compare plans</Link>
                 </>
               )
@@ -164,12 +165,21 @@ export default async function SplashPage() {
         </div>
 
         {/* Live tape */}
-        <div className="flex items-center gap-5 overflow-hidden" style={{
+        <div className="flex items-center gap-5" style={{
           fontFamily: SANS_L, fontSize: 12, color: "var(--ab-muted)",
           padding: "12px 0", borderBottom: "1px solid var(--ab-border)",
+          overflow: "hidden",
         }}>
+          {/* Mobile: 3 tickers only, no cutoff */}
+          {[["S&P 500","+0.09%",true],["QQQ","+0.07%",true],["NVDA","−0.06%",false]].map(([s,p,up], i) => (
+            <span key={i} className="sm:hidden" style={{ whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+              <span>{s as string}</span>{" "}
+              <span style={{ color: (up as boolean) ? "var(--ab-up)" : "var(--ab-down)", fontWeight: 600 }}>{p as string}</span>
+            </span>
+          ))}
+          {/* Desktop: all tickers */}
           {[["S&P 500","+0.09%",true],["QQQ","+0.07%",true],["NVDA","−0.06%",false],["AAPL","+0.18%",true],["TSLA","−2.59%",false],["MSFT","−2.44%",false],["META","−0.87%",false],["URI","+20.82%",true]].map(([s,p,up], i) => (
-            <span key={i} style={{ whiteSpace: "nowrap" as const }}>
+            <span key={i} className="hidden sm:inline" style={{ whiteSpace: "nowrap" as const }}>
               <span>{s as string}</span>{" "}
               <span style={{ color: (up as boolean) ? "var(--ab-up)" : "var(--ab-down)", fontWeight: 600 }}>{p as string}</span>
             </span>
@@ -205,64 +215,64 @@ export default async function SplashPage() {
             <span style={{ marginLeft: "auto", fontFamily: "ui-monospace, Menlo, monospace" }}>alphabrief.ai/dashboard</span>
           </div>
           {/* Dashboard content */}
-          <div style={{ padding: 24 }}>
+          <div className="ab-preview-card" style={{ padding: 24 }}>
 
-            {/* ① AI market summary — drop-cap lede */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{
-                fontSize: 10, letterSpacing: ".22em", color: ACCENT,
-                fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 12,
-                fontFamily: SANS_L,
-              }}>AI market summary</div>
-              <div style={{ fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.6, color: "var(--ab-fg)" }}>
-                <p style={{ marginBottom: 10, overflow: "hidden" }}>
-                  <span style={{
-                    float: "left", fontFamily: SERIF_L,
-                    fontSize: 46, lineHeight: 0.9, paddingTop: 4, paddingRight: 8,
-                    color: ACCENT, fontWeight: 700,
-                  }}>E</span>
-                  quities closed mixed as tech pulled back from recent highs, with the Nasdaq shedding 0.4% while energy and financials led the advance across the tape.
-                </p>
-                <p style={{ color: "var(--ab-muted)", margin: 0, fontSize: 14 }}>
-                  Options flow suggests institutional accumulation in beaten-down names. The Fed&apos;s next meeting looms as the primary near-term catalyst — consensus leans toward a hold.
-                </p>
-              </div>
-            </div>
+            {/* ① + ② side by side */}
+            <div className="grid grid-cols-2" style={{ gap: 16, marginBottom: 20 }}>
 
-            <div style={{ borderTop: "1px solid var(--ab-border)", margin: "20px 0" }} />
-
-            {/* ② Upcoming catalysts — 140 px day-column row */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{
-                fontSize: 10, letterSpacing: ".22em", color: ACCENT,
-                fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 10,
-                fontFamily: SANS_L,
-              }}>Upcoming catalysts</div>
-              <div style={{ display: "flex", alignItems: "flex-start", paddingTop: 10, paddingBottom: 10, borderBottom: "1px solid var(--ab-border)" }}>
-                {/* Left — 140 px date column */}
-                <div style={{ width: 140, flexShrink: 0, borderRight: "1px solid var(--ab-border)", paddingRight: 16 }}>
-                  <div style={{ fontFamily: SERIF_L, fontSize: 22, fontWeight: 600, lineHeight: 1, color: "var(--ab-fg)" }}>28</div>
-                  <div style={{ fontFamily: SANS_L, fontSize: 10, color: "var(--ab-faint)", marginTop: 3, letterSpacing: ".04em" }}>Apr · 8:30 AM</div>
-                </div>
-                {/* Right — event body */}
-                <div style={{ flex: 1, paddingLeft: 16 }}>
-                  <div style={{ fontFamily: SERIF_L, fontSize: 14, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 3 }}>
-                    Q1 GDP Advance Estimate
-                  </div>
-                  <div style={{ fontFamily: SERIF_L, fontSize: 13, color: "var(--ab-muted)", lineHeight: 1.4 }}>
-                    Bureau of Economic Analysis — first read on Q1 growth. Street consensus 1.8%.
-                  </div>
-                </div>
-                {/* Badge */}
-                <div style={{ flexShrink: 0, paddingLeft: 16, alignSelf: "center" }}>
-                  <span style={{
-                    fontSize: 9, letterSpacing: ".12em", fontWeight: 700,
-                    textTransform: "uppercase" as const,
-                    color: ACCENT, border: `1px solid ${ACCENT}`, padding: "2px 6px",
-                    fontFamily: SANS_L,
-                  }}>ECON</span>
+              {/* ① AI market summary — drop-cap lede */}
+              <div>
+                <div style={{
+                  fontSize: 10, letterSpacing: ".22em", color: ACCENT,
+                  fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 12,
+                  fontFamily: SANS_L,
+                }}>AI summary</div>
+                <div className="ab-preview-body" style={{ fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.6, color: "var(--ab-fg)" }}>
+                  <p style={{ marginBottom: 10, overflow: "hidden" }}>
+                    <span className="ab-preview-drop" style={{
+                      float: "left", fontFamily: SERIF_L,
+                      fontSize: 46, lineHeight: 0.9, paddingTop: 4, paddingRight: 8,
+                      color: ACCENT, fontWeight: 700,
+                    }}>E</span>
+                    quities closed mixed as tech pulled back, with the Nasdaq shedding 0.4% while energy led the advance.
+                  </p>
+                  <p className="hidden sm:block" style={{ color: "var(--ab-muted)", margin: 0, fontSize: 14 }}>
+                    Options flow suggests institutional accumulation. The Fed&apos;s next meeting looms as the primary catalyst.
+                  </p>
                 </div>
               </div>
+
+              {/* ② Upcoming catalysts */}
+              <div>
+                <div style={{
+                  fontSize: 10, letterSpacing: ".22em", color: ACCENT,
+                  fontWeight: 700, textTransform: "uppercase" as const, marginBottom: 10,
+                  fontFamily: SANS_L,
+                }}>Catalysts</div>
+                <div style={{ display: "flex", alignItems: "flex-start", paddingTop: 8, paddingBottom: 8, borderBottom: "1px solid var(--ab-border)" }}>
+                  {/* Date column */}
+                  <div className="ab-preview-cal-col" style={{ width: 80, flexShrink: 0, borderRight: "1px solid var(--ab-border)", paddingRight: 12 }}>
+                    <div className="ab-preview-cal-num" style={{ fontFamily: SERIF_L, fontSize: 22, fontWeight: 600, lineHeight: 1, color: "var(--ab-fg)" }}>28</div>
+                    <div style={{ fontFamily: SANS_L, fontSize: 9, color: "var(--ab-faint)", marginTop: 2 }}>Apr · 8:30 AM</div>
+                  </div>
+                  {/* Event body */}
+                  <div style={{ flex: 1, paddingLeft: 10 }}>
+                    <div className="ab-preview-title" style={{ fontFamily: SERIF_L, fontSize: 14, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 3 }}>
+                      Q1 GDP Estimate
+                    </div>
+                    <div className="ab-preview-body hidden sm:block" style={{ fontFamily: SERIF_L, fontSize: 13, color: "var(--ab-muted)", lineHeight: 1.4 }}>
+                      Street consensus 1.8% growth.
+                    </div>
+                    <span style={{
+                      fontSize: 9, letterSpacing: ".12em", fontWeight: 700,
+                      textTransform: "uppercase" as const,
+                      color: ACCENT, border: `1px solid ${ACCENT}`, padding: "2px 5px",
+                      fontFamily: SANS_L, marginTop: 4, display: "inline-block",
+                    }}>ECON</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div style={{ borderTop: "1px solid var(--ab-border)", margin: "0 0 20px" }} />
@@ -332,18 +342,18 @@ export default async function SplashPage() {
           }}>
             Everything you need to stay ahead of the market — with more on the way.
           </p>
-          <div className="grid ab-features-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", gap: "32px 40px", marginTop: 32 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: "24px 20px", marginTop: 32 }}>
             {features.map(({ num, title, body }) => (
               <div key={title} style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 14 }}>
                 <div style={{
-                  fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15,
+                  fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13,
                   color: ACCENT, fontWeight: 600, marginBottom: 4,
                 }}>{num}</div>
-                <div style={{
-                  fontFamily: SERIF_L, fontSize: 20, fontWeight: 600,
-                  marginBottom: 6, color: "var(--ab-fg)",
+                <div className="text-sm sm:text-xl" style={{
+                  fontFamily: SERIF_L, fontWeight: 600,
+                  marginBottom: 4, color: "var(--ab-fg)",
                 }}>{title}</div>
-                <p style={{
+                <p className="hidden sm:block" style={{
                   fontFamily: SERIF_L, fontSize: 14,
                   color: "var(--ab-muted)", lineHeight: 1.55, margin: 0,
                 }}>{body}</p>
@@ -360,17 +370,67 @@ export default async function SplashPage() {
             fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
             color: ACCENT, fontWeight: 700, marginBottom: 10, textAlign: "center",
           }}>Beta pricing</div>
-          <h2 style={{
-            fontFamily: SERIF_L, fontSize: 44, fontWeight: 600,
+          <h2 className="text-2xl sm:text-5xl" style={{
+            fontFamily: SERIF_L, fontWeight: 600,
             letterSpacing: "-.02em", textAlign: "center", margin: 0,
           }}>Compare our plans</h2>
-          <p style={{
+          <p className="hidden sm:block" style={{
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
             color: "var(--ab-muted)", marginTop: 8, textAlign: "center",
           }}>
             Start free. Upgrade when you want more. Beta prices are locked in for early supporters.
           </p>
-          <div className="grid ab-pricing-grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
+          {/* ── Mobile: comparison table ── */}
+          <div className="sm:hidden" style={{ marginTop: 20 }}>
+            {/* Plan headers */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: `2px solid var(--ab-fg)` }}>
+              <div />
+              <div style={{ textAlign: "center", padding: "10px 4px", borderRight: "1px solid var(--ab-border)" }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: "var(--ab-faint)", letterSpacing: ".16em", textTransform: "uppercase" }}>FREE</div>
+                <div style={{ fontFamily: SERIF_L, fontSize: 34, fontWeight: 600, lineHeight: 1, marginTop: 4 }}>$0</div>
+                <div style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 11, color: "var(--ab-muted)" }}>/mo</div>
+              </div>
+              <div style={{ textAlign: "center", padding: "10px 4px", background: "var(--ab-surface-hi)" }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT, letterSpacing: ".16em", textTransform: "uppercase" }}>PRO</div>
+                <div style={{ fontFamily: SERIF_L, fontSize: 34, fontWeight: 600, lineHeight: 1, marginTop: 4, color: "var(--ab-fg)" }}>$9</div>
+                <div style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 11, color: "var(--ab-muted)" }}>/mo</div>
+              </div>
+            </div>
+            {/* Feature rows */}
+            {planRows.map((row, i) => (
+              <div key={row.label} style={{
+                display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+                borderBottom: "1px solid var(--ab-border)",
+              }}>
+                <div style={{ fontFamily: SERIF_L, fontSize: 11, padding: "7px 6px 7px 0", color: "var(--ab-muted)", lineHeight: 1.3 }}>{row.label}</div>
+                <div style={{ textAlign: "center", padding: "7px 4px", borderRight: "1px solid var(--ab-border)", fontSize: 12, fontWeight: 700,
+                  color: row.free === false ? "var(--ab-faint)" : ACCENT }}>
+                  {row.free === false ? "—" : typeof row.free === "string" ? <span style={{ fontSize: 10 }}>{row.free}</span> : "✓"}
+                </div>
+                <div style={{ textAlign: "center", padding: "7px 4px", fontSize: 12, fontWeight: 700,
+                  color: ACCENT, background: "rgba(108,92,231,.04)" }}>
+                  {typeof row.pro === "string" ? <span style={{ fontSize: 10 }}>{row.pro}</span> : "✓"}
+                </div>
+              </div>
+            ))}
+            {/* CTAs */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 16 }}>
+              <Link href="/signup" style={{
+                display: "block", padding: "11px 6px", textAlign: "center",
+                border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
+                background: "transparent", fontSize: 11, fontWeight: 600,
+                letterSpacing: ".06em", textTransform: "uppercase",
+              }}>Get started</Link>
+              <Link href="/signup?next=/dashboard/upgrade" style={{
+                display: "block", padding: "11px 6px", textAlign: "center",
+                background: ACCENT, color: "#fff",
+                fontSize: 11, fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase",
+              }}>Start with Pro</Link>
+            </div>
+          </div>
+
+          {/* ── Desktop: side-by-side cards ── */}
+          <div className="hidden sm:grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
             {/* Free */}
             <div style={{ border: "1px solid var(--ab-border)", padding: "28px 30px", background: "var(--ab-card)", position: "relative" }}>
               <div style={{ fontSize: 11, letterSpacing: ".22em", fontWeight: 700, color: "var(--ab-faint)", textTransform: "uppercase" }}>FREE</div>
@@ -401,10 +461,7 @@ export default async function SplashPage() {
               }}>Get started free</Link>
             </div>
             {/* Pro */}
-            <div style={{
-              border: `2px solid ${ACCENT}`, padding: "28px 30px",
-              background: "var(--ab-surface-hi)", position: "relative",
-            }}>
+            <div style={{ border: `2px solid ${ACCENT}`, padding: "28px 30px", background: "var(--ab-surface-hi)", position: "relative" }}>
               <span style={{
                 position: "absolute", top: 18, right: 18,
                 fontSize: 10, background: ACCENT, color: "#fff",

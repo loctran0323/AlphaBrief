@@ -171,6 +171,7 @@ export function NewsBriefing({
 }) {
   const [tab, setTab] = useState<Tab>("all");
   const [page, setPage] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const watchlistSet = useMemo(
     () => new Set(watchlistTickers.map((t) => t.toUpperCase())),
@@ -197,23 +198,22 @@ export function NewsBriefing({
 
   const tabIds: Tab[] = ["all", "tickers", ...CATEGORIES];
 
+  const getTabLabel = (id: Tab) =>
+    id === "all" ? "All" : id === "tickers" ? "Tickers" : categoryLabel[id as Category];
+  const getTabCount = (id: Tab) =>
+    id === "all" ? articles.length
+    : id === "tickers"
+      ? articles.filter((a) => a.matchedTicker && watchlistSet.has(a.matchedTicker.toUpperCase())).length
+    : articles.filter((a) => a.category === id).length;
+
   return (
     <div>
-      {/* Category tabs — serif text with accent underline on active */}
-      <div style={{
-        display: "flex", flexWrap: "wrap", gap: "0 24px", marginBottom: 16,
+      {/* ── Desktop: full tab row ── */}
+      <div className="hidden sm:flex" style={{
+        flexWrap: "wrap", gap: "0 24px", marginBottom: 16,
         fontFamily: SERIF_L, fontSize: 14,
       }}>
         {tabIds.map((id) => {
-          const label =
-            id === "all" ? "All"
-            : id === "tickers" ? "Tickers"
-            : categoryLabel[id as Category];
-          const count =
-            id === "all" ? articles.length
-            : id === "tickers"
-              ? articles.filter((a) => a.matchedTicker && watchlistSet.has(a.matchedTicker.toUpperCase())).length
-            : articles.filter((a) => a.category === id).length;
           const active = tab === id;
           return (
             <button
@@ -228,10 +228,61 @@ export function NewsBriefing({
                 borderBottom: active ? `2px solid ${ACCENT}` : "2px solid transparent",
               }}
             >
-              {label} <span style={{ color: "var(--ab-faint)" }}>({count})</span>
+              {getTabLabel(id)} <span style={{ color: "var(--ab-faint)" }}>({getTabCount(id)})</span>
             </button>
           );
         })}
+      </div>
+
+      {/* ── Mobile: active tab + dropdown ── */}
+      <div className="sm:hidden" style={{ position: "relative", marginBottom: 16 }}>
+        <button
+          type="button"
+          onClick={() => setDropdownOpen((o) => !o)}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            background: "none", border: "none", cursor: "pointer", padding: "0 0 2px",
+            fontFamily: SERIF_L, fontSize: 14,
+            color: "var(--ab-fg)", fontWeight: 600,
+            borderBottom: `2px solid ${ACCENT}`,
+          }}
+        >
+          {getTabLabel(tab)}{" "}
+          <span style={{ color: "var(--ab-faint)" }}>({getTabCount(tab)})</span>
+          <span style={{ fontSize: 9, marginLeft: 2, color: "var(--ab-muted)" }}>
+            {dropdownOpen ? "▲" : "▼"}
+          </span>
+        </button>
+        {dropdownOpen && (
+          <div style={{
+            position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+            background: "var(--ab-bg)", border: "1px solid var(--ab-border)",
+            boxShadow: "0 6px 20px rgba(0,0,0,.12)",
+            minWidth: 180, padding: "4px 0",
+          }}>
+            {tabIds.map((id) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setTab(id); setDropdownOpen(false); }}
+                  style={{
+                    display: "block", width: "100%", textAlign: "left",
+                    padding: "9px 16px", fontFamily: SERIF_L, fontSize: 14,
+                    color: active ? ACCENT : "var(--ab-fg)",
+                    fontWeight: active ? 600 : 400,
+                    background: "none", border: "none", cursor: "pointer",
+                    borderLeft: active ? `3px solid ${ACCENT}` : "3px solid transparent",
+                  }}
+                >
+                  {getTabLabel(id)}{" "}
+                  <span style={{ color: "var(--ab-faint)" }}>({getTabCount(id)})</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {dataFetchedAt && (

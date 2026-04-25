@@ -24,7 +24,13 @@ export function LedgerMasthead({
 }) {
   return (
     <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 20, marginBottom: 28 }}>
-      <div style={{
+      {/* Mobile eyebrow — tighter spacing so it stays on one line */}
+      <div className="sm:hidden" style={{
+        fontFamily: SANS_L, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase",
+        color: ACCENT, fontWeight: 700, marginBottom: 10, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+      }}>{eyebrow}</div>
+      {/* Desktop eyebrow */}
+      <div className="hidden sm:block" style={{
         fontFamily: SANS_L, fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
         color: ACCENT, fontWeight: 700, marginBottom: 10,
       }}>{eyebrow}</div>
@@ -44,9 +50,11 @@ export function LedgerMasthead({
 /** Italic byline bar below masthead */
 export function LedgerByline({
   left,
+  leftMobile,
   right,
 }: {
   left: React.ReactNode;
+  leftMobile?: React.ReactNode;
   right?: React.ReactNode;
 }) {
   return (
@@ -54,7 +62,14 @@ export function LedgerByline({
       borderBottom: "1px solid var(--ab-border)", paddingBottom: 10, marginBottom: 24,
       fontSize: 12, color: "var(--ab-muted)",
     }}>
-      <div style={{ fontFamily: SERIF_L, fontStyle: "italic" }}>{left}</div>
+      {/* Mobile: shorter text, single line */}
+      <div className="sm:hidden" style={{
+        fontFamily: SERIF_L, fontStyle: "italic", fontSize: 11,
+        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+        minWidth: 0, flex: 1,
+      }}>{leftMobile ?? left}</div>
+      {/* Desktop: full text */}
+      <div className="hidden sm:block" style={{ fontFamily: SERIF_L, fontStyle: "italic" }}>{left}</div>
       {right && <div className="flex items-center gap-3">{right}</div>}
     </div>
   );
@@ -78,7 +93,7 @@ export function LedgerRuleLabel({
       <span style={{ whiteSpace: "nowrap" }}>{children}</span>
       <span style={{ flex: 1, height: 1, background: "var(--ab-border)" }} />
       {right && (
-        <span style={{ letterSpacing: ".1em", color: "var(--ab-muted)", whiteSpace: "nowrap" }}>
+        <span className="hidden sm:inline" style={{ letterSpacing: ".1em", color: "var(--ab-muted)", whiteSpace: "nowrap" }}>
           {right}
         </span>
       )}

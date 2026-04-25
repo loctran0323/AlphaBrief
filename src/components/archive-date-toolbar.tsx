@@ -71,9 +71,12 @@ export function ArchiveDateToolbar({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 8 }}>
-      <div className="grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 32 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 0 }}>
         {sections.map((sec, si) => (
-          <div key={sec.label} style={si === 1 ? { borderLeft: "1px solid var(--ab-border)", paddingLeft: 32 } : undefined}>
+          <div
+            key={sec.label}
+            className={si === 1 ? "border-t sm:border-t-0 sm:border-l border-[var(--ab-border)] pt-6 sm:pt-0 sm:pl-8 mt-2 sm:mt-0" : ""}
+          >
             <div style={{ fontFamily: SERIF_L, fontSize: 16, fontWeight: 600, marginBottom: 10 }}>
               {sec.label}
             </div>

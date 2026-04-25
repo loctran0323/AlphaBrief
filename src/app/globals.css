@@ -185,7 +185,7 @@ body { overflow-x: hidden; }
   .ab-grid-4  { grid-template-columns: repeat(2, 1fr) !important; gap: 12px 20px !important; }
   .ab-grid-3  { grid-template-columns: 1fr !important; gap: 24px !important; }
   .ab-grid-2  { grid-template-columns: 1fr !important; gap: 24px !important; }
-  .ab-grid-preview-news { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .ab-grid-preview-news { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
 
   /* Home page movers layout — lede full-width, gainers+losers side by side */
   .ab-movers-grid    { grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; }
@@ -208,11 +208,22 @@ body { overflow-x: hidden; }
   /* Ledger masthead font size */
   .ab-masthead-h1    { font-size: clamp(28px, 8vw, 46px) !important; }
 
-  /* Features grid — 1 col on mobile */
-  .ab-features-grid  { grid-template-columns: 1fr !important; gap: 20px 0 !important; }
+  /* Features grid — 2 col on mobile */
+  .ab-features-grid  { grid-template-columns: 1fr 1fr !important; gap: 16px 14px !important; }
 
-  /* Pricing grid — stack */
-  .ab-pricing-grid   { grid-template-columns: 1fr !important; }
+  /* Pricing grid — side by side on mobile */
+  .ab-pricing-grid   { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .ab-price-card     { padding: 14px 12px !important; }
+  .ab-price-num      { font-size: 36px !important; }
+
+  /* Preview inner — AI summary + catalysts side by side */
+  .ab-preview-inner  { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
+  .ab-preview-card   { padding: 12px !important; }
+  .ab-preview-drop   { font-size: 32px !important; }
+  .ab-preview-body   { font-size: 12px !important; line-height: 1.5 !important; }
+  .ab-preview-cal-col { width: 52px !important; padding-right: 8px !important; }
+  .ab-preview-cal-num { font-size: 16px !important; }
+  .ab-preview-title  { font-size: 13px !important; }
 
   /* Kicker 4-col → 2-col */
   .ab-kicker-grid    { grid-template-columns: repeat(2, 1fr) !important; }

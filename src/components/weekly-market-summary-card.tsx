@@ -43,8 +43,8 @@ export function WeeklyMarketSummaryCard({
   return (
     <div style={{ fontFamily: SERIF_L, color: "var(--ab-fg)" }}>
       {/* Headline */}
-      <h2 style={{
-        fontFamily: SERIF_L, fontSize: 28, fontWeight: 600,
+      <h2 className="text-xl sm:text-3xl" style={{
+        fontFamily: SERIF_L, fontWeight: 600,
         letterSpacing: "-.02em", lineHeight: 1.15, marginBottom: 12,
       }}>
         {headline}
@@ -57,11 +57,11 @@ export function WeeklyMarketSummaryCard({
       )}
 
       {/* 2-col: lede | pull-quote */}
-      <div className="grid" style={{ gridTemplateColumns: "1.4fr 1fr", gap: 40 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 40 }}>
         {/* Left — drop-cap lede */}
-        <div style={{ fontSize: 16, lineHeight: 1.7 }}>
+        <div className="ab-lede-prose" style={{ fontSize: 16, lineHeight: 1.7 }}>
           <p style={{ marginBottom: 12 }}>
-            <span style={{
+            <span className="ab-drop-cap" style={{
               float: "left", fontFamily: SERIF_L,
               fontSize: 52, lineHeight: 0.9, paddingTop: 4, paddingRight: 8,
               color: ACCENT, fontWeight: 700,
@@ -75,9 +75,9 @@ export function WeeklyMarketSummaryCard({
           ))}
         </div>
 
-        {/* Right — pull-quote */}
+        {/* Right — pull-quote (hidden on mobile) */}
         {pullQuote && (
-          <div style={{
+          <div className="hidden sm:block" style={{
             borderLeft: `3px solid ${ACCENT}`,
             padding: "4px 0 4px 18px",
             fontStyle: "italic", fontSize: 18, lineHeight: 1.35,

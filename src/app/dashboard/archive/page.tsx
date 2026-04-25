@@ -122,6 +122,7 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
       {/* ── Byline bar ── */}
       <LedgerByline
         left={`Compiled by AlphaBrief AI · ${pastEvents.length} past events · ${archivedNews.length} archived headlines`}
+        leftMobile={`${pastEvents.length} past events · ${archivedNews.length} archived headlines`}
         right={
           <Link href="/dashboard" style={{
             fontSize: 11, border: "1px solid var(--ab-border)",
