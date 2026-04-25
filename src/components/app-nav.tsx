@@ -340,9 +340,13 @@ export function AppNav({
             </nav>
           )}
 
-          {/* Controls — always visible on all screen sizes */}
+          {/* Controls — ThemeToggle always visible; UserMenu hidden on mobile (sidebar handles it) */}
           <ThemeToggle />
-          {signedIn && <UserMenu email={email} tier={tier} />}
+          {signedIn && (
+            <div className="hidden sm:block">
+              <UserMenu email={email} tier={tier} />
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -132,18 +132,18 @@ export default async function HomePage() {
         </>
       )}
 
-      {/* ── Movers of the day — 3-column editorial ── */}
+      {/* ── Movers of the day — mobile: lede full-width then 2-col; desktop: 3-col ── */}
       <LedgerRuleLabel>Movers of the day</LedgerRuleLabel>
-      <div className="grid ab-movers-grid" style={{ gridTemplateColumns: "1.2fr 1fr 1fr", gap: 32 }}>
-        {/* Editorial lede */}
-        <div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-8">
+        {/* Editorial lede — spans both cols on mobile, 1 col on desktop */}
+        <div className="col-span-2 sm:col-span-1">
           <div style={{ fontFamily: SERIF_L, fontSize: 14, fontStyle: "italic", color: "var(--ab-muted)", marginBottom: 6 }}>
             The leaders
           </div>
-          <h3 style={{ fontFamily: SERIF_L, fontSize: 24, fontWeight: 600, lineHeight: 1.15, letterSpacing: "-.01em", marginBottom: 14, color: "var(--ab-fg)" }}>
+          <h3 style={{ fontFamily: SERIF_L, fontSize: 22, fontWeight: 600, lineHeight: 1.15, letterSpacing: "-.01em", marginBottom: 14, color: "var(--ab-fg)" }}>
             {ledeTitle}
           </h3>
-          <p style={{ fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.55, color: "var(--ab-muted)", margin: 0 }}>
+          <p className="hidden sm:block" style={{ fontFamily: SERIF_L, fontSize: 15, lineHeight: 1.55, color: "var(--ab-muted)", margin: 0 }}>
             {ledeDek}
           </p>
           {topGainer && (
@@ -156,8 +156,8 @@ export default async function HomePage() {
         <MoverColClient label="Losers"  rows={data.losers.slice(0, 6)} />
       </div>
 
-      {/* ── Most active + Largest cap ── */}
-      <div className="grid ab-movers-2col" style={{ gridTemplateColumns: "1fr 1fr", gap: 32, marginTop: 28 }}>
+      {/* ── Most active + Largest cap — 2-col on both mobile and desktop ── */}
+      <div className="grid grid-cols-2 gap-5 sm:gap-8" style={{ marginTop: 28 }}>
         <MoverColClient label="Most active" rows={data.mostActives.slice(0, 6)} />
         <MoverColClient label="Largest cap" rows={data.largestByCap.slice(0, 6)} />
       </div>

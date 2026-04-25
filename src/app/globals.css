@@ -187,9 +187,11 @@ body { overflow-x: hidden; }
   .ab-grid-2  { grid-template-columns: 1fr !important; gap: 24px !important; }
   .ab-grid-preview-news { grid-template-columns: 1fr !important; gap: 10px !important; }
 
-  /* Home page movers layout */
-  .ab-movers-grid    { grid-template-columns: 1fr !important; gap: 32px !important; }
-  .ab-movers-2col    { grid-template-columns: 1fr !important; gap: 32px !important; }
+  /* Home page movers layout — lede full-width, gainers+losers side by side */
+  .ab-movers-grid    { grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; }
+  .ab-movers-lede    { grid-column: 1 / -1 !important; }
+  /* Most active + largest cap — stay 2-col on mobile, just smaller */
+  .ab-movers-2col    { grid-template-columns: repeat(2, 1fr) !important; gap: 20px !important; }
 
   /* Watchlist 9-col → 3-col */
   .ab-watchlist-grid { grid-template-columns: repeat(3, 1fr) !important; }
@@ -217,4 +219,10 @@ body { overflow-x: hidden; }
 
   /* Prevent text overflow on nowrap elements */
   .ab-dek-nowrap     { white-space: normal !important; font-size: 15px !important; }
+
+  /* AI market summary lede — compact on mobile */
+  .ab-lede-grid      { grid-template-columns: 1fr !important; gap: 20px !important; }
+  .ab-lede-right     { display: none !important; }
+  .ab-drop-cap       { font-size: 36px !important; }
+  .ab-lede-prose     { font-size: 14px !important; line-height: 1.6 !important; }
 }

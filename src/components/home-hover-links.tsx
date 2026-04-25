@@ -103,7 +103,7 @@ export function MoverRow({ r }: { r: MarketMover }) {
         }}>
           {r.symbol}
         </div>
-        <div style={{ fontSize: 11, color: "var(--ab-muted)", marginTop: 1, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: SANS_L }}>
+        <div style={{ fontSize: 11, color: "var(--ab-muted)", marginTop: 1, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: SANS_L }}>
           {r.name}
         </div>
       </div>

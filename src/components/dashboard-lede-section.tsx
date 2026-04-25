@@ -33,11 +33,11 @@ function DashboardLedeContent({ summary }: { summary: string }) {
   const afterDrop = ledeFirst.slice(1);
 
   return (
-    <div className="grid" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 40, marginBottom: 8 }}>
+    <div className="grid ab-lede-grid" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 40, marginBottom: 8 }}>
       {/* Left — lede prose */}
-      <div style={{ fontFamily: SERIF_L, fontSize: 16, lineHeight: 1.7, color: "var(--ab-fg)" }}>
+      <div className="ab-lede-prose" style={{ fontFamily: SERIF_L, fontSize: 16, lineHeight: 1.7, color: "var(--ab-fg)" }}>
         <p style={{ marginBottom: 14 }}>
-          <span style={{
+          <span className="ab-drop-cap" style={{
             float: "left", fontFamily: SERIF_L,
             fontSize: 52, lineHeight: 0.9, paddingTop: 4, paddingRight: 8,
             color: ACCENT, fontWeight: 700,
@@ -51,8 +51,8 @@ function DashboardLedeContent({ summary }: { summary: string }) {
         ))}
       </div>
 
-      {/* Right — pull-quote + key points */}
-      <div>
+      {/* Right — pull-quote + key points (hidden on mobile) */}
+      <div className="ab-lede-right">
         {pullQuote && (
           <div style={{
             borderLeft: `3px solid ${ACCENT}`,
@@ -109,7 +109,7 @@ function DashboardLedeUnavailable() {
 
 function DashboardLedeSkeleton() {
   return (
-    <div className="grid" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 40, marginBottom: 8 }}>
+    <div className="grid ab-lede-grid" style={{ gridTemplateColumns: "1.6fr 1fr", gap: 40, marginBottom: 8 }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {[1, 0.9, 0.95, 0.85, 1, 0.92, 0.88, 0.75].map((w, i) => (
           <div key={i} style={{
