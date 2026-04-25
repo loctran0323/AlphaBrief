@@ -11,7 +11,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     return (
       <div className="min-h-screen">
         <AppNav signedIn={false} />
-        <div className="ab-dash-pad" style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
+        <div className="px-4 sm:px-10" style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 36, paddingBottom: 60 }}>{children}</div>
       </div>
     );
   }
@@ -45,7 +45,7 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-screen">
       <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-      <div className="ab-dash-pad" style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>{children}</div>
+      <div className="px-4 sm:px-10" style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 36, paddingBottom: 60 }}>{children}</div>
     </div>
   );
 }

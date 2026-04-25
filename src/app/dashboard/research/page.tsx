@@ -33,18 +33,18 @@ export default async function ResearchPage() {
   }
 
   return (
-    <div style={{ maxWidth: 920, margin: "0 auto", padding: "80px 0 60px", textAlign: "center", fontFamily: SANS_L }}>
+    <div className="px-0 sm:px-0 pt-10 sm:pt-20" style={{ maxWidth: 920, margin: "0 auto", paddingBottom: 60, textAlign: "center", fontFamily: SANS_L }}>
       {/* Eyebrow */}
       <div style={{ fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase", color: ACCENT, fontWeight: 700, marginBottom: 14 }}>
         Research · The desk
       </div>
 
       {/* Hero headline */}
-      <h1 style={{ fontFamily: SERIF_L, fontSize: 60, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, margin: "0 0 14px" }}>
+      <h1 className="text-4xl sm:text-6xl" style={{ fontFamily: SERIF_L, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, margin: "0 0 14px" }}>
         Look up any ticker.
       </h1>
-      <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 18, color: "var(--ab-muted)", margin: "0 auto", whiteSpace: "nowrap" }}>
-        Price, chart, valuation, and AI-summarized headlines — one page, one search.
+      <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 18, color: "var(--ab-muted)", margin: "0 auto" }}>
+        Price, chart, valuation, and AI-summarized headlines.
       </p>
 
       {/* Underline-only search */}
