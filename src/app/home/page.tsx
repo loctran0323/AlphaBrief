@@ -118,7 +118,9 @@ export default async function HomePage() {
                 background: marketStatus.color === "green" ? "#10B981" : marketStatus.color === "yellow" ? "#F59E0B" : "#EF4444",
               }} />
             </span>
-            <span style={{ fontWeight: 600, color: "var(--ab-fg)" }}>{marketStatus.label}</span>
+            <span style={{ fontWeight: 600, color: "var(--ab-fg)" }}>
+              {marketStatus.label === "Closed" ? "Markets closed" : marketStatus.label === "Open" ? "Markets open" : marketStatus.label}
+            </span>
             <span>· {marketStatus.reason} · as of {timeStr}</span>
           </span>
         }
