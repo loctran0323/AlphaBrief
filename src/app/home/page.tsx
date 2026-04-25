@@ -104,27 +104,26 @@ export default async function HomePage() {
         dek="Indices, ETFs, top movers, and your watchlist — the full picture in one view."
       />
 
-      {/* ── Byline with market status ── */}
+      {/* ── Market status byline ── */}
       <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
-      <LedgerByline
-        left={
-          <span className="flex items-center gap-2">
-            <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }}>
-              {marketStatus.isOpen && (
-                <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#10B981", opacity: 0.5, animation: "ping 1.5s cubic-bezier(0,0,.2,1) infinite" }} />
-              )}
-              <span style={{
-                position: "relative", display: "inline-flex", width: 7, height: 7, borderRadius: "50%",
-                background: marketStatus.color === "green" ? "#10B981" : marketStatus.color === "yellow" ? "#F59E0B" : "#EF4444",
-              }} />
-            </span>
-            <span style={{ fontWeight: 600, color: "var(--ab-fg)" }}>
-              {marketStatus.label === "Closed" ? "Markets closed" : marketStatus.label === "Open" ? "Markets open" : marketStatus.label}
-            </span>
-            <span>· {marketStatus.reason} · as of {timeStr}</span>
-          </span>
-        }
-      />
+      <div className="flex items-center gap-2" style={{
+        borderBottom: "1px solid var(--ab-border)", paddingBottom: 8, marginBottom: 16,
+        fontFamily: SANS_L, fontSize: 11, color: "var(--ab-muted)",
+      }}>
+        <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }}>
+          {marketStatus.isOpen && (
+            <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#10B981", opacity: 0.5, animation: "ping 1.5s cubic-bezier(0,0,.2,1) infinite" }} />
+          )}
+          <span style={{
+            position: "relative", display: "inline-flex", width: 7, height: 7, borderRadius: "50%",
+            background: marketStatus.color === "green" ? "#10B981" : marketStatus.color === "yellow" ? "#F59E0B" : "#EF4444",
+          }} />
+        </span>
+        <span style={{ fontWeight: 600, color: "var(--ab-fg)" }}>
+          {marketStatus.label === "Closed" ? "Markets closed" : marketStatus.label === "Open" ? "Markets open" : marketStatus.label}
+        </span>
+        <span>· {marketStatus.reason} · as of {timeStr}</span>
+      </div>
 
       {/* ── Benchmarks — flat 4-column quote strip ── */}
       <LedgerRuleLabel>Benchmarks</LedgerRuleLabel>
