@@ -22,7 +22,7 @@ async function callGroq(prompt: string, maxTokens: number): Promise<string> {
     body: JSON.stringify({
       model: GROQ_MODEL,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.65,
+      temperature: 0.3,
       max_tokens: maxTokens,
     }),
     signal: AbortSignal.timeout(30_000),
@@ -104,30 +104,37 @@ export async function generateMarketSummaryText(): Promise<string> {
 
 ${sessionNote}
 
+CRITICAL RULES — FOLLOW STRICTLY:
+- Only reference events, decisions, or facts that appear in the RECENT HEADLINES below.
+- Do NOT invent, assume, or extrapolate events that are not in the headlines (e.g. do not say a Fed decision happened if it is not in the headlines).
+- Do NOT use your training data to fill gaps with plausible-sounding but unverified information.
+- If headlines are sparse, write a shorter, honest summary based only on what is there.
+- Never fabricate earnings results, rate decisions, or geopolitical outcomes.
+
 MARKET BENCHMARKS (most recent close):
 ${benchmarkText}
 
 TOP GAINERS (last session): ${gainerText}
 TOP LOSERS (last session):  ${loserText}
 
-RECENT HEADLINES (newest first):
+RECENT HEADLINES (newest first — these are the ONLY facts you may use):
 ${headlineText}
 
 Write a structured market summary using exactly these four bold section headers:
 
 **MARKET SNAPSHOT**
-One sentence on where markets stand — if open, today's direction; if closed, how the last session ended and current futures/sentiment.
+One sentence on where markets stand — if open, today's direction; if closed, how the last session ended.
 
 **WHAT'S DRIVING IT**
-2–3 bullet points on the main themes and catalysts. If after-hours or weekend, focus on geopolitical developments, macro announcements, earnings after the bell, or anything that could move markets at open. Be specific — name the event and why it matters.
+2–3 bullet points on themes and catalysts backed by the headlines above. If after-hours or weekend, focus on geopolitical developments, macro news, or earnings from the headlines. Only cite things that are actually in the headlines.
 
 **KEY MOVERS**
-2–3 bullet points on notable stocks or sectors. Include any after-hours movers, earnings reactions, or news-driven moves.
+2–3 bullet points on notable stocks or sectors from the headlines or benchmark data above.
 
 **WATCH FOR**
-1–2 bullet points on what to monitor next — upcoming economic data, Fed speakers, earnings, or geopolitical flashpoints that could set the tone for the next session.
+1–2 bullet points on upcoming events mentioned in the headlines — e.g. scheduled Fed meetings, earnings dates, economic data releases. Only mention events you can see evidence of in the headlines.
 
-Keep it tight and specific. Write clearly for a retail investor. Total length: 180–250 words.`;
+Keep it tight. Write clearly for a retail investor. Total length: 180–250 words.`;
 
   return callGroq(prompt, 600);
 }
