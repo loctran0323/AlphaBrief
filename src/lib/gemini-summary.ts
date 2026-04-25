@@ -106,10 +106,10 @@ ${sessionNote}
 
 CRITICAL RULES — FOLLOW STRICTLY:
 - Only reference events, decisions, or facts that appear in the RECENT HEADLINES below.
-- Do NOT invent, assume, or extrapolate events that are not in the headlines (e.g. do not say a Fed decision happened if it is not in the headlines).
-- Do NOT use your training data to fill gaps with plausible-sounding but unverified information.
+- For upcoming scheduled events (e.g. Fed meetings, earnings, economic data), you may reference market expectations — but always use speculative language: "expected to", "markets anticipate", "consensus expects", "widely expected". Never state a future or pending decision as if it already happened.
+- Do NOT use your training data to state outcomes as facts (e.g. never say "the Fed held rates" if the decision hasn't occurred yet — say "the Fed is expected to hold rates").
 - If headlines are sparse, write a shorter, honest summary based only on what is there.
-- Never fabricate earnings results, rate decisions, or geopolitical outcomes.
+- Never present an anticipated event as a completed one.
 
 MARKET BENCHMARKS (most recent close):
 ${benchmarkText}
