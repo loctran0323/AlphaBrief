@@ -158,6 +158,9 @@ body {
 .dark .bg-gray-900.text-white { background-color: #F1F5F9 !important; color: #111827 !important; }
 .dark .hover\:bg-gray-700:hover { background-color: #D1D5DB !important; }
 
+/* Prevent any element from causing a horizontal scrollbar on any screen */
+body { overflow-x: hidden; }
+
 /* ── Mobile responsive overrides (≤640px) ───────────────────────────────── */
 @media (max-width: 640px) {
 

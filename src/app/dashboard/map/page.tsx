@@ -82,8 +82,7 @@ export default async function MarketMapPage() {
       <LedgerMasthead
         eyebrow={`Cartography · ${timeStr}`}
         title="The map, in one glance"
-        dek="Area encodes market capitalization; tint encodes the day's move. Click any tile to pull up headlines and a brief."
-        dekStyle={{ maxWidth: "none", whiteSpace: "nowrap" }}
+        dek="Area encodes market cap; tint encodes the day's move."
       />
 
       {/* ── Byline ── */}
@@ -98,16 +97,16 @@ export default async function MarketMapPage() {
 
       {/* ── Legend ── */}
       <LedgerRuleLabel>Legend</LedgerRuleLabel>
-      <div className="flex items-center gap-6" style={{ fontSize: 11, color: "var(--ab-muted)", marginBottom: 14 }}>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4 flex-wrap" style={{ fontSize: 11, color: "var(--ab-muted)", marginBottom: 14 }}>
+        <div className="flex items-center gap-2" style={{ flexShrink: 0 }}>
           <span>−10%</span>
-          <div style={{ width: 140, height: 6, background: "linear-gradient(90deg, rgba(244,63,94,.6), rgba(244,63,94,.15), rgba(16,185,129,.15), rgba(16,185,129,.6))" }} />
+          <div style={{ width: 100, height: 6, background: "linear-gradient(90deg, rgba(244,63,94,.6), rgba(244,63,94,.15), rgba(16,185,129,.15), rgba(16,185,129,.6))" }} />
           <span>+10%</span>
         </div>
-        <span>·</span>
+        <span style={{ color: "var(--ab-faint)" }}>·</span>
         <span>area ∝ market cap</span>
-        <span>·</span>
-        <span>click tile for headlines</span>
+        <span style={{ color: "var(--ab-faint)" }}>·</span>
+        <span>tap tile for headlines</span>
       </div>
 
       {/* ── Map ── */}
@@ -120,7 +119,7 @@ export default async function MarketMapPage() {
 
       {/* ── What the map is saying — 4-col kicker ── */}
       <LedgerRuleLabel>What the map is saying</LedgerRuleLabel>
-      <div className="grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 32 }}>
+      <div className="grid ab-kicker-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", gap: 32 }}>
         {[kicker.driver, kicker.green, kicker.drag, kicker.breadth].map((item) => (
           <div key={item.label} style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 12 }}>
             <div style={{
