@@ -28,29 +28,52 @@ const sourceSerif4 = Source_Serif_4({
 });
 
 const siteDescription =
-  "AlphaBrief is a markets workspace for your watchlist, catalyst timeline, sector map, and AI-tagged news — signal first, noise last.";
+  "AlphaBrief delivers AI-written market summaries, a watchlist, upcoming catalyst calendar, sector map, and AI-tagged financial news — signal first, noise last.";
 
 export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
   applicationName: "AlphaBrief",
-  title: "AlphaBrief — watchlist, timeline & market news",
+  title: "AlphaBrief — AI Market Summaries & Financial News",
   description: siteDescription,
+  keywords: [
+    "AlphaBrief",
+    "AI market summaries",
+    "AI financial news",
+    "stock market briefing",
+    "market summary AI",
+    "stock watchlist",
+    "earnings catalyst calendar",
+    "AI market analysis",
+    "financial news aggregator",
+    "market intelligence",
+    "daily market briefing",
+    "stock market news",
+  ],
   icons: {
     icon: "/alpha-brief-icon.svg",
     shortcut: "/alpha-brief-icon.svg",
     apple: "/alpha-brief-icon.svg",
   },
   openGraph: {
-    title: "AlphaBrief — watchlist, timeline & market news",
+    title: "AlphaBrief — AI Market Summaries & Financial News",
     description: siteDescription,
     type: "website",
     siteName: "AlphaBrief",
     url: "/",
+    images: [
+      {
+        url: "/alpha-brief-og.png",
+        width: 1200,
+        height: 630,
+        alt: "AlphaBrief — AI Market Summaries & Financial News",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AlphaBrief — watchlist, timeline & market news",
+    title: "AlphaBrief — AI Market Summaries & Financial News",
     description: siteDescription,
+    images: ["/alpha-brief-og.png"],
   },
 };
 
@@ -65,16 +88,51 @@ function structuredDataJsonLd(): string {
         name: "AlphaBrief",
         url: base,
         description:
-          "Markets workspace: watchlist, catalyst timeline, sector map, and AI-tagged news.",
+          "AlphaBrief delivers AI-written market summaries, a watchlist, catalyst calendar, sector map, and AI-tagged financial news.",
         publisher: { "@id": `${base}/#organization` },
         inLanguage: "en",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${base}/explore?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
       },
       {
         "@type": "Organization",
         "@id": `${base}/#organization`,
         name: "AlphaBrief",
         url: base,
-        logo: `${base}/alpha-brief-icon.svg`,
+        logo: {
+          "@type": "ImageObject",
+          url: `${base}/alpha-brief-icon.svg`,
+        },
+        sameAs: [],
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${base}/#app`,
+        name: "AlphaBrief",
+        url: base,
+        applicationCategory: "FinanceApplication",
+        operatingSystem: "Web",
+        description:
+          "AI-written daily market summaries, watchlist tracking, upcoming earnings and catalyst calendar, interactive sector map, and AI-tagged financial news briefings.",
+        offers: [
+          {
+            "@type": "Offer",
+            name: "Free",
+            price: "0",
+            priceCurrency: "USD",
+            description: "Free tier with core market briefing features.",
+          },
+          {
+            "@type": "Offer",
+            name: "Pro",
+            price: "9",
+            priceCurrency: "USD",
+            description: "Pro tier with full archive, weekly AI recap, and priority features.",
+          },
+        ],
       },
     ],
   };

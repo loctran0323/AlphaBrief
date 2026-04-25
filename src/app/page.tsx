@@ -1,8 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SplashEditionTagline } from "@/components/splash-edition-tagline";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
+
+export const metadata: Metadata = {
+  title: "AlphaBrief — AI Market Summaries, Watchlist & Catalyst Calendar",
+  description:
+    "AlphaBrief is the AI market briefing tool built for investors. Get daily AI-written market summaries, track your watchlist, follow upcoming earnings catalysts, explore the sector map, and read AI-tagged financial news — all in one place.",
+  alternates: {
+    canonical: "https://alphabrief.net",
+  },
+};
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -340,7 +350,7 @@ export default async function SplashPage() {
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
             color: "var(--ab-muted)", marginTop: 8, maxWidth: 640, marginBottom: 0,
           }}>
-            Everything you need to stay ahead of the market — with more on the way.
+            AI market summaries, earnings catalyst tracking, sector maps, and AI-tagged financial news — everything you need to stay ahead of the market.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: "24px 20px", marginTop: 32 }}>
             {features.map(({ num, title, body }) => (
