@@ -107,8 +107,8 @@ export default async function HomePage() {
       {/* ── Market status byline ── */}
       <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
       <div className="flex items-center gap-2" style={{
-        paddingBottom: 4, marginBottom: 8,
-        marginTop: -18,
+        paddingBottom: 4, marginBottom: 4,
+        marginTop: -10,
         fontFamily: SANS_L, fontSize: 11, color: "var(--ab-muted)",
       }}>
         <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }}>
