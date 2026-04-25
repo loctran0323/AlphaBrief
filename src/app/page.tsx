@@ -121,10 +121,10 @@ export default async function SplashPage() {
                 color: "var(--ab-muted)", textDecoration: "none",
               }}>Log in</Link>
               <Link href="/signup" style={{
-                padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
-                fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
-                letterSpacing: ".08em", textTransform: "uppercase",
-              }}>Sign up free</Link>
+                padding: "6px 10px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+                fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
+                letterSpacing: ".06em", textTransform: "uppercase", whiteSpace: "nowrap",
+              }}>Sign up</Link>
             </>
           )}
         </div>
