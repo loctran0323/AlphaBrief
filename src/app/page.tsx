@@ -114,11 +114,18 @@ export default async function SplashPage() {
             }}>Open app</Link>
           )}
           {configured && !signedIn && (
-            <Link href="/signup" style={{
-              padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
-              fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
-              letterSpacing: ".08em", textTransform: "uppercase",
-            }}>Sign up free</Link>
+            <>
+              {/* Log in — mobile only (desktop has it in ab-splash-links) */}
+              <Link href="/login" className="sm:hidden" style={{
+                fontFamily: SANS_L, fontSize: 12, fontWeight: 500,
+                color: "var(--ab-muted)", textDecoration: "none",
+              }}>Log in</Link>
+              <Link href="/signup" style={{
+                padding: "7px 14px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+                fontFamily: SANS_L, fontSize: 12, fontWeight: 600,
+                letterSpacing: ".08em", textTransform: "uppercase",
+              }}>Sign up free</Link>
+            </>
           )}
         </div>
       </div>
