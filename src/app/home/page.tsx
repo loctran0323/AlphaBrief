@@ -3,7 +3,8 @@ import { ChatRoom } from "@/components/chat-room";
 import { WatchlistRowLedger } from "@/components/watchlist-row";
 import { BenchmarkCard, MoverColClient } from "@/components/home-hover-links";
 import { AddTickerForm } from "@/components/add-ticker-form";
-import { LedgerMasthead, LedgerRuleLabel } from "@/components/ledger-ui";
+import { LedgerMasthead, LedgerByline, LedgerRuleLabel } from "@/components/ledger-ui";
+import { getMarketStatus } from "@/lib/market-hours";
 import { isSupabaseConfigured } from "@/lib/env";
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
@@ -82,6 +83,7 @@ export default async function HomePage() {
   const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
   const timeStr = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const eyebrow = `Market Snapshot · ${dateStr}`;
+  const marketStatus = getMarketStatus(now);
 
   // Pick the biggest daily mover for the editorial lede
   const topGainer = data.gainers[0];
@@ -100,6 +102,26 @@ export default async function HomePage() {
         eyebrow={eyebrow}
         title="A quiet tape steadies the week"
         dek="Indices, ETFs, top movers, and your watchlist — the full picture in one view."
+      />
+
+      {/* ── Byline with market status ── */}
+      <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
+      <LedgerByline
+        left={
+          <span className="flex items-center gap-2">
+            <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }}>
+              {marketStatus.isOpen && (
+                <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#10B981", opacity: 0.5, animation: "ping 1.5s cubic-bezier(0,0,.2,1) infinite" }} />
+              )}
+              <span style={{
+                position: "relative", display: "inline-flex", width: 7, height: 7, borderRadius: "50%",
+                background: marketStatus.color === "green" ? "#10B981" : marketStatus.color === "yellow" ? "#F59E0B" : "#EF4444",
+              }} />
+            </span>
+            <span style={{ fontWeight: 600, color: "var(--ab-fg)" }}>{marketStatus.label}</span>
+            <span>· {marketStatus.reason} · as of {timeStr}</span>
+          </span>
+        }
       />
 
       {/* ── Benchmarks — flat 4-column quote strip ── */}
