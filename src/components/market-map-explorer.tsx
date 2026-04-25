@@ -639,7 +639,7 @@ export function MarketMapExplorer({
 
       {/* ── Selected stock panel ── */}
       {!selected?.symbol ? (
-        <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)" }}>
+        <p style={{ fontFamily: SERIF_MME, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           Click any tile to pull up headlines and a brief on why it might be moving.
         </p>
       ) : (
