@@ -23,7 +23,7 @@ export function LedgerMasthead({
   dekStyle?: React.CSSProperties;
 }) {
   return (
-    <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 20, marginBottom: 28 }}>
+    <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 20, marginBottom: 14 }}>
       {/* Mobile eyebrow — tighter spacing so it stays on one line */}
       <div className="sm:hidden" style={{
         fontFamily: SANS_L, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase",
