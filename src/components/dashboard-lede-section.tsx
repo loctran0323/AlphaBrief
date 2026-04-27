@@ -5,6 +5,7 @@
 
 import { Suspense } from "react";
 import { getMarketSummary } from "@/lib/market-summary";
+import { RefreshSummaryButton } from "@/components/refresh-summary-button";
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -93,7 +94,17 @@ async function DashboardLedeInner() {
   try {
     const result = await getMarketSummary();
     if (!result) return <DashboardLedeUnavailable />;
-    return <DashboardLedeContent summary={result.summary} />;
+    return (
+      <>
+        <DashboardLedeContent summary={result.summary} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+          <span style={{ fontFamily: `-apple-system,'Inter',system-ui,sans-serif`, fontSize: 11, color: "var(--ab-faint)" }}>
+            Updated {new Date(result.generatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZoneName: "short" })}
+          </span>
+          <RefreshSummaryButton />
+        </div>
+      </>
+    );
   } catch {
     return <DashboardLedeUnavailable />;
   }
