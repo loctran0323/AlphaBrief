@@ -4,9 +4,10 @@
  * MapV2Client — squarified treemap + advancing/declining table with tab toggle.
  * Ported from design_handoff_map/map-combined.jsx; wired to real AlphaBrief data.
  * Preserves the tile-click → headlines panel from the original MarketMapExplorer.
+ * Finviz-style hover card shows sector panel on tile hover.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MarketMapRoot, MarketMapSector } from "@/lib/market-map-data";
 import { treemapIndustryLabel } from "@/lib/market-map-data";
 import type { NewsArticle } from "@/types/news";
@@ -23,6 +24,15 @@ type Stock = [string, string, number, number];
 type StockMeta = { shortName: string; price: number | null; changePct: number };
 type MarketStatusInfo = { isOpen: boolean; label: string; reason: string; color: string };
 type KickerItem = { label: string; value: string; sub: string };
+
+type HoverStock = { sym: string; pct: number };
+type HoverInfo = {
+  hoveredSym: string;
+  sec: string;
+  sectorStocks: HoverStock[];
+  x: number;   // viewport x
+  y: number;   // viewport y
+};
 
 // ── Squarify algorithm ────────────────────────────────────────────────────
 type SqItem = { value: number } & Record<string, unknown>;
@@ -92,10 +102,153 @@ const mpTone = (p: number, dark: boolean) => {
     : `rgba(220,38,38,${(0.10 + a * 0.45).toFixed(3)})`;
 };
 
+// ── Finviz-style hover card ───────────────────────────────────────────────
+function SectorHoverCard({
+  info,
+  metaMap,
+  dark,
+}: {
+  info: HoverInfo;
+  metaMap: Map<string, StockMeta>;
+  dark: boolean;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ left: info.x + 14, top: info.y });
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const cw = card.offsetWidth;
+    const ch = card.offsetHeight;
+    let left = info.x + 14;
+    let top = info.y;
+    if (left + cw > vw - 8) left = info.x - cw - 14;
+    if (left < 8) left = 8;
+    if (top + ch > vh - 8) top = Math.max(8, vh - ch - 8);
+    setPos({ left, top });
+  }, [info]);
+
+  const bg   = dark ? "rgba(16,20,28,0.97)" : "rgba(255,255,255,0.97)";
+  const bdr  = dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.12)";
+  const muted = dark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.40)";
+
+  return (
+    <div
+      ref={cardRef}
+      style={{
+        position: "fixed",
+        left: pos.left,
+        top: pos.top,
+        zIndex: 9999,
+        background: bg,
+        border: `1px solid ${bdr}`,
+        boxShadow: dark
+          ? "0 8px 32px rgba(0,0,0,0.55)"
+          : "0 8px 32px rgba(0,0,0,0.18)",
+        minWidth: 280,
+        maxWidth: 340,
+        pointerEvents: "none",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+      }}
+    >
+      {/* Sector header */}
+      <div style={{
+        padding: "8px 14px 6px",
+        borderBottom: `1px solid ${bdr}`,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <span style={{
+          fontFamily: SERIF_MP, fontStyle: "italic",
+          fontSize: 13, fontWeight: 600,
+          color: dark ? "rgba(255,255,255,0.85)" : "rgba(0,0,0,0.75)",
+        }}>{info.sec}</span>
+        <span style={{
+          fontFamily: SANS_MP, fontSize: 9,
+          letterSpacing: ".14em", textTransform: "uppercase",
+          color: muted, fontWeight: 700,
+        }}>{info.sectorStocks.length} stocks</span>
+      </div>
+
+      {/* Stock rows */}
+      <div style={{ maxHeight: 340, overflowY: "auto" }}>
+        {info.sectorStocks.map(s => {
+          const meta = metaMap.get(s.sym.toUpperCase());
+          const isActive = s.sym === info.hoveredSym;
+          const rowBg = isActive
+            ? (dark ? "rgba(108,92,231,0.18)" : "rgba(108,92,231,0.08)")
+            : "transparent";
+          return (
+            <div key={s.sym} style={{
+              display: "grid",
+              gridTemplateColumns: "50px 1fr auto auto",
+              alignItems: "baseline",
+              gap: "0 10px",
+              padding: "6px 14px",
+              background: rowBg,
+              borderLeft: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
+            }}>
+              {/* Symbol */}
+              <span style={{
+                fontFamily: SERIF_MP,
+                fontSize: isActive ? 14 : 13,
+                fontWeight: isActive ? 700 : 600,
+                color: dark ? (isActive ? "#fff" : "rgba(255,255,255,0.85)") : (isActive ? "#000" : "rgba(0,0,0,0.80)"),
+                whiteSpace: "nowrap",
+              }}>{s.sym}</span>
+
+              {/* Short name */}
+              <span style={{
+                fontFamily: SANS_MP,
+                fontSize: 11,
+                color: muted,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>{meta?.shortName ?? ""}</span>
+
+              {/* Price */}
+              <span style={{
+                fontFamily: "var(--ab-mono)",
+                fontSize: 12,
+                fontVariantNumeric: "tabular-nums",
+                color: dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.55)",
+                whiteSpace: "nowrap",
+                textAlign: "right",
+              }}>
+                {meta?.price != null ? `$${meta.price.toFixed(2)}` : ""}
+              </span>
+
+              {/* % change */}
+              <span style={{
+                fontFamily: "var(--ab-mono)",
+                fontSize: 12,
+                fontWeight: 700,
+                fontVariantNumeric: "tabular-nums",
+                color: s.pct >= 0 ? "var(--ab-up)" : "var(--ab-down)",
+                whiteSpace: "nowrap",
+                textAlign: "right",
+                minWidth: 60,
+              }}>{mpFmt(s.pct)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── Treemap View ──────────────────────────────────────────────────────────
 function MP_TreemapView({
-  stocks, dark, onTileClick,
-}: { stocks: Stock[]; dark: boolean; onTileClick: (sym: string) => void }) {
+  stocks, dark, metaMap, onTileClick, onTileHover, onSectorLeave,
+}: {
+  stocks: Stock[];
+  dark: boolean;
+  metaMap: Map<string, StockMeta>;
+  onTileClick: (sym: string) => void;
+  onTileHover: (info: HoverInfo | null) => void;
+  onSectorLeave: () => void;
+}) {
   const sectorOrder: string[] = [];
   const bySec: Record<string, { sym: string; pct: number; cap: number }[]> = {};
   for (const [sec, sym, pct, cap] of stocks) {
@@ -104,13 +257,14 @@ function MP_TreemapView({
   }
   for (const sec of sectorOrder) bySec[sec]!.sort((a, b) => b.cap - a.cap);
 
+  const W = 1040, H = 780, HEADER = 22;
+
   const sectorItems = sectorOrder.map(sec => ({
     sec,
     stocks: bySec[sec]!,
     value: bySec[sec]!.reduce((a, r) => a + r.cap, 0),
   }));
 
-  const W = 1040, H = 780, HEADER = 22;
   const sectorBoxes = squarify(sectorItems, W, H);
 
   return (
@@ -125,17 +279,21 @@ function MP_TreemapView({
         const stockItems = sb.stocks.map(s => ({ ...s, value: s.cap }));
         const stockBoxes = squarify(stockItems, innerW, innerH);
         return (
-          <div key={sb.sec} style={{
-            position: "absolute",
-            left: `${(sb.x / W) * 100}%`,
-            top: `${(sb.y / H) * 100}%`,
-            width: `${(sb.w / W) * 100}%`,
-            height: `${(sb.h / H) * 100}%`,
-            background: "var(--ab-card)",
-            borderRight: "1px solid var(--ab-border)",
-            borderBottom: "1px solid var(--ab-border)",
-            overflow: "hidden",
-          }}>
+          <div
+            key={sb.sec}
+            onMouseLeave={onSectorLeave}
+            style={{
+              position: "absolute",
+              left: `${(sb.x / W) * 100}%`,
+              top: `${(sb.y / H) * 100}%`,
+              width: `${(sb.w / W) * 100}%`,
+              height: `${(sb.h / H) * 100}%`,
+              background: "var(--ab-card)",
+              borderRight: "1px solid var(--ab-border)",
+              borderBottom: "1px solid var(--ab-border)",
+              overflow: "hidden",
+            }}
+          >
             {/* Sector header */}
             <div style={{
               position: "absolute", top: 4, left: 8, right: 8, height: HEADER - 4,
@@ -161,6 +319,16 @@ function MP_TreemapView({
                 <div
                   key={box.sym}
                   onClick={() => onTileClick(box.sym)}
+                  onMouseEnter={(e) => {
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    onTileHover({
+                      hoveredSym: box.sym,
+                      sec: sb.sec,
+                      sectorStocks: sb.stocks,
+                      x: rect.right,
+                      y: rect.top,
+                    });
+                  }}
                   title={`${box.sym} ${mpFmt(box.pct)}`}
                   style={{
                     position: "absolute",
@@ -249,8 +417,7 @@ function MP_TableView({
             }}>{mpFmt(pct)}</span>
             <div style={{
               height: 8, background: bg,
-              borderLeft: `2px solid ${color}`,
-              width: barWidth,
+              borderLeft: `2px solid ${color}`, width: barWidth,
             }} />
           </>
         ) : (
@@ -383,20 +550,28 @@ function MP_Tabs({
           );
         })}
       </div>
-      {/* Keyboard shortcuts hint */}
+
+      {/* Keyboard shortcut hint — clarified */}
       <div style={{
-        display: "flex", alignItems: "center", gap: 6, paddingBottom: 8,
+        display: "flex", alignItems: "center", gap: 6, paddingBottom: 10,
       }}>
         <span style={{
-          fontFamily: SANS_MP, fontSize: 10, letterSpacing: ".12em",
+          fontFamily: SANS_MP, fontSize: 9, letterSpacing: ".10em",
           textTransform: "uppercase", color: "var(--ab-faint)", fontWeight: 600,
-        }}>View</span>
-        {["M", "T"].map(k => (
-          <kbd key={k} style={{
-            fontFamily: "var(--ab-mono)", fontSize: 10,
-            border: "1px solid var(--ab-border)", padding: "2px 6px",
-            borderRadius: 3, color: "var(--ab-muted)", background: "transparent",
-          }}>{k}</kbd>
+        }}>Shortcut</span>
+        <span style={{ color: "var(--ab-faint)", fontSize: 9 }}>·</span>
+        {(["M", "T"] as const).map((k, i) => (
+          <span key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <kbd style={{
+              fontFamily: "var(--ab-mono)", fontSize: 10,
+              border: "1px solid var(--ab-border)", padding: "2px 6px",
+              borderRadius: 3, color: "var(--ab-muted)", background: "transparent",
+            }}>{k}</kbd>
+            <span style={{
+              fontFamily: SANS_MP, fontSize: 9,
+              color: "var(--ab-faint)", letterSpacing: ".04em",
+            }}>{i === 0 ? "map" : "table"}</span>
+          </span>
         ))}
       </div>
     </div>
@@ -466,6 +641,25 @@ export function MapV2Client({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Hover card state
+  const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onTileHover = useCallback((info: HoverInfo | null) => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    if (info) {
+      setHoverInfo(info);
+    } else {
+      // Small delay on hide so moving between tiles within a sector feels smooth
+      hoverTimeout.current = setTimeout(() => setHoverInfo(null), 80);
+    }
+  }, []);
+
+  const onSectorLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = setTimeout(() => setHoverInfo(null), 80);
+  }, []);
+
   // Headlines panel state
   const [selected, setSelected] = useState<(StockMeta & { symbol: string }) | null>(null);
   const [news, setNews] = useState<NewsArticle[]>([]);
@@ -532,7 +726,7 @@ export function MapV2Client({
     void loadAiSummary(symbol, meta.changePct, meta.price);
   }, [metaMap, isPro, lookupsLeft, loadNews, loadAiSummary]);
 
-  // Dynamic content based on view
+  // Dynamic content
   const title = view === "map"
     ? "The map, in one glance."
     : "Gainers and losers, at a glance.";
@@ -551,7 +745,7 @@ export function MapV2Client({
       <AutoRefresh everyMs={900000} />
       <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
 
-      {/* ── Masthead (title/dek changes on tab swap) ── */}
+      {/* ── Masthead ── */}
       <LedgerMasthead
         eyebrow={`Cartography · ${timeStr}`}
         title={title}
@@ -571,7 +765,7 @@ export function MapV2Client({
         }
       />
 
-      {/* ── Legend + market status — one compact row ── */}
+      {/* ── Legend + market status ── */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         fontSize: 10, color: "var(--ab-faint)", marginBottom: 10, gap: 8,
@@ -591,7 +785,6 @@ export function MapV2Client({
             · area ∝ mkt cap · tap tile for headlines
           </span>
         </div>
-        {/* Market status */}
         <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
           <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }}>
             {marketStatus.isOpen && (
@@ -617,7 +810,7 @@ export function MapV2Client({
         </div>
       </div>
 
-      {/* ── Daily limit banner ── */}
+      {/* ── Limit hit banner ── */}
       {limitHit && (
         <div style={{
           border: `2px solid ${ACCENT}`, background: "var(--ab-surface-hi)",
@@ -656,7 +849,6 @@ export function MapV2Client({
           border: "1px solid var(--ab-border)", background: "var(--ab-card)",
           padding: "20px 24px", minHeight: 140, marginBottom: 20,
         }}>
-          {/* Stock header */}
           <div style={{
             display: "flex", flexWrap: "wrap",
             alignItems: "baseline", gap: "6px 12px", marginBottom: 12,
@@ -690,7 +882,6 @@ export function MapV2Client({
             </span>
           </div>
 
-          {/* AI summary */}
           {aiLoading && (
             <p style={{
               fontFamily: SERIF_MP, fontStyle: "italic",
@@ -704,7 +895,6 @@ export function MapV2Client({
             }}>{aiSummary.summary}</p>
           )}
 
-          {/* News headlines */}
           {newsLoading && (
             <p style={{
               fontFamily: SERIF_MP, fontStyle: "italic",
@@ -739,9 +929,7 @@ export function MapV2Client({
                     }}>{a.summary}</p>
                   )}
                   <a
-                    href={a.url}
-                    target="_blank"
-                    rel="noreferrer"
+                    href={a.url} target="_blank" rel="noreferrer"
                     style={{
                       fontFamily: SANS_MP, fontSize: 11, color: ACCENT,
                       letterSpacing: ".04em", textDecoration: "none",
@@ -765,13 +953,25 @@ export function MapV2Client({
 
       {/* ── Views ── */}
       {view === "map" && (
-        <MP_TreemapView stocks={stocks} dark={dark} onTileClick={onTileClick} />
+        <MP_TreemapView
+          stocks={stocks}
+          dark={dark}
+          metaMap={metaMap}
+          onTileClick={onTileClick}
+          onTileHover={onTileHover}
+          onSectorLeave={onSectorLeave}
+        />
       )}
       {view === "table" && (
         <MP_TableView stocks={stocks} dark={dark} onTileClick={onTileClick} />
       )}
 
-      {/* ── What the map is saying — 4-col kicker ── */}
+      {/* ── Hover card (portal-style fixed overlay) ── */}
+      {hoverInfo && (
+        <SectorHoverCard info={hoverInfo} metaMap={metaMap} dark={dark} />
+      )}
+
+      {/* ── What the map is saying — kicker grid ── */}
       <LedgerRuleLabel>What the map is saying</LedgerRuleLabel>
       <div className="grid ab-kicker-grid" style={{ gridTemplateColumns: "repeat(4,1fr)", gap: 32 }}>
         {[kicker.driver, kicker.green, kicker.drag, kicker.breadth].map(item => (
