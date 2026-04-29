@@ -70,9 +70,6 @@ export default async function MarketMapPage() {
   }
 
   const now = new Date();
-  const timeStr = now.toLocaleTimeString("en-US", {
-    hour: "numeric", minute: "2-digit", timeZoneName: "short",
-  });
   const marketStatus = getMarketStatus(now);
   const kicker = deriveMapKicker(tree);
 
@@ -82,7 +79,6 @@ export default async function MarketMapPage() {
       isPro={isPro}
       lookupsUsed={lookupsUsed}
       maxLookups={FREE_MAP_LOOKUPS_PER_DAY}
-      timeStr={timeStr}
       marketStatus={marketStatus}
       kicker={kicker}
     />

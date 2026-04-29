@@ -381,26 +381,35 @@ function MP_TreemapView({
       </div>
     </div>
     {/* Mobile scroll progress bar */}
-    <div className="sm:hidden" style={{ marginTop: 6, padding: "0 2px" }}>
-      <div style={{ position: "relative", height: 6, background: "var(--ab-border)", borderRadius: 3, overflow: "hidden" }}>
+    <div className="sm:hidden" style={{ marginTop: 8, padding: "0 2px" }}>
+      <div
+        style={{ position: "relative", height: 10, background: "var(--ab-border)", borderRadius: 5, cursor: "pointer", touchAction: "none" }}
+        onPointerDown={(e) => {
+          const track = e.currentTarget;
+          const map = scrollRef.current;
+          if (!map) return;
+          e.preventDefault();
+          track.setPointerCapture(e.pointerId);
+          const rect = track.getBoundingClientRect();
+          const setPos = (clientX: number) => {
+            const x = clientX - rect.left;
+            const pct = Math.max(0, Math.min(1, (x / rect.width - thumbPct / 2) / Math.max(0.01, 1 - thumbPct)));
+            map.scrollLeft = pct * (map.scrollWidth - map.clientWidth);
+          };
+          setPos(e.clientX);
+          track.onpointermove = (ev) => setPos(ev.clientX);
+          track.onpointerup = () => { track.onpointermove = null; track.onpointerup = null; };
+        }}
+      >
         <div style={{
-          position: "absolute",
-          top: 0,
+          position: "absolute", top: 0,
           left: `${scrollPct * (1 - thumbPct) * 100}%`,
           width: `${thumbPct * 100}%`,
           height: "100%",
           background: ACCENT,
-          borderRadius: 3,
+          borderRadius: 5,
           transition: "left 0.05s",
         }} />
-      </div>
-      <div style={{
-        display: "flex", justifyContent: "space-between",
-        fontFamily: SANS_MP, fontSize: 9, color: "var(--ab-faint)",
-        marginTop: 4, letterSpacing: ".06em",
-      }}>
-        <span>← scroll</span>
-        <span>scroll →</span>
       </div>
     </div>
     </>
@@ -725,7 +734,6 @@ export function MapV2Client({
   isPro = false,
   lookupsUsed = 0,
   maxLookups = 3,
-  timeStr,
   marketStatus,
   kicker,
 }: {
@@ -733,10 +741,17 @@ export function MapV2Client({
   isPro?: boolean;
   lookupsUsed?: number;
   maxLookups?: number;
-  timeStr: string;
   marketStatus: MarketStatusInfo;
   kicker: { driver: KickerItem; green: KickerItem; drag: KickerItem; breadth: KickerItem };
 }) {
+  const [timeStr, setTimeStr] = useState("");
+  useEffect(() => {
+    const update = () => setTimeStr(new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", timeZoneName: "short" }));
+    update();
+    const id = setInterval(update, 30000);
+    return () => clearInterval(id);
+  }, []);
+
   const { stocks, metaMap } = useMemo(() => {
     const stocks: Stock[] = [];
     const metaMap = new Map<string, StockMeta>();
