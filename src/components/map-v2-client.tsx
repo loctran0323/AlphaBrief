@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * MapV2Client — squarified treemap + advancing/declining table with tab toggle.
+ * MapV2Client – squarified treemap + advancing/declining table with tab toggle.
  * Features: Finviz-style hover card, zoom/fullscreen, mobile-responsive.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MarketMapRoot, MarketMapSector } from "@/lib/market-map-data";
 import { treemapIndustryLabel } from "@/lib/market-map-data";
 import type { NewsArticle } from "@/types/news";
@@ -208,6 +208,8 @@ function SectorHoverCard({
 
 // ── Treemap view ──────────────────────────────────────────────────────────
 const ZOOM_LEVELS = [0.5, 0.75, 1, 1.5, 2, 3];
+/** Minimum pixel width for the treemap canvas – keeps tiles legible on mobile. */
+const MAP_MIN_PX = 820;
 
 function MP_TreemapView({
   stocks, dark, metaMap, zoom, isFullscreen,
@@ -239,20 +241,23 @@ function MP_TreemapView({
   const sectorBoxes = squarify(sectorItems, W, H);
 
   return (
-    /* scrollable wrapper — grows with zoom */
+    /* scrollable wrapper – always scrollable on mobile, grows with zoom on desktop */
     <div style={{
       width: "100%",
-      overflowX: zoom > 1 ? "auto" : "hidden",
+      overflowX: "auto",
       overflowY: zoom > 1 ? "auto" : "hidden",
       maxHeight: isFullscreen ? "calc(100dvh - 64px)" : "none",
+      // smooth momentum scroll on iOS
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      WebkitOverflowScrolling: "touch" as any,
     }}>
       <div style={{
         width: `${zoom * 100}%`,
+        minWidth: `${MAP_MIN_PX}px`,
         aspectRatio: `${W} / ${H}`,
         position: "relative",
         border: "1px solid var(--ab-border)",
         background: "var(--ab-bg)",
-        minWidth: zoom > 1 ? `${zoom * 100}%` : undefined,
       }}>
         {sectorBoxes.map(sb => {
           const innerX = 2, innerY = HEADER + 2;
@@ -533,7 +538,8 @@ function ZoomToolbar({
       display: "flex", flexWrap: "nowrap", alignItems: "center", gap: 6,
       borderBottom: "1px solid var(--ab-border)", paddingBottom: 10, marginBottom: 12,
     }}>
-      <span style={{
+      {/* "Map view" label – desktop only */}
+      <span className="hidden sm:inline" style={{
         fontFamily: SANS_MP, fontSize: 9, fontWeight: 700,
         letterSpacing: ".14em", textTransform: "uppercase",
         color: "var(--ab-faint)", whiteSpace: "nowrap",
@@ -569,9 +575,17 @@ function ZoomToolbar({
         Reset
       </button>
 
+      {/* Scroll hint – mobile only */}
+      <span className="sm:hidden" style={{
+        fontFamily: SANS_MP, fontSize: 9, color: "var(--ab-faint)",
+        marginLeft: 4, whiteSpace: "nowrap",
+      }}>← scroll →</span>
+
+      {/* Full screen – desktop only (not supported on mobile Safari) */}
       <button
         type="button"
         onClick={onToggleFullscreen}
+        className="hidden sm:inline-block"
         style={{
           ...btn, fontSize: 10, padding: "3px 12px",
           marginLeft: "auto",
@@ -635,7 +649,7 @@ function MP_Tabs({
         })}
       </div>
 
-      {/* Keyboard shortcut hint — desktop only */}
+      {/* Keyboard shortcut hint – desktop only */}
       <div className="hidden sm:flex" style={{ alignItems: "center", gap: 6, paddingBottom: 10 }}>
         <span style={{
           fontFamily: SANS_MP, fontSize: 9, letterSpacing: ".10em",
@@ -832,8 +846,8 @@ export function MapV2Client({
 
   const title = view === "map" ? "The map, in one glance." : "Gainers and losers, at a glance.";
   const dek = view === "map"
-    ? "Each tile is a stock. Area encodes market capitalization; tint encodes today's move. Tap any tile for headlines and the story behind it."
-    : "A two-column ledger: advancers on the left, decliners on the right — sorted by the size of the move. Bars are visual; numbers are exact.";
+    ? "Each tile is a stock. Area encodes market capitalization; tint encodes today's move."
+    : "A two-column ledger: advancers on the left, decliners on the right, sorted by the size of the move.";
   const bylineLeft = view === "map"
     ? `Treemap · ${stocks.length} tickers · live data · updated every 15 min`
     : `Ranked table · ${stocks.length} tickers`;
