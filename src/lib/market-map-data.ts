@@ -23,7 +23,7 @@ export type MarketMapRoot = {
   children: MarketMapSector[];
 };
 
-/** Treemap ribbon labels — short enough to avoid mid-word “…” truncation. */
+/** Treemap ribbon labels -- short enough to avoid mid-word "…" truncation. */
 const SECTOR_TREEMAP_LABEL: Record<string, string> = {
   Technology: "Tech",
   Communications: "Comm",
@@ -34,6 +34,7 @@ const SECTOR_TREEMAP_LABEL: Record<string, string> = {
   Energy: "Energy",
   Industrials: "Indust",
   Materials: "Matls",
+  REITs: "REITs",
   Utilities: "Utils",
 };
 
@@ -51,10 +52,15 @@ const INDUSTRY_TREEMAP_LABEL: Record<string, string> = {
   "Pharma & biotech": "Pharma",
   Banks: "Banks",
   "Capital markets": "Cap mkts",
+  "Payments & FinTech": "Payments",
+  Insurance: "Insurance",
   "Integrated & E&P": "Oil & E&P",
   "Oilfield & refining": "Oilfield",
-  "Machinery & transport": "Machinery",
+  "Machinery & equipment": "Machinery",
+  "Aerospace & defense": "Aero & def",
+  "Transport & logistics": "Transport",
   "Chemicals & mining": "Chemicals",
+  "Real estate": "Real estate",
   "Regulated utilities": "Utilities",
 };
 
@@ -83,71 +89,212 @@ const MAP_STRUCTURE: {
   {
     sector: "Technology",
     industries: [
-      { name: "Semiconductors", tickers: ["NVDA", "AMD", "AVGO", "QCOM", "TXN", "INTC"] },
-      { name: "Software", tickers: ["MSFT", "ORCL", "CRM", "ADBE", "NOW", "PANW", "INTU"] },
-      { name: "Hardware & IT services", tickers: ["AAPL", "IBM", "ACN", "CSCO"] },
+      {
+        name: "Semiconductors",
+        tickers: [
+          "NVDA", "AMD", "AVGO", "QCOM", "TXN", "INTC",
+          "MU", "AMAT", "LRCX", "KLAC", "MRVL", "ADI",
+          "MCHP", "ON", "MPWR", "NXPI", "SNPS", "CDNS",
+          "TER", "SWKS", "ENTG",
+        ],
+      },
+      {
+        name: "Software",
+        tickers: [
+          "MSFT", "ORCL", "CRM", "ADBE", "NOW", "PANW", "INTU",
+          "PLTR", "SNOW", "WDAY", "TEAM", "SHOP", "DDOG", "CRWD",
+          "ZS", "FTNT", "VEEV", "MDB", "ZM", "GTLB", "DOCU",
+        ],
+      },
+      {
+        name: "Hardware & IT services",
+        tickers: [
+          "AAPL", "IBM", "ACN", "CSCO",
+          "DELL", "HPE", "HPQ", "NTAP",
+          "ANET", "JNPR", "WDC", "STX",
+        ],
+      },
     ],
   },
   {
     sector: "Communications",
     industries: [
-      { name: "Internet & media", tickers: ["GOOGL", "META", "NFLX", "DIS"] },
+      {
+        name: "Internet & media",
+        tickers: [
+          "GOOGL", "META", "NFLX", "DIS",
+          "SNAP", "PINS", "TTD", "ROKU",
+          "SPOT", "WBD", "FOXA", "PARA",
+        ],
+      },
       { name: "Telecom", tickers: ["CMCSA", "T", "TMUS", "CHTR", "VZ"] },
     ],
   },
   {
     sector: "Consumer",
     industries: [
-      { name: "E‑commerce & autos", tickers: ["AMZN", "TSLA", "BKNG"] },
-      { name: "Retail & dining", tickers: ["HD", "NKE", "MCD", "SBUX", "LOW", "TJX"] },
+      {
+        name: "E‑commerce & autos",
+        tickers: [
+          "AMZN", "TSLA", "BKNG",
+          "GM", "F", "EBAY", "MELI",
+          "ETSY", "ABNB", "UBER", "LYFT",
+        ],
+      },
+      {
+        name: "Retail & dining",
+        tickers: [
+          "HD", "NKE", "MCD", "SBUX", "LOW", "TJX",
+          "TGT", "LULU", "CMG", "YUM", "ROST",
+          "DRI", "QSR", "DKNG",
+        ],
+      },
     ],
   },
   {
     sector: "Staples",
     industries: [
-      { name: "Household & food", tickers: ["WMT", "COST", "PG", "KO", "PEP", "MDLZ", "CL"] },
-      { name: "Tobacco", tickers: ["PM", "MO"] },
+      {
+        name: "Household & food",
+        tickers: [
+          "WMT", "COST", "PG", "KO", "PEP", "MDLZ", "CL",
+          "KHC", "GIS", "HSY", "KMB", "CLX", "CAG", "EL", "ULTA",
+        ],
+      },
+      { name: "Tobacco", tickers: ["PM", "MO", "BTI"] },
     ],
   },
   {
     sector: "Healthcare",
     industries: [
-      { name: "Managed care & tools", tickers: ["UNH", "TMO", "DHR", "ABT"] },
-      { name: "Pharma & biotech", tickers: ["JNJ", "LLY", "MRK", "ABBV", "PFE", "BMY", "AMGN", "GILD"] },
+      {
+        name: "Managed care & tools",
+        tickers: [
+          "UNH", "CVS", "HUM", "CI", "ELV", "CNC",
+          "TMO", "DHR", "ABT", "ISRG", "BSX",
+          "EW", "BDX", "MDT", "DXCM", "IDXX",
+        ],
+      },
+      {
+        name: "Pharma & biotech",
+        tickers: [
+          "JNJ", "LLY", "MRK", "ABBV", "PFE", "BMY",
+          "AMGN", "GILD", "BIIB", "VRTX", "REGN",
+          "MRNA", "ZTS", "INCY", "ILMN", "EXAS",
+        ],
+      },
     ],
   },
   {
     sector: "Financials",
     industries: [
-      { name: "Banks", tickers: ["JPM", "BAC", "WFC", "C", "USB"] },
-      { name: "Capital markets", tickers: ["GS", "MS", "BLK", "SCHW", "AXP"] },
+      {
+        name: "Banks",
+        tickers: [
+          "JPM", "BAC", "WFC", "C", "USB",
+          "PNC", "TFC", "FITB", "KEY", "HBAN",
+          "RF", "MTB", "CFG",
+        ],
+      },
+      {
+        name: "Capital markets",
+        tickers: [
+          "GS", "MS", "BLK", "SCHW", "AXP",
+          "COF", "DFS", "NDAQ", "ICE", "CME",
+          "MCO", "SPGI",
+        ],
+      },
+      {
+        name: "Payments & FinTech",
+        tickers: ["V", "MA", "PYPL", "FIS", "FI", "GPN", "AFRM", "COIN"],
+      },
+      {
+        name: "Insurance",
+        tickers: ["PGR", "ALL", "CB", "MET", "PRU", "AFL", "TRV", "HIG"],
+      },
     ],
   },
   {
     sector: "Energy",
     industries: [
-      { name: "Integrated & E&P", tickers: ["XOM", "CVX", "COP", "EOG", "OXY"] },
-      { name: "Oilfield & refining", tickers: ["SLB", "MPC", "PSX"] },
+      {
+        name: "Integrated & E&P",
+        tickers: [
+          "XOM", "CVX", "COP", "EOG", "OXY",
+          "DVN", "FANG", "MRO", "HES", "CTRA",
+        ],
+      },
+      {
+        name: "Oilfield & refining",
+        tickers: ["SLB", "MPC", "PSX", "HAL", "BKR", "VLO"],
+      },
     ],
   },
   {
     sector: "Industrials",
     industries: [
       {
-        name: "Machinery & transport",
-        tickers: ["CAT", "DE", "HON", "UPS", "RTX", "LMT", "BA", "GE", "MMM", "UNP"],
+        name: "Machinery & equipment",
+        tickers: [
+          "CAT", "DE", "HON", "GE", "MMM",
+          "ITW", "EMR", "ROK", "PH", "DOV",
+          "IR", "CARR", "OTIS",
+        ],
+      },
+      {
+        name: "Aerospace & defense",
+        tickers: [
+          "RTX", "LMT", "BA", "NOC", "GD",
+          "TDG", "LHX", "HEI", "TXT",
+        ],
+      },
+      {
+        name: "Transport & logistics",
+        tickers: [
+          "UPS", "UNP", "FDX", "ODFL", "CSX",
+          "NSC", "DAL", "UAL", "LUV",
+        ],
       },
     ],
   },
   {
     sector: "Materials",
     industries: [
-      { name: "Chemicals & mining", tickers: ["LIN", "APD", "SHW", "ECL", "NEM", "FCX"] },
+      {
+        name: "Chemicals & mining",
+        tickers: [
+          "LIN", "APD", "SHW", "ECL", "NEM", "FCX",
+          "DD", "DOW", "LYB", "CF", "MOS",
+          "ALB", "NUE", "STLD", "AA",
+        ],
+      },
+    ],
+  },
+  {
+    sector: "REITs",
+    industries: [
+      {
+        name: "Real estate",
+        tickers: [
+          "PLD", "AMT", "EQIX", "CCI", "PSA",
+          "SPG", "O", "VICI", "WELL", "DLR",
+          "SBAC", "EQR", "AVB", "EXR", "WY",
+        ],
+      },
     ],
   },
   {
     sector: "Utilities",
-    industries: [{ name: "Regulated utilities", tickers: ["NEE", "DUK", "SO", "D", "AEP"] }],
+    industries: [
+      {
+        name: "Regulated utilities",
+        tickers: [
+          "NEE", "DUK", "SO", "D", "AEP",
+          "EXC", "PCG", "ED", "XEL", "WEC",
+          "ETR", "PPL", "FE", "FSLR", "ENPH",
+        ],
+      },
+    ],
   },
 ];
 
@@ -262,7 +409,7 @@ export async function fetchYahooChartSnapshot(symbol: string): Promise<SymbolSna
 
 async function fetchAllSnapshots(symbols: string[]): Promise<Map<string, SymbolSnapshot>> {
   const out = new Map<string, SymbolSnapshot>();
-  const batch = 14;
+  const batch = 20;
   for (let i = 0; i < symbols.length; i += batch) {
     const chunk = symbols.slice(i, i + batch);
     const rows = await Promise.all(

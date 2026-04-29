@@ -2,9 +2,7 @@
 
 /**
  * MapV2Client — squarified treemap + advancing/declining table with tab toggle.
- * Ported from design_handoff_map/map-combined.jsx; wired to real AlphaBrief data.
- * Preserves the tile-click → headlines panel from the original MarketMapExplorer.
- * Finviz-style hover card shows sector panel on tile hover.
+ * Features: Finviz-style hover card, zoom/fullscreen, mobile-responsive.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -19,7 +17,6 @@ const SERIF_MP = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_MP  = `-apple-system, 'Inter', system-ui, sans-serif`;
 const ACCENT   = "#6C5CE7";
 
-// [industryLabel, symbol, changePct, sizeProxy]
 type Stock = [string, string, number, number];
 type StockMeta = { shortName: string; price: number | null; changePct: number };
 type MarketStatusInfo = { isOpen: boolean; label: string; reason: string; color: string };
@@ -30,11 +27,11 @@ type HoverInfo = {
   hoveredSym: string;
   sec: string;
   sectorStocks: HoverStock[];
-  x: number;   // viewport x
-  y: number;   // viewport y
+  x: number;
+  y: number;
 };
 
-// ── Squarify algorithm ────────────────────────────────────────────────────
+// ── Squarify ──────────────────────────────────────────────────────────────
 type SqItem = { value: number } & Record<string, unknown>;
 type SqRect<T> = T & { x: number; y: number; w: number; h: number };
 
@@ -89,7 +86,6 @@ function squarify<T extends SqItem>(items: T[], W: number, H: number): SqRect<T>
   return out;
 }
 
-// ── Color helpers ─────────────────────────────────────────────────────────
 const mpFmt = (p: number) => `${p >= 0 ? "+" : ""}${p.toFixed(2)}%`;
 
 const mpTone = (p: number, dark: boolean) => {
@@ -102,16 +98,10 @@ const mpTone = (p: number, dark: boolean) => {
     : `rgba(220,38,38,${(0.10 + a * 0.45).toFixed(3)})`;
 };
 
-// ── Finviz-style hover card ───────────────────────────────────────────────
+// ── Sector hover card (Finviz-style) ──────────────────────────────────────
 function SectorHoverCard({
-  info,
-  metaMap,
-  dark,
-}: {
-  info: HoverInfo;
-  metaMap: Map<string, StockMeta>;
-  dark: boolean;
-}) {
+  info, metaMap, dark,
+}: { info: HoverInfo; metaMap: Map<string, StockMeta>; dark: boolean }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: info.x + 14, top: info.y });
 
@@ -130,8 +120,8 @@ function SectorHoverCard({
     setPos({ left, top });
   }, [info]);
 
-  const bg   = dark ? "rgba(16,20,28,0.97)" : "rgba(255,255,255,0.97)";
-  const bdr  = dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.12)";
+  const bg    = dark ? "rgba(16,20,28,0.97)" : "rgba(255,255,255,0.97)";
+  const bdr   = dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.12)";
   const muted = dark ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.40)";
 
   return (
@@ -139,22 +129,17 @@ function SectorHoverCard({
       ref={cardRef}
       style={{
         position: "fixed",
-        left: pos.left,
-        top: pos.top,
+        left: pos.left, top: pos.top,
         zIndex: 9999,
         background: bg,
         border: `1px solid ${bdr}`,
-        boxShadow: dark
-          ? "0 8px 32px rgba(0,0,0,0.55)"
-          : "0 8px 32px rgba(0,0,0,0.18)",
-        minWidth: 280,
-        maxWidth: 340,
+        boxShadow: dark ? "0 8px 32px rgba(0,0,0,0.55)" : "0 8px 32px rgba(0,0,0,0.18)",
+        minWidth: 280, maxWidth: 340,
         pointerEvents: "none",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
       }}
     >
-      {/* Sector header */}
       <div style={{
         padding: "8px 14px 6px",
         borderBottom: `1px solid ${bdr}`,
@@ -171,8 +156,6 @@ function SectorHoverCard({
           color: muted, fontWeight: 700,
         }}>{info.sectorStocks.length} stocks</span>
       </div>
-
-      {/* Stock rows */}
       <div style={{ maxHeight: 340, overflowY: "auto" }}>
         {info.sectorStocks.map(s => {
           const meta = metaMap.get(s.sym.toUpperCase());
@@ -183,52 +166,37 @@ function SectorHoverCard({
           return (
             <div key={s.sym} style={{
               display: "grid",
-              gridTemplateColumns: "50px 1fr auto auto",
+              gridTemplateColumns: "46px 1fr auto auto",
               alignItems: "baseline",
-              gap: "0 10px",
-              padding: "6px 14px",
+              gap: "0 8px",
+              padding: "5px 14px",
               background: rowBg,
               borderLeft: isActive ? `2px solid ${ACCENT}` : "2px solid transparent",
             }}>
-              {/* Symbol */}
               <span style={{
                 fontFamily: SERIF_MP,
-                fontSize: isActive ? 14 : 13,
+                fontSize: isActive ? 13 : 12,
                 fontWeight: isActive ? 700 : 600,
                 color: dark ? (isActive ? "#fff" : "rgba(255,255,255,0.85)") : (isActive ? "#000" : "rgba(0,0,0,0.80)"),
                 whiteSpace: "nowrap",
               }}>{s.sym}</span>
-
-              {/* Short name */}
               <span style={{
-                fontFamily: SANS_MP,
-                fontSize: 11,
-                color: muted,
+                fontFamily: SANS_MP, fontSize: 11, color: muted,
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>{meta?.shortName ?? ""}</span>
-
-              {/* Price */}
               <span style={{
-                fontFamily: "var(--ab-mono)",
-                fontSize: 12,
+                fontFamily: "var(--ab-mono)", fontSize: 11,
                 fontVariantNumeric: "tabular-nums",
-                color: dark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.55)",
+                color: dark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)",
                 whiteSpace: "nowrap",
-                textAlign: "right",
               }}>
                 {meta?.price != null ? `$${meta.price.toFixed(2)}` : ""}
               </span>
-
-              {/* % change */}
               <span style={{
-                fontFamily: "var(--ab-mono)",
-                fontSize: 12,
-                fontWeight: 700,
-                fontVariantNumeric: "tabular-nums",
+                fontFamily: "var(--ab-mono)", fontSize: 12,
+                fontWeight: 700, fontVariantNumeric: "tabular-nums",
                 color: s.pct >= 0 ? "var(--ab-up)" : "var(--ab-down)",
-                whiteSpace: "nowrap",
-                textAlign: "right",
-                minWidth: 60,
+                whiteSpace: "nowrap", minWidth: 58, textAlign: "right",
               }}>{mpFmt(s.pct)}</span>
             </div>
           );
@@ -238,13 +206,18 @@ function SectorHoverCard({
   );
 }
 
-// ── Treemap View ──────────────────────────────────────────────────────────
+// ── Treemap view ──────────────────────────────────────────────────────────
+const ZOOM_LEVELS = [0.5, 0.75, 1, 1.5, 2, 3];
+
 function MP_TreemapView({
-  stocks, dark, metaMap, onTileClick, onTileHover, onSectorLeave,
+  stocks, dark, metaMap, zoom, isFullscreen,
+  onTileClick, onTileHover, onSectorLeave,
 }: {
   stocks: Stock[];
   dark: boolean;
   metaMap: Map<string, StockMeta>;
+  zoom: number;
+  isFullscreen: boolean;
   onTileClick: (sym: string) => void;
   onTileHover: (info: HoverInfo | null) => void;
   onSectorLeave: () => void;
@@ -258,126 +231,137 @@ function MP_TreemapView({
   for (const sec of sectorOrder) bySec[sec]!.sort((a, b) => b.cap - a.cap);
 
   const W = 1040, H = 780, HEADER = 22;
-
   const sectorItems = sectorOrder.map(sec => ({
     sec,
     stocks: bySec[sec]!,
     value: bySec[sec]!.reduce((a, r) => a + r.cap, 0),
   }));
-
   const sectorBoxes = squarify(sectorItems, W, H);
 
   return (
+    /* scrollable wrapper — grows with zoom */
     <div style={{
-      border: "1px solid var(--ab-border)", background: "var(--ab-bg)",
-      position: "relative", width: "100%", aspectRatio: `${W} / ${H}`,
+      width: "100%",
+      overflowX: zoom > 1 ? "auto" : "hidden",
+      overflowY: zoom > 1 ? "auto" : "hidden",
+      maxHeight: isFullscreen ? "calc(100dvh - 64px)" : "none",
     }}>
-      {sectorBoxes.map(sb => {
-        const innerX = 2, innerY = HEADER + 2;
-        const innerW = Math.max(1, sb.w - 4);
-        const innerH = Math.max(1, sb.h - HEADER - 4);
-        const stockItems = sb.stocks.map(s => ({ ...s, value: s.cap }));
-        const stockBoxes = squarify(stockItems, innerW, innerH);
-        return (
-          <div
-            key={sb.sec}
-            onMouseLeave={onSectorLeave}
-            style={{
-              position: "absolute",
-              left: `${(sb.x / W) * 100}%`,
-              top: `${(sb.y / H) * 100}%`,
-              width: `${(sb.w / W) * 100}%`,
-              height: `${(sb.h / H) * 100}%`,
-              background: "var(--ab-card)",
-              borderRight: "1px solid var(--ab-border)",
-              borderBottom: "1px solid var(--ab-border)",
-              overflow: "hidden",
-            }}
-          >
-            {/* Sector header */}
-            <div style={{
-              position: "absolute", top: 4, left: 8, right: 8, height: HEADER - 4,
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 12,
-              color: "var(--ab-muted)", pointerEvents: "none",
-            }}>
-              <span>{sb.sec}</span>
-              <span style={{
-                fontFamily: SANS_MP, fontStyle: "normal", fontSize: 9,
-                letterSpacing: ".12em", textTransform: "uppercase",
-                color: "var(--ab-faint)", fontWeight: 700,
-              }}>{sb.stocks.length}</span>
-            </div>
+      <div style={{
+        width: `${zoom * 100}%`,
+        aspectRatio: `${W} / ${H}`,
+        position: "relative",
+        border: "1px solid var(--ab-border)",
+        background: "var(--ab-bg)",
+        minWidth: zoom > 1 ? `${zoom * 100}%` : undefined,
+      }}>
+        {sectorBoxes.map(sb => {
+          const innerX = 2, innerY = HEADER + 2;
+          const innerW = Math.max(1, sb.w - 4);
+          const innerH = Math.max(1, sb.h - HEADER - 4);
+          const stockItems = sb.stocks.map(s => ({ ...s, value: s.cap }));
+          const stockBoxes = squarify(stockItems, innerW, innerH);
+          return (
+            <div
+              key={sb.sec}
+              onMouseLeave={onSectorLeave}
+              style={{
+                position: "absolute",
+                left: `${(sb.x / W) * 100}%`,
+                top: `${(sb.y / H) * 100}%`,
+                width: `${(sb.w / W) * 100}%`,
+                height: `${(sb.h / H) * 100}%`,
+                background: "var(--ab-card)",
+                borderRight: "1px solid var(--ab-border)",
+                borderBottom: "1px solid var(--ab-border)",
+                overflow: "hidden",
+              }}
+            >
+              {/* Sector header */}
+              <div style={{
+                position: "absolute", top: 4, left: 8, right: 8, height: HEADER - 4,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 12,
+                color: "var(--ab-muted)", pointerEvents: "none",
+              }}>
+                <span>{sb.sec}</span>
+                <span style={{
+                  fontFamily: SANS_MP, fontStyle: "normal", fontSize: 9,
+                  letterSpacing: ".12em", textTransform: "uppercase",
+                  color: "var(--ab-faint)", fontWeight: 700,
+                }}>{sb.stocks.length}</span>
+              </div>
 
-            {/* Stock tiles */}
-            {stockBoxes.map(box => {
-              const area = box.w * box.h;
-              const showSym = box.w > 26 && box.h > 18;
-              const showPct = area > 900 && box.h > 28;
-              const bigSym = area > 3600;
-              return (
-                <div
-                  key={box.sym}
-                  onClick={() => onTileClick(box.sym)}
-                  onMouseEnter={(e) => {
-                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                    onTileHover({
-                      hoveredSym: box.sym,
-                      sec: sb.sec,
-                      sectorStocks: sb.stocks,
-                      x: rect.right,
-                      y: rect.top,
-                    });
-                  }}
-                  title={`${box.sym} ${mpFmt(box.pct)}`}
-                  style={{
-                    position: "absolute",
-                    left: `${((innerX + box.x) / sb.w) * 100}%`,
-                    top: `${((innerY + box.y) / sb.h) * 100}%`,
-                    width: `${(box.w / sb.w) * 100}%`,
-                    height: `${(box.h / sb.h) * 100}%`,
-                    background: mpTone(box.pct, dark),
-                    border: "1px solid var(--ab-border)",
-                    padding: bigSym ? "6px 8px" : "3px 5px",
-                    display: "flex", flexDirection: "column",
-                    justifyContent: "space-between",
-                    minHeight: 0, overflow: "hidden",
-                    cursor: "pointer", boxSizing: "border-box",
-                  }}
-                >
-                  {showSym && (
-                    <div style={{
-                      fontFamily: SERIF_MP,
-                      fontSize: bigSym ? 15 : 11,
-                      fontWeight: 600,
-                      letterSpacing: "-.01em", lineHeight: 1.1,
-                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                    }}>{box.sym}</div>
-                  )}
-                  {showPct && (
-                    <div style={{
-                      fontFamily: "var(--ab-mono)",
-                      fontVariantNumeric: "tabular-nums",
-                      fontSize: bigSym ? 11 : 9,
-                      fontWeight: 600,
-                      color: box.pct >= 0 ? "var(--ab-up)" : "var(--ab-down)",
-                      lineHeight: 1, whiteSpace: "nowrap",
-                    }}>{mpFmt(box.pct)}</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
+              {/* Stock tiles */}
+              {stockBoxes.map(box => {
+                const area = box.w * box.h;
+                const showSym = box.w > 26 && box.h > 18;
+                const showPct = area > 900 && box.h > 28;
+                const bigSym = area > 3600;
+                return (
+                  <div
+                    key={box.sym}
+                    onClick={() => onTileClick(box.sym)}
+                    onMouseEnter={(e) => {
+                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                      onTileHover({
+                        hoveredSym: box.sym,
+                        sec: sb.sec,
+                        sectorStocks: sb.stocks,
+                        x: rect.right,
+                        y: rect.top,
+                      });
+                    }}
+                    title={`${box.sym} ${mpFmt(box.pct)}`}
+                    style={{
+                      position: "absolute",
+                      left: `${((innerX + box.x) / sb.w) * 100}%`,
+                      top: `${((innerY + box.y) / sb.h) * 100}%`,
+                      width: `${(box.w / sb.w) * 100}%`,
+                      height: `${(box.h / sb.h) * 100}%`,
+                      background: mpTone(box.pct, dark),
+                      border: "1px solid var(--ab-border)",
+                      padding: bigSym ? "6px 8px" : "3px 5px",
+                      display: "flex", flexDirection: "column",
+                      justifyContent: "space-between",
+                      minHeight: 0, overflow: "hidden",
+                      cursor: "pointer", boxSizing: "border-box",
+                    }}
+                  >
+                    {showSym && (
+                      <div style={{
+                        fontFamily: SERIF_MP,
+                        fontSize: bigSym ? 15 : 11,
+                        fontWeight: 600,
+                        letterSpacing: "-.01em", lineHeight: 1.1,
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                      }}>{box.sym}</div>
+                    )}
+                    {showPct && (
+                      <div style={{
+                        fontFamily: "var(--ab-mono)",
+                        fontVariantNumeric: "tabular-nums",
+                        fontSize: bigSym ? 11 : 9,
+                        fontWeight: 600,
+                        color: box.pct >= 0 ? "var(--ab-up)" : "var(--ab-down)",
+                        lineHeight: 1, whiteSpace: "nowrap",
+                      }}>{mpFmt(box.pct)}</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-// ── Table View ────────────────────────────────────────────────────────────
+// ── Table view (mobile: one column at a time) ─────────────────────────────
 function MP_TableView({
   stocks, dark, onTileClick,
 }: { stocks: Stock[]; dark: boolean; onTileClick: (sym: string) => void }) {
+  const [mobileTab, setMobileTab] = useState<"up" | "down">("up");
   const up   = stocks.filter(s => s[2] > 0).sort((a, b) => b[2] - a[2]);
   const down = stocks.filter(s => s[2] < 0).sort((a, b) => a[2] - b[2]);
   const maxAbs = Math.max(...up.map(s => s[2]), ...down.map(s => -s[2]), 0.01);
@@ -395,118 +379,213 @@ function MP_TableView({
         onClick={() => onTileClick(sym)}
         style={{
           display: "grid",
-          gridTemplateColumns: side === "up"
-            ? "56px 1fr 72px 1fr"
-            : "72px 1fr 56px",
+          gridTemplateColumns: "52px 1fr 68px 1fr",
           padding: "8px 0",
           borderBottom: "1px solid var(--ab-border)",
-          fontFamily: SANS_MP, fontSize: 13,
-          columnGap: 10, cursor: "pointer", alignItems: "center",
+          columnGap: 8, cursor: "pointer", alignItems: "center",
         }}
       >
-        {side === "up" ? (
-          <>
-            <span style={{ fontFamily: SERIF_MP, fontWeight: 600 }}>{sym}</span>
-            <span style={{
-              fontFamily: SERIF_MP, fontStyle: "italic",
-              color: "var(--ab-muted)", fontSize: 12,
-            }}>{sec}</span>
-            <span style={{
-              fontFamily: "var(--ab-mono)", fontVariantNumeric: "tabular-nums",
-              fontWeight: 600, color, fontSize: 12, textAlign: "right",
-            }}>{mpFmt(pct)}</span>
-            <div style={{
-              height: 8, background: bg,
-              borderLeft: `2px solid ${color}`, width: barWidth,
-            }} />
-          </>
-        ) : (
-          <>
-            <span style={{
-              fontFamily: "var(--ab-mono)", fontVariantNumeric: "tabular-nums",
-              fontWeight: 600, color, fontSize: 12,
-            }}>{mpFmt(pct)}</span>
-            <span style={{
-              fontFamily: SERIF_MP, fontStyle: "italic",
-              color: "var(--ab-muted)", fontSize: 12,
-            }}>{sec}</span>
-            <span style={{
-              fontFamily: SERIF_MP, fontWeight: 600, textAlign: "right",
-            }}>{sym}</span>
-          </>
-        )}
+        <span style={{ fontFamily: SERIF_MP, fontWeight: 600, fontSize: 14 }}>{sym}</span>
+        <span style={{
+          fontFamily: SERIF_MP, fontStyle: "italic",
+          color: "var(--ab-muted)", fontSize: 12,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>{sec}</span>
+        <span style={{
+          fontFamily: "var(--ab-mono)", fontVariantNumeric: "tabular-nums",
+          fontWeight: 600, color, fontSize: 12, textAlign: "right",
+        }}>{mpFmt(pct)}</span>
+        <div style={{
+          height: 8, background: bg,
+          borderLeft: `2px solid ${color}`, width: barWidth,
+        }} />
       </div>
     );
   }
 
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
-      {/* Advancing */}
-      <div>
-        <div style={{
-          display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-          marginBottom: 10, borderBottom: "2px solid var(--ab-up)", paddingBottom: 6,
-        }}>
-          <span style={{ fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600 }}>
-            ↑ Advancing{" "}
-            <span style={{ color: "var(--ab-muted)", fontSize: 14, fontStyle: "italic", fontWeight: 400 }}>
-              · {up.length}
+  const ColHeader = ({ side }: { side: "up" | "down" }) => (
+    <>
+      <div style={{
+        display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+        marginBottom: 10,
+        borderBottom: `2px solid ${side === "up" ? "var(--ab-up)" : "var(--ab-down)"}`,
+        paddingBottom: 6,
+      }}>
+        {side === "up" ? (
+          <>
+            <span style={{ fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600 }}>
+              ↑ Advancing{" "}
+              <span style={{ color: "var(--ab-muted)", fontSize: 14, fontStyle: "italic", fontWeight: 400 }}>
+                · {up.length}
+              </span>
             </span>
-          </span>
-          <span style={{
-            fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase",
-            color: "var(--ab-faint)", fontWeight: 700,
-          }}>today&apos;s best</span>
-        </div>
-        <div style={{
-          display: "grid", gridTemplateColumns: "56px 1fr 72px 1fr",
-          padding: "6px 0", borderBottom: "1px solid var(--ab-border)",
-          fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase",
-          color: "var(--ab-faint)", fontWeight: 700, columnGap: 10,
-        }}>
-          <span>Sym</span><span>Sector</span>
-          <span style={{ textAlign: "right" }}>Δ%</span><span></span>
-        </div>
-        {up.map(([sec, sym, pct]) => (
-          <Row key={sym} sec={sec} sym={sym} pct={pct} side="up" />
+            <span style={{
+              fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase",
+              color: "var(--ab-faint)", fontWeight: 700,
+            }}>today&apos;s best</span>
+          </>
+        ) : (
+          <>
+            <span style={{
+              fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase",
+              color: "var(--ab-faint)", fontWeight: 700,
+            }}>today&apos;s worst</span>
+            <span style={{ fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600 }}>
+              Declining{" "}
+              <span style={{ color: "var(--ab-muted)", fontSize: 14, fontStyle: "italic", fontWeight: 400 }}>
+                · {down.length}
+              </span>{" "}↓
+            </span>
+          </>
+        )}
+      </div>
+      <div style={{
+        display: "grid", gridTemplateColumns: "52px 1fr 68px 1fr",
+        padding: "6px 0", borderBottom: "1px solid var(--ab-border)",
+        fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase",
+        color: "var(--ab-faint)", fontWeight: 700, columnGap: 8,
+      }}>
+        <span>Sym</span><span>Sector</span>
+        <span style={{ textAlign: "right" }}>Δ%</span><span></span>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile: tab strip to pick advancing vs declining */}
+      <div className="sm:hidden" style={{
+        display: "flex", gap: 0,
+        borderBottom: "1px solid var(--ab-border)",
+        marginBottom: 16,
+      }}>
+        {(["up", "down"] as const).map(t => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setMobileTab(t)}
+            style={{
+              flex: 1, padding: "8px 0",
+              fontFamily: SERIF_MP, fontSize: 15, fontWeight: mobileTab === t ? 600 : 400,
+              color: mobileTab === t
+                ? (t === "up" ? "var(--ab-up)" : "var(--ab-down)")
+                : "var(--ab-muted)",
+              background: "transparent", border: "none",
+              borderBottom: mobileTab === t
+                ? `2px solid ${t === "up" ? "var(--ab-up)" : "var(--ab-down)"}`
+                : "2px solid transparent",
+              marginBottom: -1, cursor: "pointer",
+            }}
+          >
+            {t === "up" ? `↑ Advancing · ${up.length}` : `Declining · ${down.length} ↓`}
+          </button>
         ))}
       </div>
 
-      {/* Declining */}
-      <div>
-        <div style={{
-          display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-          marginBottom: 10, borderBottom: "2px solid var(--ab-down)", paddingBottom: 6,
-        }}>
-          <span style={{
-            fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase",
-            color: "var(--ab-faint)", fontWeight: 700,
-          }}>today&apos;s worst</span>
-          <span style={{ fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600, textAlign: "right" }}>
-            Declining{" "}
-            <span style={{ color: "var(--ab-muted)", fontSize: 14, fontStyle: "italic", fontWeight: 400 }}>
-              · {down.length}
-            </span>{" "}↓
-          </span>
+      {/* Desktop: two columns */}
+      <div className="hidden sm:grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 40 }}>
+        <div>
+          <ColHeader side="up" />
+          {up.map(([sec, sym, pct]) => (
+            <Row key={sym} sec={sec} sym={sym} pct={pct} side="up" />
+          ))}
         </div>
-        <div style={{
-          display: "grid", gridTemplateColumns: "72px 1fr 56px",
-          padding: "6px 0", borderBottom: "1px solid var(--ab-border)",
-          fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase",
-          color: "var(--ab-faint)", fontWeight: 700, columnGap: 10,
-        }}>
-          <span>Δ%</span><span style={{ textAlign: "right" }}>Sector</span>
-          <span style={{ textAlign: "right" }}>Sym</span>
+        <div>
+          <ColHeader side="down" />
+          {down.map(([sec, sym, pct]) => (
+            <Row key={sym} sec={sec} sym={sym} pct={pct} side="down" />
+          ))}
         </div>
-        {down.map(([sec, sym, pct]) => (
-          <Row key={sym} sec={sec} sym={sym} pct={pct} side="down" />
+      </div>
+
+      {/* Mobile: single column */}
+      <div className="sm:hidden">
+        <ColHeader side={mobileTab} />
+        {(mobileTab === "up" ? up : down).map(([sec, sym, pct]) => (
+          <Row key={sym} sec={sec} sym={sym} pct={pct} side={mobileTab} />
         ))}
       </div>
+    </>
+  );
+}
+
+// ── Zoom toolbar ──────────────────────────────────────────────────────────
+function ZoomToolbar({
+  zoom, onZoom, isFullscreen, onToggleFullscreen,
+}: {
+  zoom: number;
+  onZoom: (z: number) => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
+}) {
+  const LEVELS = [0.5, 0.75, 1, 1.5, 2, 3];
+  const idx = LEVELS.indexOf(zoom);
+
+  const btn: React.CSSProperties = {
+    fontFamily: SANS_MP, fontSize: 11, fontWeight: 700,
+    letterSpacing: ".08em",
+    background: "none", border: "1px solid var(--ab-border)",
+    color: "var(--ab-muted)", padding: "4px 10px", cursor: "pointer",
+  };
+
+  return (
+    <div style={{
+      display: "flex", flexWrap: "nowrap", alignItems: "center", gap: 6,
+      borderBottom: "1px solid var(--ab-border)", paddingBottom: 10, marginBottom: 12,
+    }}>
+      <span style={{
+        fontFamily: SANS_MP, fontSize: 9, fontWeight: 700,
+        letterSpacing: ".14em", textTransform: "uppercase",
+        color: "var(--ab-faint)", whiteSpace: "nowrap",
+      }}>Map view</span>
+
+      {/* Zoom control */}
+      <div style={{
+        display: "flex", alignItems: "center",
+        border: "1px solid var(--ab-border)", background: "var(--ab-surface)",
+      }}>
+        <button
+          type="button" aria-label="Zoom out"
+          onClick={() => onZoom(LEVELS[Math.max(0, idx - 1)]!)}
+          disabled={idx <= 0}
+          style={{ ...btn, fontSize: 14, padding: "2px 9px", border: "none",
+            borderRight: "1px solid var(--ab-border)", opacity: idx <= 0 ? 0.3 : 1 }}
+        >−</button>
+        <span style={{
+          fontFamily: "ui-monospace,Menlo,monospace", fontSize: 11,
+          color: "var(--ab-fg)", minWidth: 42, textAlign: "center",
+          fontVariantNumeric: "tabular-nums",
+        }}>{Math.round(zoom * 100)}%</span>
+        <button
+          type="button" aria-label="Zoom in"
+          onClick={() => onZoom(LEVELS[Math.min(LEVELS.length - 1, idx + 1)]!)}
+          disabled={idx >= LEVELS.length - 1}
+          style={{ ...btn, fontSize: 14, padding: "2px 9px", border: "none",
+            borderLeft: "1px solid var(--ab-border)", opacity: idx >= LEVELS.length - 1 ? 0.3 : 1 }}
+        >+</button>
+      </div>
+
+      <button type="button" onClick={() => onZoom(1)} style={{ ...btn, fontSize: 10, padding: "3px 8px" }}>
+        Reset
+      </button>
+
+      <button
+        type="button"
+        onClick={onToggleFullscreen}
+        style={{
+          ...btn, fontSize: 10, padding: "3px 12px",
+          marginLeft: "auto",
+          background: ACCENT, color: "#fff", border: "none",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {isFullscreen ? "Exit ⛶" : "Full screen ⛶"}
+      </button>
     </div>
   );
 }
 
-// ── Tab Toggle ────────────────────────────────────────────────────────────
+// ── Tab toggle ────────────────────────────────────────────────────────────
 function MP_Tabs({
   view, setView,
 }: { view: "map" | "table"; setView: (v: "map" | "table") => void }) {
@@ -528,9 +607,9 @@ function MP_Tabs({
               type="button"
               onClick={() => setView(t.id)}
               style={{
-                padding: "10px 18px 12px",
+                padding: "10px 14px 12px",
                 fontFamily: SERIF_MP,
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: active ? 600 : 500,
                 color: active ? "var(--ab-fg)" : "var(--ab-muted)",
                 cursor: "pointer",
@@ -540,21 +619,24 @@ function MP_Tabs({
                 marginBottom: -1,
               }}
             >
-              {t.label}
-              <span style={{
-                fontFamily: SANS_MP, fontSize: 10,
-                letterSpacing: ".12em", textTransform: "uppercase",
-                color: "var(--ab-faint)", fontWeight: 600, marginLeft: 10,
-              }}>{t.hint}</span>
+              {/* Mobile: shorter label */}
+              <span className="sm:hidden">{t.id === "map" ? "Map" : "Adv / Dec"}</span>
+              {/* Desktop: full label */}
+              <span className="hidden sm:inline">
+                {t.label}
+                <span style={{
+                  fontFamily: SANS_MP, fontSize: 10,
+                  letterSpacing: ".12em", textTransform: "uppercase",
+                  color: "var(--ab-faint)", fontWeight: 600, marginLeft: 8,
+                }}>{t.hint}</span>
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Keyboard shortcut hint — clarified */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 6, paddingBottom: 10,
-      }}>
+      {/* Keyboard shortcut hint — desktop only */}
+      <div className="hidden sm:flex" style={{ alignItems: "center", gap: 6, paddingBottom: 10 }}>
         <span style={{
           fontFamily: SANS_MP, fontSize: 9, letterSpacing: ".10em",
           textTransform: "uppercase", color: "var(--ab-faint)", fontWeight: 600,
@@ -578,7 +660,7 @@ function MP_Tabs({
   );
 }
 
-// ── Main Export ───────────────────────────────────────────────────────────
+// ── Main export ───────────────────────────────────────────────────────────
 export function MapV2Client({
   tree,
   isPro = false,
@@ -596,7 +678,6 @@ export function MapV2Client({
   marketStatus: MarketStatusInfo;
   kicker: { driver: KickerItem; green: KickerItem; drag: KickerItem; breadth: KickerItem };
 }) {
-  // Convert tree → flat stocks + symbol→meta lookup
   const { stocks, metaMap } = useMemo(() => {
     const stocks: Stock[] = [];
     const metaMap = new Map<string, StockMeta>();
@@ -616,7 +697,7 @@ export function MapV2Client({
     return { stocks, metaMap };
   }, [tree]);
 
-  // Dark mode detection
+  // Dark mode
   const [dark, setDark] = useState(false);
   useEffect(() => {
     const check = () => setDark(document.documentElement.classList.contains("dark"));
@@ -626,7 +707,7 @@ export function MapV2Client({
     return () => obs.disconnect();
   }, []);
 
-  // Tab state
+  // View tab
   const [view, setView] = useState<"map" | "table">("map");
 
   // Keyboard shortcuts
@@ -641,7 +722,46 @@ export function MapV2Client({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Hover card state
+  // Zoom + fullscreen
+  const [zoom, setZoom] = useState(1);
+  const mapShellRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const sync = () => {
+      const el = mapShellRef.current;
+      const doc = document as Document & { webkitFullscreenElement?: Element | null };
+      setIsFullscreen(Boolean(el && (document.fullscreenElement === el || doc.webkitFullscreenElement === el)));
+    };
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    return () => {
+      document.removeEventListener("fullscreenchange", sync);
+      document.removeEventListener("webkitfullscreenchange", sync);
+    };
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    const el = mapShellRef.current;
+    if (!el) return;
+    const doc = document as Document & {
+      webkitFullscreenElement?: Element | null;
+      webkitExitFullscreen?: () => Promise<void>;
+    };
+    const hel = el as HTMLElement & { webkitRequestFullscreen?: () => void };
+    try {
+      if (document.fullscreenElement === el || doc.webkitFullscreenElement === el) {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else await doc.webkitExitFullscreen?.();
+      } else if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else {
+        await hel.webkitRequestFullscreen?.();
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Hover card
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -650,7 +770,6 @@ export function MapV2Client({
     if (info) {
       setHoverInfo(info);
     } else {
-      // Small delay on hide so moving between tiles within a sector feels smooth
       hoverTimeout.current = setTimeout(() => setHoverInfo(null), 80);
     }
   }, []);
@@ -660,7 +779,7 @@ export function MapV2Client({
     hoverTimeout.current = setTimeout(() => setHoverInfo(null), 80);
   }, []);
 
-  // Headlines panel state
+  // Headlines panel
   const [selected, setSelected] = useState<(StockMeta & { symbol: string }) | null>(null);
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [newsLoading, setNewsLoading] = useState(false);
@@ -668,68 +787,50 @@ export function MapV2Client({
   const [aiSummary, setAiSummary] = useState<{ summary: string; sentiment: string } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Lookup quota
   const [lookupsLeft, setLookupsLeft] = useState<number>(
     isPro ? Infinity : Math.max(0, maxLookups - lookupsUsed),
   );
   const [limitHit, setLimitHit] = useState(!isPro && lookupsUsed >= maxLookups);
 
   const loadNews = useCallback(async (symbol: string) => {
-    setNewsLoading(true);
-    setNewsError(null);
-    setNews([]);
+    setNewsLoading(true); setNewsError(null); setNews([]);
     try {
       const res = await fetch(`/api/news/ticker?symbol=${encodeURIComponent(symbol)}`);
       if (!res.ok) throw new Error("Failed");
       const data = (await res.json()) as { articles?: NewsArticle[] };
       setNews(data.articles ?? []);
-    } catch {
-      setNewsError("Could not load headlines. Try again.");
-    } finally {
-      setNewsLoading(false);
-    }
+    } catch { setNewsError("Could not load headlines. Try again."); }
+    finally { setNewsLoading(false); }
   }, []);
 
-  const loadAiSummary = useCallback(async (
-    symbol: string, changePct: number, price: number | null,
-  ) => {
-    setAiLoading(true);
-    setAiSummary(null);
+  const loadAiSummary = useCallback(async (sym: string, pct: number, price: number | null) => {
+    setAiLoading(true); setAiSummary(null);
     try {
-      const params = new URLSearchParams({ symbol });
-      params.set("changePct", changePct.toFixed(4));
-      if (price != null) params.set("price", price.toFixed(2));
-      const res = await fetch(`/api/market/stock-summary?${params.toString()}`);
+      const p = new URLSearchParams({ symbol: sym });
+      p.set("changePct", pct.toFixed(4));
+      if (price != null) p.set("price", price.toFixed(2));
+      const res = await fetch(`/api/market/stock-summary?${p.toString()}`);
       if (!res.ok) throw new Error("Failed");
-      const data = (await res.json()) as { sentiment: string; summary: string };
-      setAiSummary(data);
-    } catch {
-      setAiSummary(null);
-    } finally {
-      setAiLoading(false);
-    }
+      setAiSummary((await res.json()) as { sentiment: string; summary: string });
+    } catch { setAiSummary(null); }
+    finally { setAiLoading(false); }
   }, []);
 
   const onTileClick = useCallback(async (symbol: string) => {
     const meta = metaMap.get(symbol.toUpperCase());
     if (!meta) return;
-
     if (!isPro) {
       if (lookupsLeft <= 0) { setLimitHit(true); return; }
       const result = await checkAndRecordLookup(symbol);
       if (!result.allowed) { setLimitHit(true); return; }
       setLookupsLeft(n => Math.max(0, isFinite(n) ? n - 1 : n));
     }
-
     setSelected({ ...meta, symbol });
     void loadNews(symbol);
     void loadAiSummary(symbol, meta.changePct, meta.price);
   }, [metaMap, isPro, lookupsLeft, loadNews, loadAiSummary]);
 
-  // Dynamic content
-  const title = view === "map"
-    ? "The map, in one glance."
-    : "Gainers and losers, at a glance.";
+  const title = view === "map" ? "The map, in one glance." : "Gainers and losers, at a glance.";
   const dek = view === "map"
     ? "Each tile is a stock. Area encodes market capitalization; tint encodes today's move. Tap any tile for headlines and the story behind it."
     : "A two-column ledger: advancers on the left, decliners on the right — sorted by the size of the move. Bars are visual; numbers are exact.";
@@ -745,27 +846,19 @@ export function MapV2Client({
       <AutoRefresh everyMs={900000} />
       <style>{`@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`}</style>
 
-      {/* ── Masthead ── */}
-      <LedgerMasthead
-        eyebrow={`Cartography · ${timeStr}`}
-        title={title}
-        dek={dek}
-      />
+      <LedgerMasthead eyebrow={`Cartography · ${timeStr}`} title={title} dek={dek} />
 
-      {/* ── Byline ── */}
       <LedgerByline
         left={bylineLeft}
         right={
           <span style={{
             fontFamily: SANS_MP, fontSize: 11,
             color: "var(--ab-faint)", fontVariantNumeric: "tabular-nums",
-          }}>
-            {lookupsLabel}
-          </span>
+          }}>{lookupsLabel}</span>
         }
       />
 
-      {/* ── Legend + market status ── */}
+      {/* Legend + market status */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         fontSize: 10, color: "var(--ab-faint)", marginBottom: 10, gap: 8,
@@ -797,9 +890,8 @@ export function MapV2Client({
             <span style={{
               position: "relative", display: "inline-flex",
               width: 7, height: 7, borderRadius: "50%",
-              background: marketStatus.color === "green"
-                ? "#10B981" : marketStatus.color === "yellow"
-                ? "#F59E0B" : "#EF4444",
+              background: marketStatus.color === "green" ? "#10B981"
+                : marketStatus.color === "yellow" ? "#F59E0B" : "#EF4444",
             }} />
           </span>
           <span style={{
@@ -810,16 +902,15 @@ export function MapV2Client({
         </div>
       </div>
 
-      {/* ── Limit hit banner ── */}
+      {/* Limit banner */}
       {limitHit && (
         <div style={{
           border: `2px solid ${ACCENT}`, background: "var(--ab-surface-hi)",
           padding: "24px 32px", textAlign: "center", marginBottom: 20,
         }}>
-          <p style={{
-            fontFamily: SERIF_MP, fontSize: 18, fontWeight: 600,
-            color: "var(--ab-fg)", margin: 0,
-          }}>Daily limit reached</p>
+          <p style={{ fontFamily: SERIF_MP, fontSize: 18, fontWeight: 600, color: "var(--ab-fg)", margin: 0 }}>
+            Daily limit reached
+          </p>
           <p style={{
             fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 14,
             color: "var(--ab-muted)", marginTop: 6,
@@ -836,7 +927,7 @@ export function MapV2Client({
         </div>
       )}
 
-      {/* ── Headlines panel ── */}
+      {/* Headlines panel */}
       {!selected ? (
         <p style={{
           fontFamily: SERIF_MP, fontStyle: "italic",
@@ -853,23 +944,14 @@ export function MapV2Client({
             display: "flex", flexWrap: "wrap",
             alignItems: "baseline", gap: "6px 12px", marginBottom: 12,
           }}>
-            <span style={{
-              fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600,
-              color: "var(--ab-fg)",
-            }}>
+            <span style={{ fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600, color: "var(--ab-fg)" }}>
               {selected.shortName ?? selected.symbol}
             </span>
-            <span style={{
-              fontFamily: SANS_MP, fontSize: 12,
-              color: "var(--ab-muted)", fontVariantNumeric: "tabular-nums",
-            }}>
+            <span style={{ fontFamily: SANS_MP, fontSize: 12, color: "var(--ab-muted)", fontVariantNumeric: "tabular-nums" }}>
               {selected.symbol}
             </span>
             {selected.price != null && (
-              <span style={{
-                fontFamily: SERIF_MP, fontSize: 15,
-                fontWeight: 600, fontVariantNumeric: "tabular-nums",
-              }}>
+              <span style={{ fontFamily: SERIF_MP, fontSize: 15, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
                 ${selected.price.toFixed(2)}
               </span>
             )}
@@ -881,97 +963,103 @@ export function MapV2Client({
               {selected.changePct >= 0 ? "+" : ""}{selected.changePct.toFixed(2)}%
             </span>
           </div>
-
           {aiLoading && (
-            <p style={{
-              fontFamily: SERIF_MP, fontStyle: "italic",
-              fontSize: 13, color: "var(--ab-muted)",
-            }}>Analysing move…</p>
+            <p style={{ fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>
+              Analysing move…
+            </p>
           )}
           {!aiLoading && aiSummary?.summary && (
-            <p style={{
-              fontFamily: SERIF_MP, fontSize: 14, lineHeight: 1.6,
-              color: "var(--ab-muted)", marginBottom: 14,
-            }}>{aiSummary.summary}</p>
+            <p style={{ fontFamily: SERIF_MP, fontSize: 14, lineHeight: 1.6, color: "var(--ab-muted)", marginBottom: 14 }}>
+              {aiSummary.summary}
+            </p>
           )}
-
           {newsLoading && (
-            <p style={{
-              fontFamily: SERIF_MP, fontStyle: "italic",
-              fontSize: 13, color: "var(--ab-muted)",
-            }}>Loading headlines…</p>
+            <p style={{ fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>
+              Loading headlines…
+            </p>
           )}
           {newsError && (
-            <p style={{ fontFamily: SANS_MP, fontSize: 12, color: "var(--ab-down)" }}
-               role="alert">{newsError}</p>
+            <p style={{ fontFamily: SANS_MP, fontSize: 12, color: "var(--ab-down)" }} role="alert">
+              {newsError}
+            </p>
           )}
           {!newsLoading && news.length > 0 && (
             <div style={{ maxHeight: "min(52vh, 480px)", overflowY: "auto" }}>
               {news.slice(0, 6).map(a => (
-                <div key={a.id} style={{
-                  padding: "12px 0",
-                  borderBottom: "1px solid var(--ab-border)",
-                }}>
+                <div key={a.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--ab-border)" }}>
                   <p style={{
                     fontFamily: SERIF_MP, fontSize: 15, fontWeight: 600,
                     lineHeight: 1.25, color: "var(--ab-fg)", marginBottom: 4,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
                     overflow: "hidden",
                   }}>{a.title}</p>
                   {a.summary && (
                     <p style={{
                       fontFamily: SERIF_MP, fontSize: 13,
                       color: "var(--ab-muted)", lineHeight: 1.55, marginBottom: 6,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
                       overflow: "hidden",
                     }}>{a.summary}</p>
                   )}
-                  <a
-                    href={a.url} target="_blank" rel="noreferrer"
-                    style={{
-                      fontFamily: SANS_MP, fontSize: 11, color: ACCENT,
-                      letterSpacing: ".04em", textDecoration: "none",
-                    }}
-                  >Original article →</a>
+                  <a href={a.url} target="_blank" rel="noreferrer" style={{
+                    fontFamily: SANS_MP, fontSize: 11, color: ACCENT,
+                    letterSpacing: ".04em", textDecoration: "none",
+                  }}>Original article →</a>
                 </div>
               ))}
             </div>
           )}
           {!newsLoading && !newsError && news.length === 0 && (
-            <p style={{
-              fontFamily: SERIF_MP, fontStyle: "italic",
-              fontSize: 13, color: "var(--ab-muted)",
-            }}>No headlines matched this symbol yet. Try again later.</p>
+            <p style={{ fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)" }}>
+              No headlines matched this symbol yet. Try again later.
+            </p>
           )}
         </div>
       )}
 
-      {/* ── Tab toggle ── */}
+      {/* Tab toggle */}
       <MP_Tabs view={view} setView={setView} />
 
-      {/* ── Views ── */}
+      {/* Views */}
       {view === "map" && (
-        <MP_TreemapView
-          stocks={stocks}
-          dark={dark}
-          metaMap={metaMap}
-          onTileClick={onTileClick}
-          onTileHover={onTileHover}
-          onSectorLeave={onSectorLeave}
-        />
+        <div
+          ref={mapShellRef}
+          style={isFullscreen ? {
+            display: "flex", flexDirection: "column",
+            height: "100dvh", width: "100%",
+            background: "var(--ab-bg)", padding: 16,
+          } : {
+            display: "flex", flexDirection: "column",
+          }}
+        >
+          <ZoomToolbar
+            zoom={zoom}
+            onZoom={setZoom}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={toggleFullscreen}
+          />
+          <MP_TreemapView
+            stocks={stocks}
+            dark={dark}
+            metaMap={metaMap}
+            zoom={zoom}
+            isFullscreen={isFullscreen}
+            onTileClick={onTileClick}
+            onTileHover={onTileHover}
+            onSectorLeave={onSectorLeave}
+          />
+        </div>
       )}
       {view === "table" && (
         <MP_TableView stocks={stocks} dark={dark} onTileClick={onTileClick} />
       )}
 
-      {/* ── Hover card (portal-style fixed overlay) ── */}
-      {hoverInfo && (
+      {/* Hover card overlay */}
+      {hoverInfo && view === "map" && (
         <SectorHoverCard info={hoverInfo} metaMap={metaMap} dark={dark} />
       )}
 
-      {/* ── What the map is saying — kicker grid ── */}
+      {/* Kickers */}
       <LedgerRuleLabel>What the map is saying</LedgerRuleLabel>
       <div className="grid ab-kicker-grid" style={{ gridTemplateColumns: "repeat(4,1fr)", gap: 32 }}>
         {[kicker.driver, kicker.green, kicker.drag, kicker.breadth].map(item => (
@@ -981,15 +1069,13 @@ export function MapV2Client({
               textTransform: "uppercase", color: "var(--ab-faint)",
               fontWeight: 700, marginBottom: 6,
             }}>{item.label}</div>
-            <div style={{
-              fontFamily: SERIF_MP, fontSize: 20,
-              fontWeight: 600, lineHeight: 1.15,
-            }}>{item.value}</div>
+            <div style={{ fontFamily: SERIF_MP, fontSize: 20, fontWeight: 600, lineHeight: 1.15 }}>
+              {item.value}
+            </div>
             {item.sub && (
-              <div style={{
-                fontFamily: SERIF_MP, fontStyle: "italic",
-                fontSize: 13, color: "var(--ab-muted)", marginTop: 4,
-              }}>{item.sub}</div>
+              <div style={{ fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", marginTop: 4 }}>
+                {item.sub}
+              </div>
             )}
           </div>
         ))}
