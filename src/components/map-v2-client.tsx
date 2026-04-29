@@ -933,7 +933,7 @@ export function MapV2Client({
           fontFamily: SERIF_MP, fontStyle: "italic",
           fontSize: 12, color: "var(--ab-muted)", marginBottom: 16,
         }}>
-          Tile size reflects market capitalization — larger tiles are bigger companies.
+          Tile size reflects market capitalization. Larger tiles are bigger companies.
           Tap a tile to see headlines and why it&apos;s moving.
         </p>
       ) : (
