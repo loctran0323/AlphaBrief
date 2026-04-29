@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { updatePassword } from "./actions";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Account — AlphaBrief" };
+export const metadata: Metadata = { title: "Account · AlphaBrief" };
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;

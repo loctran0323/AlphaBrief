@@ -4,7 +4,7 @@ import { TickerSearch } from "./ticker-search";
 import { LedgerRuleLabel } from "@/components/ledger-ui";
 import { ResearchTickerChips } from "@/components/research-ticker-chips";
 
-export const metadata: Metadata = { title: "Research — AlphaBrief" };
+export const metadata: Metadata = { title: "Research · AlphaBrief" };
 export const dynamic = "force-dynamic";
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;

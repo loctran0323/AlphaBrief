@@ -223,7 +223,7 @@ export function ChatRoom({
               fontFamily: SERIF_L, fontStyle: "italic",
               fontSize: 13, color: "var(--ab-faint)", textAlign: "center",
             }}>
-              {email ? "No messages yet — say hello 👋" : "Sign in to join the chat."}
+              {email ? "No messages yet. Say hello 👋" : "Sign in to join the chat."}
             </p>
           ) : (
             messages.map((m) => (

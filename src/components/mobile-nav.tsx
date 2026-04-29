@@ -288,7 +288,7 @@ export function MobileNav({
                     textDecoration: "none",
                   }}
                 >
-                  Upgrade to Pro — $9/mo
+                  Upgrade to Pro · $9/mo
                 </Link>
               </div>
             )}

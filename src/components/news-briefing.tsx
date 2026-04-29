@@ -295,7 +295,7 @@ export function NewsBriefing({
         <p style={{ fontFamily: SERIF_L, fontSize: 14, color: "var(--ab-muted)", lineHeight: 1.55 }}>
           {tab === "tickers" && emptyHintTickers
             ? emptyHintTickers
-            : "Nothing here yet — try another tab or check back after the next refresh."}
+            : "Nothing here yet. Try another tab or check back after the next refresh."}
         </p>
       ) : (
         <>

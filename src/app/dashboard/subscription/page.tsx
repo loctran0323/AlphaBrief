@@ -4,7 +4,7 @@ import { getUserTier } from "@/lib/subscription";
 import { ManageBillingButton } from "./manage-billing-button";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Subscription — AlphaBrief" };
+export const metadata: Metadata = { title: "Subscription · AlphaBrief" };
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -57,7 +57,7 @@ export default async function SubscriptionPage() {
         </div>
         <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15, color: "var(--ab-muted)", marginBottom: 0 }}>
           {isPro
-            ? "Full access — unlimited map lookups, archive, email digest, and priority features."
+            ? "Full access: unlimited map lookups, archive, email digest, and priority features."
             : "3 market map lookups per day. Upgrade for full access."}
         </p>
       </div>
@@ -96,7 +96,7 @@ export default async function SubscriptionPage() {
       ) : (
         <div style={{ border: `1px solid ${ACCENT}`, padding: "24px 28px", marginBottom: 32 }}>
           <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 8 }}>
-            Upgrade to Pro — $9/month
+            Upgrade to Pro · $9/month
           </div>
           <p style={{ fontFamily: SERIF_L, fontSize: 15, color: "var(--ab-muted)", lineHeight: 1.6, marginBottom: 16 }}>
             Unlock the full archive, unlimited market map lookups, and email digest. Beta price locked in for early supporters.

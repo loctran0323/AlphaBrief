@@ -6,7 +6,7 @@ import { getUserTier } from "@/lib/subscription";
 import type { DigestFrequency } from "@/types/database";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Digest — AlphaBrief" };
+export const metadata: Metadata = { title: "Digest · AlphaBrief" };
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -67,7 +67,7 @@ export default async function SettingsPage({
       {/* Status banners */}
       {digestTest === "sent" && (
         <div style={{ border: "1px solid var(--ab-up)", padding: "12px 16px", marginBottom: 24, fontFamily: SANS_L, fontSize: 13, color: "var(--ab-up)" }}>
-          Test digest sent — check your inbox (and spam).
+          Test digest sent. Check your inbox (and spam).
         </div>
       )}
       {digestTest === "fail" && (
@@ -77,7 +77,7 @@ export default async function SettingsPage({
       )}
       {digestTest === "noemail" && (
         <div style={{ border: "1px solid var(--ab-border)", padding: "12px 16px", marginBottom: 24, fontFamily: SANS_L, fontSize: 13, color: "var(--ab-muted)" }}>
-          No email on file — sign in with an email provider or add one in your account settings.
+          No email on file. Sign in with an email provider or add one in your account settings.
         </div>
       )}
 
@@ -88,7 +88,7 @@ export default async function SettingsPage({
             Email digest is a Pro feature
           </div>
           <p style={{ fontFamily: SERIF_L, fontSize: 15, color: "var(--ab-muted)", lineHeight: 1.6, marginBottom: 16 }}>
-            Upgrade to Pro to receive daily or weekly briefings — headlines, upcoming earnings, and price alerts — straight to your inbox.
+            Upgrade to Pro to receive daily or weekly briefings: headlines, upcoming earnings, and price alerts, straight to your inbox.
           </p>
           <Link href="/dashboard/upgrade" style={{
             display: "inline-block",
@@ -96,7 +96,7 @@ export default async function SettingsPage({
             letterSpacing: ".08em", textTransform: "uppercase",
             color: "#fff", background: ACCENT, padding: "8px 18px", textDecoration: "none",
           }}>
-            Upgrade to Pro — $9/month
+            Upgrade to Pro · $9/month
           </Link>
         </div>
       )}
@@ -142,7 +142,7 @@ export default async function SettingsPage({
               Test email
             </div>
             <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)", marginBottom: 20 }}>
-              Sends one sample digest now — briefing headlines and upcoming events from your watchlist.
+              Sends one sample digest now. Briefing headlines and upcoming events from your watchlist.
             </p>
             <form action={sendTestDigest}>
               <button type="submit" style={{

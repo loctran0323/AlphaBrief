@@ -206,7 +206,7 @@ export function HomeTickerMonitor({
       <div className={shell}>
         <h2 className="text-base font-semibold text-[var(--foreground)]">Your tickers</h2>
         <p className="mt-0.5 text-xs text-[var(--muted)]">
-          Saved to your account — same list as on Dashboard (news &amp; timeline use these symbols).
+          Saved to your account. Same list as on Dashboard (news &amp; timeline use these symbols).
         </p>
 
         <form action={addTicker} className="mt-4 flex flex-wrap items-end gap-2">
@@ -231,7 +231,7 @@ export function HomeTickerMonitor({
         </form>
 
         {sortedSaved.length === 0 ? (
-          <p className="mt-4 text-sm text-[var(--muted)]">No symbols yet — add a ticker above.</p>
+          <p className="mt-4 text-sm text-[var(--muted)]">No symbols yet. Add a ticker above.</p>
         ) : (
           <ul className="mt-4 divide-y divide-[var(--border)]">
             {sortedSaved.map((item) => {
@@ -372,7 +372,7 @@ export function HomeTickerMonitor({
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-        <span>You&apos;re not signed in — tickers below are not saved.</span>
+        <span>You&apos;re not signed in. Tickers below are not saved.</span>
         <Link href="/login?next=/home" className="font-semibold text-[var(--accent)] hover:underline">
           Log in
         </Link>

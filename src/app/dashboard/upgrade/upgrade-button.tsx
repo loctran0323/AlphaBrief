@@ -46,7 +46,7 @@ export function UpgradeButton() {
           transition: "opacity .15s",
         }}
       >
-        {loading ? "Redirecting to Stripe…" : "Upgrade to Pro — $9/month"}
+        {loading ? "Redirecting to Stripe…" : "Upgrade to Pro · $9/month"}
       </button>
     </div>
   );

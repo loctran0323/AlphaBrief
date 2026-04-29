@@ -55,7 +55,7 @@ export function PriceAlertForm({ symbol, currentPrice }: Props) {
           background: "rgba(16,185,129,.08)", border: "1px solid rgba(16,185,129,.3)",
           padding: "8px 14px",
         }}>
-          Alert set — you&apos;ll be notified in your digest when the price is reached.
+          Alert set. You&apos;ll be notified in your digest when the price is reached.
         </div>
       ) : (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "stretch" }}>

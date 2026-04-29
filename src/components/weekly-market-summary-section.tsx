@@ -39,7 +39,7 @@ async function WeeklyMarketSummaryInner() {
 function WeeklyMarketSummaryUnavailable() {
   return (
     <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-faint)" }}>
-      Weekly recap temporarily unavailable — the AI is rate-limited. It will retry automatically on the next page load.
+      Weekly recap temporarily unavailable. The AI is rate-limited. It will retry automatically on the next page load.
     </p>
   );
 }

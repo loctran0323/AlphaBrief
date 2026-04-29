@@ -24,7 +24,7 @@ type Props = { params: Promise<{ symbol: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { symbol } = await params;
-  return { title: `${symbol.toUpperCase()} — AlphaBrief Research` };
+  return { title: `${symbol.toUpperCase()} · AlphaBrief Research` };
 }
 
 function StatRow({ label, value }: { label: string; value: string }) {
@@ -99,7 +99,7 @@ export default async function ResearchSymbolPage({ params }: Props) {
       <LedgerMasthead
         eyebrow={`Ticker profile · ${quote.exchange ?? "Market"}`}
         title={quote.shortName || symbol}
-        dek={`${symbol} — live price, valuation stats, catalysts, and recent news from the wire.`}
+        dek={`${symbol}: live price, valuation stats, catalysts, and recent news from the wire.`}
       />
 
       {/* ── Price line ── */}

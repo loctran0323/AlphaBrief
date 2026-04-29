@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       <LedgerMasthead
         eyebrow={`Daily Briefing · ${todayHeading}`}
         title={<LocalDateHeading fallback={todayHeading} />}
-        dek="Markets compiled by AlphaBrief AI — your watchlist, upcoming catalysts, and the wire."
+        dek="Markets compiled by AlphaBrief AI. Your watchlist, upcoming catalysts, and the wire."
       />
 
       {/* ── Byline bar ── */}

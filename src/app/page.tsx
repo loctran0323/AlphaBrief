@@ -6,9 +6,9 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "AlphaBrief — AI Market Summaries, Watchlist & Catalyst Calendar",
+  title: "AlphaBrief · AI Market Summaries, Watchlist & Catalyst Calendar",
   description:
-    "AlphaBrief is the AI market briefing tool built for investors. Get daily AI-written market summaries, track your watchlist, follow upcoming earnings catalysts, explore the sector map, and read AI-tagged financial news — all in one place.",
+    "AlphaBrief is the AI market briefing tool built for investors. Get daily AI-written market summaries, track your watchlist, follow upcoming earnings catalysts, explore the sector map, and read AI-tagged financial news, all in one place.",
   alternates: {
     canonical: "https://alphabrief.net",
   },
@@ -25,7 +25,7 @@ const features = [
   { num: "IV.",   title: "Market map",        body: "Clickable sector heat map. Click any company for headlines and a 'why it's moving' brief." },
   { num: "V.",    title: "News briefing",     body: "Headlines with AI summaries and bullish / bearish / neutral tags for faster context." },
   { num: "VI.",   title: "Weekly recap",      body: "AI-written weekly market recap covering the week's arc, themes, a standout signal, and catalysts ahead." },
-  { num: "VII.",  title: "Archive",           body: "Past timeline and headlines older than three days — never lose track of what moved the market." },
+  { num: "VII.",  title: "Archive",           body: "Past timeline and headlines older than three days. Never lose track of what moved the market." },
   { num: "VIII.", title: "More coming soon",  body: "Earnings models, price alerts, and deeper AI analysis are on the roadmap." },
 ] as const;
 
@@ -215,7 +215,7 @@ export default async function SplashPage() {
           fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-muted)",
           fontSize: 17, marginTop: 0, marginBottom: 24,
         }}>
-          Your briefing — AI-written market summary, upcoming catalyst calendar, and a tagged news feed.
+          Your briefing: AI-written market summary, upcoming catalyst calendar, and a tagged news feed.
         </p>
 
         {/* Browser-chrome preview card */}
@@ -229,7 +229,7 @@ export default async function SplashPage() {
             <span style={{ width: 9, height: 9, borderRadius: 99, background: "#FF5F57", display: "inline-block" }} />
             <span style={{ width: 9, height: 9, borderRadius: 99, background: "#FEBC2E", display: "inline-block" }} />
             <span style={{ width: 9, height: 9, borderRadius: 99, background: "#28C840", display: "inline-block" }} />
-            <span style={{ marginLeft: "auto", fontFamily: "ui-monospace, Menlo, monospace" }}>alphabrief.ai/dashboard</span>
+            <span style={{ marginLeft: "auto", fontFamily: "ui-monospace, Menlo, monospace" }}>alphabrief.net/dashboard</span>
           </div>
           {/* Dashboard content */}
           <div className="ab-preview-card" style={{ padding: 24 }}>
@@ -357,7 +357,7 @@ export default async function SplashPage() {
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
             color: "var(--ab-muted)", marginTop: 8, maxWidth: 640, marginBottom: 0,
           }}>
-            AI market summaries, earnings catalyst tracking, sector maps, and AI-tagged financial news — everything you need to stay ahead of the market.
+            AI market summaries, earnings catalyst tracking, sector maps, and AI-tagged financial news. Everything you need to stay ahead of the market.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: "24px 20px", marginTop: 32 }}>
             {features.map(({ num, title, body }) => (
@@ -527,7 +527,7 @@ export default async function SplashPage() {
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
             color: "var(--ab-muted)", marginTop: 10,
           }}>
-            Join AlphaBrief — free to start, no credit card required.
+            Join AlphaBrief. Free to start, no credit card required.
           </p>
           <Link href="/signup" style={{
             display: "inline-block", marginTop: 22, padding: "14px 26px",

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUserTier } from "@/lib/subscription";
 import { UpgradeButton } from "./upgrade-button";
 
-export const metadata: Metadata = { title: "Upgrade to Pro — AlphaBrief" };
+export const metadata: Metadata = { title: "Upgrade to Pro · AlphaBrief" };
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -15,7 +15,7 @@ const planRows: Row[] = [
   { label: "Home market view",           free: true,         pro: true },
   { label: "Dashboard & news briefing",  free: true,         pro: true },
   { label: "Market map lookups",         sub: "AI-powered stock analysis on click",    free: "3 / day",    pro: "Unlimited" },
-  { label: "Research — news per ticker", sub: "AI-tagged headlines on any stock",      free: "3 articles", pro: "Full feed" },
+  { label: "Research: news per ticker",  sub: "AI-tagged headlines on any stock",      free: "3 articles", pro: "Full feed" },
   { label: "Price alerts",               sub: "Email when a stock hits your target",   free: false,        pro: true },
   { label: "Email digest",               sub: "Daily briefing delivered to your inbox",free: false,        pro: true },
   { label: "Archive",                    sub: "Past timeline events & historical news", free: false,       pro: true },
@@ -76,7 +76,7 @@ export default async function UpgradePage() {
           color: ACCENT, border: `1px solid ${ACCENT}`,
           padding: "3px 10px",
         }}>
-          Beta pricing — lock in forever
+          Beta pricing · lock in forever
         </div>
         <h1 style={{
           fontFamily: SERIF_L, fontSize: 46, fontWeight: 600,
@@ -90,7 +90,7 @@ export default async function UpgradePage() {
           color: "var(--ab-muted)", margin: "0 auto", maxWidth: 520,
         }}>
           Every Pro subscription directly funds better data APIs, faster infrastructure, and new features.
-          You&apos;re not just upgrading — you&apos;re helping build something better.
+          You&apos;re not just upgrading. You&apos;re helping build something better.
         </p>
       </div>
 

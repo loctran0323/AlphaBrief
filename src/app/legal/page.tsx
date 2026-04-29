@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy & terms — AlphaBrief",
+  title: "Privacy & terms · AlphaBrief",
   description: "Privacy Policy and Terms of Use for AlphaBrief.",
 };
 

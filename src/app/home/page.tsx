@@ -101,7 +101,7 @@ export default async function HomePage() {
       <LedgerMasthead
         eyebrow={eyebrow}
         title="A quiet tape steadies the week"
-        dek="Indices, ETFs, top movers, and your watchlist — the full picture in one view."
+        dek="Indices, ETFs, top movers, and your watchlist. The full picture in one view."
       />
 
       {/* ── Market status byline ── */}
@@ -188,7 +188,7 @@ export default async function HomePage() {
 
       {/* End-of-section rule */}
       <div style={{ marginTop: 48, textAlign: "center" as const, fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-faint)", fontSize: 12 }}>
-        — end of section —
+        · · ·
       </div>
 
       {/* ── Community chat — floating sidebar ── */}

@@ -44,7 +44,7 @@ export function WatchlistRow({
       {sorted.length === 0 && (
         <div className="flex min-w-[200px] items-center bg-[var(--card)] px-5 py-4 text-xs text-[var(--faint)]"
           style={{ borderRight: "1px solid var(--border)" }}>
-          No tickers yet — add one →
+          No tickers yet. Add one →
         </div>
       )}
 
@@ -176,7 +176,7 @@ export function WatchlistRowLedger({
   if (sorted.length === 0) {
     return (
       <p style={{ fontSize: 13, color: "var(--ab-faint)", fontFamily: SERIF_L, fontStyle: "italic" }}>
-        No tickers yet — add one above.
+        No tickers yet. Add one above.
       </p>
     );
   }

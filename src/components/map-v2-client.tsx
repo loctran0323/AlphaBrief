@@ -224,6 +224,23 @@ function MP_TreemapView({
   onTileHover: (info: HoverInfo | null) => void;
   onSectorLeave: () => void;
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollPct, setScrollPct] = useState(0);
+  const [thumbPct, setThumbPct] = useState(0.4);
+
+  const onScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setScrollPct(max > 0 ? el.scrollLeft / max : 0);
+    setThumbPct(Math.max(0.12, el.clientWidth / el.scrollWidth));
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setThumbPct(Math.max(0.12, el.clientWidth / el.scrollWidth));
+  }, [zoom]);
   const sectorOrder: string[] = [];
   const bySec: Record<string, { sym: string; pct: number; cap: number }[]> = {};
   for (const [sec, sym, pct, cap] of stocks) {
@@ -241,16 +258,20 @@ function MP_TreemapView({
   const sectorBoxes = squarify(sectorItems, W, H);
 
   return (
-    /* scrollable wrapper – always scrollable on mobile, grows with zoom on desktop */
-    <div style={{
-      width: "100%",
-      overflowX: "auto",
-      overflowY: zoom > 1 ? "auto" : "hidden",
-      maxHeight: isFullscreen ? "calc(100dvh - 64px)" : "none",
-      // smooth momentum scroll on iOS
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      WebkitOverflowScrolling: "touch" as any,
-    }}>
+    <>
+    {/* scrollable wrapper – always scrollable on mobile, grows with zoom on desktop */}
+    <div
+      ref={scrollRef}
+      onScroll={onScroll}
+      style={{
+        width: "100%",
+        overflowX: "auto",
+        overflowY: zoom > 1 ? "auto" : "hidden",
+        maxHeight: isFullscreen ? "calc(100dvh - 64px)" : "none",
+        // smooth momentum scroll on iOS
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        WebkitOverflowScrolling: "touch" as any,
+      }}>
       <div style={{
         width: `${zoom * 100}%`,
         minWidth: `${MAP_MIN_PX}px`,
@@ -359,6 +380,30 @@ function MP_TreemapView({
         })}
       </div>
     </div>
+    {/* Mobile scroll progress bar */}
+    <div className="sm:hidden" style={{ marginTop: 6, padding: "0 2px" }}>
+      <div style={{ position: "relative", height: 6, background: "var(--ab-border)", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: `${scrollPct * (1 - thumbPct) * 100}%`,
+          width: `${thumbPct * 100}%`,
+          height: "100%",
+          background: ACCENT,
+          borderRadius: 3,
+          transition: "left 0.05s",
+        }} />
+      </div>
+      <div style={{
+        display: "flex", justifyContent: "space-between",
+        fontFamily: SANS_MP, fontSize: 9, color: "var(--ab-faint)",
+        marginTop: 4, letterSpacing: ".06em",
+      }}>
+        <span>← scroll</span>
+        <span>scroll →</span>
+      </div>
+    </div>
+    </>
   );
 }
 

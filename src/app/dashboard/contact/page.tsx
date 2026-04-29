@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ContactForm } from "./contact-form";
 
-export const metadata: Metadata = { title: "Contact — AlphaBrief" };
+export const metadata: Metadata = { title: "Contact · AlphaBrief" };
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;

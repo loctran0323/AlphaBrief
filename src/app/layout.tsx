@@ -32,12 +32,12 @@ const sourceSerif4 = Source_Serif_4({
 });
 
 const siteDescription =
-  "AlphaBrief delivers AI-written market summaries, a watchlist, upcoming catalyst calendar, sector map, and AI-tagged financial news — signal first, noise last.";
+  "AlphaBrief delivers AI-written market summaries, a watchlist, upcoming catalyst calendar, sector map, and AI-tagged financial news. Signal first, noise last.";
 
 export const metadata: Metadata = {
   metadataBase: siteMetadataBase(),
   applicationName: "AlphaBrief",
-  title: "AlphaBrief — AI Market Summaries & Financial News",
+  title: "AlphaBrief · AI Market Summaries & Financial News",
   alternates: {
     canonical: PRODUCTION_URL,
   },
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     apple: "/alpha-brief-icon.svg",
   },
   openGraph: {
-    title: "AlphaBrief — AI Market Summaries & Financial News",
+    title: "AlphaBrief · AI Market Summaries & Financial News",
     description: siteDescription,
     type: "website",
     siteName: "AlphaBrief",
@@ -72,13 +72,13 @@ export const metadata: Metadata = {
         url: "/alpha-brief-og.png",
         width: 1200,
         height: 630,
-        alt: "AlphaBrief — AI Market Summaries & Financial News",
+        alt: "AlphaBrief · AI Market Summaries & Financial News",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AlphaBrief — AI Market Summaries & Financial News",
+    title: "AlphaBrief · AI Market Summaries & Financial News",
     description: siteDescription,
     images: ["/alpha-brief-og.png"],
   },

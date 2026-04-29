@@ -32,7 +32,7 @@ async function MarketSummaryInner() {
 function MarketSummaryUnavailable() {
   return (
     <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-faint)" }}>
-      Summary temporarily unavailable — the AI is rate-limited. It will retry automatically on the next load.
+      Summary temporarily unavailable. The AI is rate-limited. It will retry automatically on the next load.
     </p>
   );
 }
