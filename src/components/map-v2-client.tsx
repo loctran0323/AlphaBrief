@@ -933,7 +933,7 @@ export function MapV2Client({
           fontFamily: SERIF_MP, fontStyle: "italic",
           fontSize: 12, color: "var(--ab-muted)", marginBottom: 16,
         }}>
-          Size correlated with market cap.
+          Tile size correlated with market cap.
           Tap a tile to see headlines and why it&apos;s moving.
         </p>
       ) : (
