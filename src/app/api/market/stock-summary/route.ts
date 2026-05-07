@@ -4,6 +4,9 @@ import { getNewsForTicker } from "@/lib/news";
 
 export const dynamic = "force-dynamic";
 
+const GROQ_URL   = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const symbol = (searchParams.get("symbol") ?? "").trim().toUpperCase();
@@ -30,21 +33,24 @@ export async function GET(request: Request) {
       ? `$${price.toFixed(2)} (${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}% today)`
       : null;
 
-  const key = process.env.OPENAI_API_KEY;
+  const key = process.env.GROQ_API_KEY;
 
   if (!key) {
-    // Build a natural sentence from price direction + top headline
+    // Fallback: plain sentence from price + top headline (no AI)
     const top = articles[0];
     let summary = "";
     if (priceStr && direction) {
-      summary = `${symbol} is ${direction === "flat" ? "flat" : direction} ${priceStr}.`;
-      if (top) summary += ` Latest news: ${top.title}`;
+      summary = `${symbol} is ${direction === "flat" ? "flat" : direction} at ${priceStr}.`;
+      if (top) summary += ` Latest: ${top.title}`;
     } else if (top) {
       summary = top.title;
     } else {
       summary = `No recent headlines found for ${symbol}.`;
     }
-    return NextResponse.json({ summary, sentiment: direction === "up" ? "bullish" : direction === "down" ? "bearish" : "neutral" });
+    return NextResponse.json({
+      summary,
+      sentiment: direction === "up" ? "bullish" : direction === "down" ? "bearish" : "neutral",
+    });
   }
 
   const headlineCtx = articles.length
@@ -62,23 +68,24 @@ ${headlineCtx}
 
 In 2 sentences, explain why ${symbol} is likely ${direction === "up" ? "up" : direction === "down" ? "down" : "moving the way it is"} today based on the headlines above. Be specific — reference the actual news if relevant. If no clear catalyst, say so honestly.
 
-Respond with JSON: { "summary": "..." }`;
+Respond with JSON only, no markdown: { "summary": "..." }`;
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch(GROQ_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: GROQ_MODEL,
         temperature: 0.2,
         messages: [{ role: "user", content: prompt }],
       }),
-      cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
     });
 
-    if (!res.ok) throw new Error("OpenAI error");
+    if (!res.ok) throw new Error(`Groq ${res.status}`);
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const raw = data.choices?.[0]?.message?.content ?? "";
+    const raw = (data.choices?.[0]?.message?.content ?? "")
+      .replace(/^```[a-z]*\n?/i, "").replace(/```$/, "").trim();
     const parsed = JSON.parse(raw) as { summary?: string };
     return NextResponse.json({
       summary: parsed.summary ?? "",
