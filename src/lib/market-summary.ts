@@ -47,7 +47,12 @@ export async function getMarketSummary(): Promise<MarketSummaryResult | null> {
   try {
     const summary = await generateMarketSummaryText();
     const generatedAt = new Date().toISOString();
-    await writeSummary("daily", summary, generatedAt);
+    // Write failure must not prevent the summary from being returned
+    try {
+      await writeSummary("daily", summary, generatedAt);
+    } catch (writeErr) {
+      console.error("[market-summary/daily] cache write failed:", writeErr);
+    }
     return { summary, generatedAt };
   } catch (err) {
     console.error("[market-summary/daily] generation failed:", err);
@@ -72,7 +77,11 @@ export async function getWeeklyMarketSummary(): Promise<MarketSummaryResult | nu
   try {
     const summary = await generateWeeklySummaryText();
     const generatedAt = new Date().toISOString();
-    await writeSummary("weekly", summary, generatedAt);
+    try {
+      await writeSummary("weekly", summary, generatedAt);
+    } catch (writeErr) {
+      console.error("[market-summary/weekly] cache write failed:", writeErr);
+    }
     return { summary, generatedAt };
   } catch (err) {
     console.error("[market-summary/weekly] generation failed:", err);
