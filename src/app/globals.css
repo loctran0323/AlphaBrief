@@ -236,6 +236,10 @@ body { overflow-x: hidden; }
   .ab-lede-right     { display: none !important; }
   .ab-drop-cap       { font-size: 36px !important; }
   .ab-lede-prose     { font-size: 14px !important; line-height: 1.6 !important; }
+
+  /* Recent briefing — scale down on mobile */
+  .ab-brief-h        { font-size: 26px !important; }
+  .ab-brief-body     { font-size: 15px !important; }
 }
 
 /* ── Splash hero · 2-col grid with animated Northern Star ─────────────── */

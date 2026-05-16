@@ -337,6 +337,87 @@ export default async function SplashPage() {
         </div>
       </div>
 
+      {/* ── A recent briefing — the AI voice ── */}
+      <div className="ab-section-pad" style={{
+        background: "var(--ab-card)",
+        borderTop: "1px solid var(--ab-border)",
+        borderBottom: "1px solid var(--ab-border)",
+        padding: "64px 40px",
+      }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          {/* Masthead row */}
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "baseline",
+            paddingBottom: 14, borderBottom: "1px solid var(--ab-border)", marginBottom: 28,
+            flexWrap: "wrap", gap: 8,
+          }}>
+            <div style={{
+              fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
+              color: ACCENT, fontWeight: 700,
+            }}>From a recent edition</div>
+            <div style={{
+              fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13,
+              color: "var(--ab-faint)",
+            }}>Compiled by AlphaBrief AI · Friday, 4:15 PM ET</div>
+          </div>
+
+          {/* Headline */}
+          <h2 className="ab-brief-h" style={{
+            fontFamily: SERIF_L, fontSize: 38, fontWeight: 600,
+            letterSpacing: "-.02em", margin: 0, lineHeight: 1.08,
+            color: "var(--ab-fg)",
+          }}>
+            Tech leads on the AI tape; energy holds the bid.
+          </h2>
+          <p style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 18,
+            color: "var(--ab-muted)", marginTop: 12, marginBottom: 0, lineHeight: 1.45,
+          }}>
+            Nasdaq +1.3% as semis catch a third bid this week. Crude back above $86. The Fed&apos;s blackout window opens Saturday.
+          </p>
+
+          {/* Body — drop cap */}
+          <div className="ab-brief-body" style={{
+            marginTop: 28, fontFamily: SERIF_L, fontSize: 17,
+            lineHeight: 1.65, color: "var(--ab-fg)",
+          }}>
+            <p style={{ marginTop: 0, marginBottom: 16, overflow: "hidden" }}>
+              <span style={{
+                float: "left", fontFamily: SERIF_L,
+                fontSize: 64, lineHeight: 0.9, paddingTop: 6, paddingRight: 10,
+                color: ACCENT, fontWeight: 700,
+              }}>S</span>
+              emiconductors did the heavy lifting again Friday — NVDA closed +2.4%, AVGO +1.9%, AMD +3.1% — extending a five-day rally that has the SOX up nearly 9% on the week. Underneath the move: Taiwan Semi&apos;s quiet capacity guidance bump, plus desk talk of fresh hyperscaler order books out of the Microsoft summit.
+            </p>
+            <p style={{ margin: 0, color: "var(--ab-muted)" }}>
+              Energy was the other quiet winner. Crude pushed above $86 on a softer dollar and continued OPEC+ discipline rumblings, sending XLE +1.1%. We&apos;d watch for the midweek EIA print before reading anything more into it.
+            </p>
+          </div>
+
+          {/* Footer row */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 16, marginTop: 28,
+            paddingTop: 16, borderTop: "1px solid var(--ab-border)", flexWrap: "wrap",
+          }}>
+            {configured && !signedIn ? (
+              <Link href="/signup" style={{
+                fontSize: 12, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                color: ACCENT, textDecoration: "none",
+              }}>Read the full edition →</Link>
+            ) : configured && signedIn ? (
+              <Link href="/home" style={{
+                fontSize: 12, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+                color: ACCENT, textDecoration: "none",
+              }}>Open today&apos;s briefing →</Link>
+            ) : null}
+            <span style={{ flex: 1 }} />
+            <span style={{
+              fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-faint)",
+            }}>One of three sections per briefing — direction, drivers, what to watch.</span>
+          </div>
+        </div>
+      </div>
+
       {/* ── Product preview ── */}
       <div className="ab-preview-pad" style={{ maxWidth: 1120, margin: "0 auto", padding: "40px 40px 80px" }}>
         <SplashRuleLabel>Product preview</SplashRuleLabel>
