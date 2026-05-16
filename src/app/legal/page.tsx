@@ -20,8 +20,11 @@ export default function LegalPage() {
         <div className="mx-auto flex h-14 max-w-6xl items-center px-6">
           <Link href="/" className="flex items-center gap-2 text-gray-900">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#6C5CE7]">
-              <svg className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+              <svg className="h-[18px] w-[18px] text-white" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+                <path d="M32 6 L34 30 L32 32 L30 30 Z" />
+                <path d="M32 58 L30 34 L32 32 L34 34 Z" />
+                <path d="M10 32 L30 30 L32 32 L30 34 Z" />
+                <path d="M54 32 L34 34 L32 32 L34 30 Z" />
               </svg>
             </div>
             <span className="text-base font-bold">AlphaBrief</span>

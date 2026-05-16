@@ -37,8 +37,11 @@ export default function PrivacyPage() {
             background: ACCENT,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-              <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+            <svg width="17" height="17" viewBox="0 0 64 64" fill="#fff" aria-hidden="true">
+              <path d="M32 6 L34 30 L32 32 L30 30 Z" />
+              <path d="M32 58 L30 34 L32 32 L34 34 Z" />
+              <path d="M10 32 L30 30 L32 32 L30 34 Z" />
+              <path d="M54 32 L34 34 L32 32 L34 30 Z" />
             </svg>
           </div>
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.01em", color: "var(--ab-fg)" }}>
@@ -172,8 +175,11 @@ export default function PrivacyPage() {
             width: 20, height: 20, borderRadius: 5, background: ACCENT,
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-              <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+            <svg width="13" height="13" viewBox="0 0 64 64" fill="#fff" aria-hidden="true">
+              <path d="M32 6 L34 30 L32 32 L30 30 Z" />
+              <path d="M32 58 L30 34 L32 32 L34 34 Z" />
+              <path d="M10 32 L30 30 L32 32 L30 34 Z" />
+              <path d="M54 32 L34 34 L32 32 L34 30 Z" />
             </svg>
           </div>
           <span style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-muted)" }}>
