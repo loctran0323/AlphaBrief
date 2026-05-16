@@ -18,16 +18,118 @@ const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
 const ACCENT  = "#6C5CE7";
 
-const features = [
-  { num: "I.",    title: "Home market view",  body: "ETFs, indices, top movers and screeners. Save a watchlist of the companies you track." },
-  { num: "II.",   title: "AI market summary", body: "Structured sections covering market direction, key drivers, top movers, what to watch. Refreshes every 6 hours." },
-  { num: "III.",  title: "Dashboard",         body: "Watchlist, upcoming catalysts, and a curated news briefing. Your main workspace after login." },
-  { num: "IV.",   title: "Market map",        body: "Clickable sector heat map. Click any company for headlines and a 'why it's moving' brief." },
-  { num: "V.",    title: "News briefing",     body: "Headlines with AI summaries and bullish / bearish / neutral tags for faster context." },
-  { num: "VI.",   title: "Weekly recap",      body: "AI-written weekly market recap covering the week's arc, themes, a standout signal, and catalysts ahead." },
-  { num: "VII.",  title: "Archive",           body: "Past timeline and headlines older than three days. Never lose track of what moved the market." },
-  { num: "VIII.", title: "More coming soon",  body: "Earnings models, price alerts, and deeper AI analysis are on the roadmap." },
-] as const;
+type FeatureGlyph = "home" | "summary" | "dashboard" | "map" | "news" | "recap" | "archive" | "soon";
+
+const features: { glyph: FeatureGlyph; title: string; tag: string }[] = [
+  { glyph: "home",      title: "Home market view",  tag: "Indices, movers, watchlist" },
+  { glyph: "summary",   title: "AI market summary", tag: "Refreshed every 6 hours" },
+  { glyph: "dashboard", title: "Dashboard",         tag: "Your daily workspace" },
+  { glyph: "map",       title: "Market map",        tag: "Click any sector for the why" },
+  { glyph: "news",      title: "News briefing",     tag: "Bullish · bearish · neutral" },
+  { glyph: "recap",     title: "Weekly recap",      tag: "The week, in five minutes" },
+  { glyph: "archive",   title: "Archive",           tag: "Everything older than 3 days" },
+  { glyph: "soon",      title: "More on the way",   tag: "Alerts · models · deeper AI" },
+];
+
+function FeatureGlyph({ name }: { name: FeatureGlyph }) {
+  const stroke = ACCENT;
+  const fill   = ACCENT;
+  const soft   = "rgba(108,92,231,0.18)";
+  switch (name) {
+    case "home":
+      // 2×2 grid of cells
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <rect x="4"  y="4"  width="14" height="14" rx="1.5" fill={soft}/>
+          <rect x="22" y="4"  width="14" height="14" rx="1.5" stroke={stroke} strokeWidth="1.5"/>
+          <rect x="4"  y="22" width="14" height="14" rx="1.5" stroke={stroke} strokeWidth="1.5"/>
+          <rect x="22" y="22" width="14" height="14" rx="1.5" fill={soft}/>
+        </svg>
+      );
+    case "summary":
+      // drop-cap + lines
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <rect x="4" y="6" width="14" height="14" rx="1" fill={fill}/>
+          <text x="11" y="18" textAnchor="middle" fontFamily="Source Serif Pro, Georgia, serif" fontWeight="700" fontSize="13" fill="#FCFCFB">S</text>
+          <line x1="22" y1="9"  x2="36" y2="9"  stroke={stroke} strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="22" y1="14" x2="33" y2="14" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" opacity="0.55"/>
+          <line x1="4"  y1="26" x2="36" y2="26" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" opacity="0.55"/>
+          <line x1="4"  y1="31" x2="29" y2="31" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/>
+        </svg>
+      );
+    case "dashboard":
+      // 4 panels with one highlighted
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <rect x="4"  y="4"  width="14" height="9"  rx="1.5" fill={fill}/>
+          <rect x="22" y="4"  width="14" height="9"  rx="1.5" stroke={stroke} strokeWidth="1.5"/>
+          <rect x="4"  y="17" width="32" height="9"  rx="1.5" stroke={stroke} strokeWidth="1.5"/>
+          <rect x="4"  y="30" width="20" height="6"  rx="1.5" fill={soft}/>
+          <rect x="28" y="30" width="8"  height="6"  rx="1.5" stroke={stroke} strokeWidth="1.5"/>
+        </svg>
+      );
+    case "map":
+      // treemap squares
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <rect x="4"  y="4"  width="20" height="20" fill={fill}/>
+          <rect x="26" y="4"  width="10" height="9"  fill={soft}/>
+          <rect x="26" y="15" width="10" height="9"  stroke={stroke} strokeWidth="1.5"/>
+          <rect x="4"  y="26" width="11" height="10" stroke={stroke} strokeWidth="1.5"/>
+          <rect x="17" y="26" width="9"  height="10" fill={soft}/>
+          <rect x="28" y="26" width="8"  height="10" fill={fill} opacity="0.55"/>
+        </svg>
+      );
+    case "news":
+      // 2-column newspaper
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <rect x="3" y="4" width="34" height="32" rx="1.5" stroke={stroke} strokeWidth="1.5"/>
+          <line x1="20" y1="11" x2="20" y2="33" stroke={stroke} strokeWidth="1" opacity="0.4"/>
+          <line x1="6"  y1="9"  x2="34" y2="9"  stroke={stroke} strokeWidth="1.5"/>
+          <line x1="6"  y1="14" x2="17" y2="14" stroke={stroke} strokeWidth="1" opacity="0.55"/>
+          <line x1="6"  y1="18" x2="17" y2="18" stroke={stroke} strokeWidth="1" opacity="0.55"/>
+          <line x1="6"  y1="22" x2="14" y2="22" stroke={stroke} strokeWidth="1" opacity="0.4"/>
+          <line x1="23" y1="14" x2="34" y2="14" stroke={stroke} strokeWidth="1" opacity="0.55"/>
+          <line x1="23" y1="18" x2="34" y2="18" stroke={stroke} strokeWidth="1" opacity="0.55"/>
+          <line x1="23" y1="22" x2="31" y2="22" stroke={stroke} strokeWidth="1" opacity="0.4"/>
+        </svg>
+      );
+    case "recap":
+      // 7-bar chart (the week)
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          {[8, 14, 10, 20, 16, 24, 18].map((h, i) => (
+            <rect key={i} x={4 + i * 4.6} y={36 - h} width="3.4" height={h} fill={fill} opacity={0.4 + i * 0.08} rx="0.5"/>
+          ))}
+        </svg>
+      );
+    case "archive":
+      // stacked cards
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <rect x="6"  y="10" width="24" height="20" rx="1.5" fill={soft}/>
+          <rect x="9"  y="7"  width="24" height="20" rx="1.5" stroke={stroke} strokeWidth="1.5" fill="white"/>
+          <line x1="13" y1="13" x2="29" y2="13" stroke={stroke} strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="13" y1="17" x2="25" y2="17" stroke={stroke} strokeWidth="1.2" strokeLinecap="round" opacity="0.55"/>
+          <line x1="13" y1="21" x2="27" y2="21" stroke={stroke} strokeWidth="1.2" strokeLinecap="round" opacity="0.4"/>
+        </svg>
+      );
+    case "soon":
+      // Northern Star — matches brand
+      return (
+        <svg viewBox="0 0 40 40" width="40" height="40" fill="none">
+          <g transform="translate(8 8) scale(0.375)">
+            <path d="M32 6 L34 30 L32 32 L30 30 Z" fill={fill}/>
+            <path d="M32 58 L30 34 L32 32 L34 34 Z" fill={fill}/>
+            <path d="M10 32 L30 30 L32 32 L30 34 Z" fill={fill}/>
+            <path d="M54 32 L34 34 L32 32 L34 30 Z" fill={fill}/>
+          </g>
+        </svg>
+      );
+  }
+}
 
 const planRows: { label: string; free: boolean | string; pro: boolean | string }[] = [
   { label: "Home market view",          free: true,         pro: true },
@@ -49,8 +151,34 @@ function ABLogo({ size = 24 }: { size?: number }) {
       background: ACCENT,
       display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
     }}>
-      <svg width={Math.round(size * 0.6)} height={Math.round(size * 0.6)} viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-        <path d="M13 2L4.5 13.5H11L11 22L19.5 10.5H13L13 2Z" />
+      <svg width={Math.round(size * 0.72)} height={Math.round(size * 0.72)} viewBox="0 0 64 64" fill="#fff" aria-hidden="true">
+        <path d="M32 6 L34 30 L32 32 L30 30 Z"/>
+        <path d="M32 58 L30 34 L32 32 L34 34 Z"/>
+        <path d="M10 32 L30 30 L32 32 L30 34 Z"/>
+        <path d="M54 32 L34 34 L32 32 L34 30 Z"/>
+      </svg>
+    </div>
+  );
+}
+
+function AnimatedNorthStar({ size = 280 }: { size?: number }) {
+  return (
+    <div className="ab-anim-star" style={{ width: size, height: size }} aria-hidden="true">
+      <span className="ab-ring r1" />
+      <span className="ab-ring r2" />
+      <span className="ab-ring r3" />
+      <span className="ab-glow" />
+      <svg viewBox="0 0 64 64" className="ab-star-svg" width="100%" height="100%">
+        <g className="ab-arms">
+          <path className="ab-arm a-top"    d="M32 6 L34 30 L32 32 L30 30 Z" fill={ACCENT}/>
+          <path className="ab-arm a-bot"    d="M32 58 L30 34 L32 32 L34 34 Z" fill={ACCENT}/>
+          <path className="ab-arm a-left"   d="M10 32 L30 30 L32 32 L30 34 Z" fill={ACCENT}/>
+          <path className="ab-arm a-right"  d="M54 32 L34 34 L32 32 L34 30 Z" fill={ACCENT}/>
+        </g>
+        <circle className="ab-twinkle t1" cx="50" cy="14" r="0.9" fill={ACCENT}/>
+        <circle className="ab-twinkle t2" cx="14" cy="50" r="0.7" fill={ACCENT}/>
+        <circle className="ab-twinkle t3" cx="50" cy="50" r="0.6" fill={ACCENT}/>
+        <circle className="ab-twinkle t4" cx="14" cy="14" r="0.5" fill={ACCENT}/>
       </svg>
     </div>
   );
@@ -132,7 +260,8 @@ export default async function SplashPage() {
 
       {/* ── Hero — editorial ── */}
       <div className="ab-hero-pad" style={{ maxWidth: 1120, margin: "0 auto", padding: "72px 40px 40px" }}>
-        <div style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 28, marginBottom: 28 }}>
+        <div className="ab-hero-grid" style={{ borderBottom: "2px solid var(--ab-fg)", paddingBottom: 28, marginBottom: 28 }}>
+          <div className="ab-hero-text">
           <div style={{
             fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
             color: ACCENT, fontWeight: 700, marginBottom: 14,
@@ -178,6 +307,10 @@ export default async function SplashPage() {
             color: "var(--ab-faint)", marginTop: 14,
           }}>
             No credit card · 1-minute setup · cancel anytime
+          </div>
+          </div>
+          <div className="ab-hero-mark">
+            <AnimatedNorthStar />
           </div>
         </div>
 
@@ -345,35 +478,54 @@ export default async function SplashPage() {
         padding: "60px 40px",
       }}>
         <div style={{ maxWidth: 1120, margin: "0 auto" }}>
-          <div style={{
-            fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
-            color: ACCENT, fontWeight: 700, marginBottom: 10,
-          }}>Inside the paper</div>
-          <h2 style={{
-            fontFamily: SERIF_L, fontSize: 42, fontWeight: 600,
-            letterSpacing: "-.02em", margin: 0,
-          }}>What&apos;s inside AlphaBrief</h2>
-          <p style={{
-            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
-            color: "var(--ab-muted)", marginTop: 8, maxWidth: 640, marginBottom: 0,
-          }}>
-            AI market summaries, earnings catalyst tracking, sector maps, and AI-tagged financial news. Everything you need to stay ahead of the market.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: "24px 20px", marginTop: 32 }}>
-            {features.map(({ num, title, body }) => (
-              <div key={title} style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 14 }}>
+          <div className="flex items-baseline justify-between gap-4 flex-wrap" style={{ marginBottom: 28 }}>
+            <div>
+              <div style={{
+                fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
+                color: ACCENT, fontWeight: 700, marginBottom: 10,
+              }}>Inside the paper</div>
+              <h2 style={{
+                fontFamily: SERIF_L, fontSize: 42, fontWeight: 600,
+                letterSpacing: "-.02em", margin: 0,
+              }}>What&apos;s inside AlphaBrief</h2>
+            </div>
+            <div style={{
+              fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15,
+              color: "var(--ab-muted)", maxWidth: 320, textAlign: "right",
+            }}>
+              Eight chambers. One briefing.
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 0 }}>
+            {features.map(({ glyph, title, tag }, i) => (
+              <div key={title} style={{
+                position: "relative",
+                padding: "24px 20px",
+                background: "var(--ab-card)",
+                borderRight: "1px solid var(--ab-border)",
+                borderBottom: "1px solid var(--ab-border)",
+                borderLeft: i % 4 === 0 ? "1px solid var(--ab-border)" : undefined,
+                borderTop: i < 4 ? "1px solid var(--ab-border)" : undefined,
+                display: "flex", flexDirection: "column", gap: 14,
+                minHeight: 140,
+              }}>
                 <div style={{
-                  fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13,
-                  color: ACCENT, fontWeight: 600, marginBottom: 4,
-                }}>{num}</div>
-                <div className="text-sm sm:text-xl" style={{
-                  fontFamily: SERIF_L, fontWeight: 600,
-                  marginBottom: 4, color: "var(--ab-fg)",
-                }}>{title}</div>
-                <p className="hidden sm:block" style={{
-                  fontFamily: SERIF_L, fontSize: 14,
-                  color: "var(--ab-muted)", lineHeight: 1.55, margin: 0,
-                }}>{body}</p>
+                  width: 48, height: 48, borderRadius: 8,
+                  background: "var(--ab-surface)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <FeatureGlyph name={glyph} />
+                </div>
+                <div>
+                  <div style={{
+                    fontFamily: SERIF_L, fontWeight: 600, fontSize: 17,
+                    letterSpacing: "-.01em", color: "var(--ab-fg)", lineHeight: 1.15,
+                  }}>{title}</div>
+                  <div style={{
+                    fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13,
+                    color: "var(--ab-muted)", marginTop: 4, lineHeight: 1.4,
+                  }}>{tag}</div>
+                </div>
               </div>
             ))}
           </div>

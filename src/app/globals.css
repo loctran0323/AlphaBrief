@@ -237,3 +237,91 @@ body { overflow-x: hidden; }
   .ab-drop-cap       { font-size: 36px !important; }
   .ab-lede-prose     { font-size: 14px !important; line-height: 1.6 !important; }
 }
+
+/* ── Splash hero · 2-col grid with animated Northern Star ─────────────── */
+.ab-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 32px;
+}
+.ab-hero-mark { display: none; justify-self: end; }
+@media (min-width: 1024px) {
+  .ab-hero-grid { grid-template-columns: minmax(0, 1fr) auto; gap: 48px; }
+  .ab-hero-mark { display: block; }
+}
+
+/* Animated Northern Star */
+.ab-anim-star {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-block;
+  isolation: isolate;
+}
+.ab-anim-star .ab-glow {
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(108, 92, 231, 0.42) 0%, rgba(108, 92, 231, 0) 65%);
+  filter: blur(22px);
+  z-index: 0;
+  animation: ab-glow 4.4s ease-in-out infinite;
+}
+@keyframes ab-glow {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50%      { opacity: 1;    transform: scale(1.1);  }
+}
+.ab-anim-star .ab-ring {
+  position: absolute;
+  inset: 28%;
+  border: 1.5px solid #6C5CE7;
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 0;
+  animation: ab-ring 4.5s ease-out infinite;
+}
+.ab-anim-star .ab-ring.r2 { animation-delay: 1.5s; }
+.ab-anim-star .ab-ring.r3 { animation-delay: 3s;   }
+@keyframes ab-ring {
+  0%   { transform: scale(0.55); opacity: 0; }
+  18%  { opacity: 0.55; }
+  100% { transform: scale(1.65); opacity: 0; }
+}
+.ab-anim-star .ab-star-svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  filter: drop-shadow(0 4px 18px rgba(108, 92, 231, 0.35));
+}
+.ab-anim-star .ab-arm {
+  transform-origin: 32px 32px;
+  animation: ab-arm 4s ease-in-out infinite;
+}
+.ab-anim-star .ab-arm.a-top   { animation-delay: 0s; }
+.ab-anim-star .ab-arm.a-right { animation-delay: 1s; }
+.ab-anim-star .ab-arm.a-bot   { animation-delay: 2s; }
+.ab-anim-star .ab-arm.a-left  { animation-delay: 3s; }
+@keyframes ab-arm {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.06); opacity: 0.92; }
+}
+.ab-anim-star .ab-twinkle {
+  transform-origin: center;
+  animation: ab-twinkle 4.5s ease-in-out infinite;
+  opacity: 0;
+}
+.ab-anim-star .ab-twinkle.t1 { animation-delay: 0.6s; }
+.ab-anim-star .ab-twinkle.t2 { animation-delay: 2.1s; }
+.ab-anim-star .ab-twinkle.t3 { animation-delay: 3.3s; }
+.ab-anim-star .ab-twinkle.t4 { animation-delay: 4.0s; }
+@keyframes ab-twinkle {
+  0%, 100% { opacity: 0;   transform: scale(0.6); }
+  50%      { opacity: 0.9; transform: scale(1.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ab-anim-star .ab-glow,
+  .ab-anim-star .ab-ring,
+  .ab-anim-star .ab-arm,
+  .ab-anim-star .ab-twinkle { animation: none; }
+  .ab-anim-star .ab-ring { display: none; }
+}

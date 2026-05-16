@@ -26,6 +26,19 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
     setDark(document.documentElement.classList.contains("dark"));
+
+    // Live-follow OS theme when the user hasn't explicitly chosen one
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e: MediaQueryListEvent) => {
+      let stored: string | null = null;
+      try { stored = localStorage.getItem("theme"); } catch {}
+      if (stored !== "dark" && stored !== "light") {
+        document.documentElement.classList.toggle("dark", e.matches);
+        setDark(e.matches);
+      }
+    };
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
   }, []);
 
   function toggle() {

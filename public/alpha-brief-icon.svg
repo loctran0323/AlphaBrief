@@ -1,4 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <rect width="64" height="64" rx="14" fill="#6C5CE7"/>
-  <path d="M35 8L16 37H28L28 56L48 27H36L35 8Z" fill="white"/>
+  <g transform="translate(0 0)">
+    <path d="M32 6 L34 30 L32 32 L30 30 Z" fill="#FFFFFF"/>
+    <path d="M32 58 L30 34 L32 32 L34 34 Z" fill="#FFFFFF"/>
+    <path d="M10 32 L30 30 L32 32 L30 34 Z" fill="#FFFFFF"/>
+    <path d="M54 32 L34 34 L32 32 L34 30 Z" fill="#FFFFFF"/>
+  </g>
 </svg>
