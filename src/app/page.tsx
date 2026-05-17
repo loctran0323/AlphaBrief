@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SplashEditionTagline } from "@/components/splash-edition-tagline";
 import { isSupabaseConfigured } from "@/lib/env";
+import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -144,6 +146,53 @@ const planRows: { label: string; free: boolean | string; pro: boolean | string }
 
 export const dynamic = "force-dynamic";
 
+// ── Live splash tape ────────────────────────────────────────────────
+type TapeEntry = { label: string; pct: number; ok: boolean };
+
+const TAPE_SYMBOLS: { label: string; symbol: string }[] = [
+  { label: "S&P 500", symbol: "^GSPC" },
+  { label: "QQQ",     symbol: "QQQ"   },
+  { label: "NVDA",    symbol: "NVDA"  },
+  { label: "AAPL",    symbol: "AAPL"  },
+  { label: "TSLA",    symbol: "TSLA"  },
+  { label: "MSFT",    symbol: "MSFT"  },
+  { label: "META",    symbol: "META"  },
+  { label: "URI",     symbol: "URI"   },
+];
+
+const getSplashTape = unstable_cache(
+  async (): Promise<{ rows: TapeEntry[]; fetchedAt: number }> => {
+    const rows = await Promise.all(
+      TAPE_SYMBOLS.map(async ({ label, symbol }): Promise<TapeEntry> => {
+        try {
+          const snap = await fetchYahooChartSnapshot(symbol);
+          if (!snap || !Number.isFinite(snap.changePct)) return { label, pct: 0, ok: false };
+          return { label, pct: snap.changePct, ok: true };
+        } catch {
+          return { label, pct: 0, ok: false };
+        }
+      }),
+    );
+    return { rows, fetchedAt: Date.now() };
+  },
+  ["splash-tape-v1"],
+  { revalidate: 60 },
+);
+
+function fmtTapePct(pct: number): string {
+  const fixed = Math.abs(pct).toFixed(2);
+  if (pct > 0.005) return `+${fixed}%`;
+  if (pct < -0.005) return `−${fixed}%`;
+  return `${fixed}%`;
+}
+
+function tapeColor(t: TapeEntry): string {
+  if (!t.ok) return "var(--ab-faint)";
+  if (t.pct > 0.005) return "var(--ab-up)";
+  if (t.pct < -0.005) return "var(--ab-down)";
+  return "var(--ab-muted)";
+}
+
 function ABLogo({ size = 24 }: { size?: number }) {
   return (
     <div style={{
@@ -206,6 +255,11 @@ export default async function SplashPage() {
     const { data: { user } } = await supabase.auth.getUser();
     signedIn = Boolean(user);
   }
+
+  const { rows: tape, fetchedAt } = await getSplashTape();
+  const tapeAsOf = new Date(fetchedAt).toLocaleTimeString("en-US", {
+    hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short",
+  });
 
   return (
     <div style={{ background: "var(--ab-bg)", color: "var(--ab-fg)", fontFamily: SANS_L, minHeight: "100vh" }}>
@@ -315,25 +369,32 @@ export default async function SplashPage() {
         </div>
 
         {/* Live tape */}
-        <div className="flex items-center gap-5" style={{
-          fontFamily: SANS_L, fontSize: 12, color: "var(--ab-muted)",
-          padding: "12px 0", borderBottom: "1px solid var(--ab-border)",
-          overflow: "hidden",
-        }}>
-          {/* Mobile: 3 tickers only, no cutoff */}
-          {[["S&P 500","+0.09%",true],["QQQ","+0.07%",true],["NVDA","−0.06%",false]].map(([s,p,up], i) => (
-            <span key={i} className="sm:hidden" style={{ whiteSpace: "nowrap" as const, flexShrink: 0 }}>
-              <span>{s as string}</span>{" "}
-              <span style={{ color: (up as boolean) ? "var(--ab-up)" : "var(--ab-down)", fontWeight: 600 }}>{p as string}</span>
-            </span>
-          ))}
-          {/* Desktop: all tickers */}
-          {[["S&P 500","+0.09%",true],["QQQ","+0.07%",true],["NVDA","−0.06%",false],["AAPL","+0.18%",true],["TSLA","−2.59%",false],["MSFT","−2.44%",false],["META","−0.87%",false],["URI","+20.82%",true]].map(([s,p,up], i) => (
-            <span key={i} className="hidden sm:inline" style={{ whiteSpace: "nowrap" as const }}>
-              <span>{s as string}</span>{" "}
-              <span style={{ color: (up as boolean) ? "var(--ab-up)" : "var(--ab-down)", fontWeight: 600 }}>{p as string}</span>
-            </span>
-          ))}
+        <div style={{ borderBottom: "1px solid var(--ab-border)" }}>
+          <div className="flex items-center gap-5" style={{
+            fontFamily: SANS_L, fontSize: 12, color: "var(--ab-muted)",
+            padding: "12px 0", overflow: "hidden",
+          }}>
+            {/* Mobile: 3 tickers only, no cutoff */}
+            {tape.slice(0, 3).map((t, i) => (
+              <span key={`m-${i}`} className="sm:hidden" style={{ whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                <span>{t.label}</span>{" "}
+                <span style={{ color: tapeColor(t), fontWeight: 600 }}>{t.ok ? fmtTapePct(t.pct) : "—"}</span>
+              </span>
+            ))}
+            {/* Desktop: all tickers */}
+            {tape.map((t, i) => (
+              <span key={`d-${i}`} className="hidden sm:inline" style={{ whiteSpace: "nowrap" as const }}>
+                <span>{t.label}</span>{" "}
+                <span style={{ color: tapeColor(t), fontWeight: 600 }}>{t.ok ? fmtTapePct(t.pct) : "—"}</span>
+              </span>
+            ))}
+          </div>
+          <div style={{
+            fontFamily: SERIF_L, fontStyle: "italic", fontSize: 11,
+            color: "var(--ab-faint)", padding: "0 0 10px", textAlign: "right",
+          }}>
+            Last updated · {tapeAsOf}
+          </div>
         </div>
       </div>
 
