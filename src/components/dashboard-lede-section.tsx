@@ -95,7 +95,10 @@ function DashboardLedeContent({ summary }: { summary: string }) {
 async function DashboardLedeInner() {
   try {
     const result = await getMarketSummary();
-    if (!result) return <DashboardLedeUnavailable />;
+    if (!result) {
+      console.warn("[dashboard-lede] getMarketSummary returned null — no cached row and Groq generation either disabled or failed.");
+      return <DashboardLedeUnavailable />;
+    }
     return (
       <>
         <DashboardLedeContent summary={result.summary} />
@@ -107,7 +110,8 @@ async function DashboardLedeInner() {
         </div>
       </>
     );
-  } catch {
+  } catch (err) {
+    console.error("[dashboard-lede] threw — showing Unavailable.", err);
     return <DashboardLedeUnavailable />;
   }
 }
