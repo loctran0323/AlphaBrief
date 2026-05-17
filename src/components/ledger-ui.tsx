@@ -17,7 +17,7 @@ export function LedgerMasthead({
   dek,
   dekStyle,
 }: {
-  eyebrow: string;
+  eyebrow: React.ReactNode;
   title: React.ReactNode;
   dek?: string;
   dekStyle?: React.CSSProperties;

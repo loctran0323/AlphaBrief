@@ -3,7 +3,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
 import { DashboardLedeSection } from "@/components/dashboard-lede-section";
 import { DashboardTimelineTabs } from "@/components/dashboard-timeline-tabs";
-import { LocalDateHeading } from "@/components/local-date-heading";
+import { LocalDateHeading, LocalDateEyebrow } from "@/components/local-date-heading";
 import { LedgerMasthead, LedgerByline, LedgerRuleLabel } from "@/components/ledger-ui";
 import { NewsBriefing } from "@/components/news-briefing";
 import { fetchMergedDashboardEvents } from "@/lib/events";
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
 
       {/* ── Masthead ── */}
       <LedgerMasthead
-        eyebrow={`Daily Briefing · ${todayHeading}`}
+        eyebrow={<LocalDateEyebrow prefix="Daily Briefing · " fallback={todayHeading} />}
         title={<LocalDateHeading fallback={todayHeading} />}
         dek="Markets compiled by AlphaBrief AI. Your watchlist, upcoming catalysts, and the wire."
       />

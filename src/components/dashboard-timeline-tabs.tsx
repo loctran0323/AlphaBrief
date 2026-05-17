@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { MarketEvent, WatchlistItem } from "@/types/database";
 import { filterUpcomingMarketEvents } from "@/lib/timeline-upcoming";
 import { formatEtTimeShort } from "@/lib/date-utils";
+import { LocalTimeShort } from "@/components/local-date-heading";
 import { TimelinePager } from "@/components/timeline-pager";
 
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -61,7 +62,7 @@ export function DashboardTimelineTabs({
           )}
           {dataFetchedAt && (
             <p style={{ fontFamily: SANS_L, fontSize: 11, color: "var(--ab-faint)", marginTop: 4 }}>
-              Updated {formatEtTimeShort(new Date(dataFetchedAt))}
+              Updated <LocalTimeShort at={dataFetchedAt} fallback={formatEtTimeShort(new Date(dataFetchedAt))} />
             </p>
           )}
         </div>

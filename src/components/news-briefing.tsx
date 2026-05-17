@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { NewsArticle } from "@/types/news";
 import { formatEtTimeShort } from "@/lib/date-utils";
+import { LocalTimeShort } from "@/components/local-date-heading";
 
 const SERIF_L = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS_L  = `-apple-system, 'Inter', system-ui, sans-serif`;
@@ -287,7 +288,7 @@ export function NewsBriefing({
 
       {dataFetchedAt && (
         <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 12, color: "var(--ab-faint)", marginBottom: 8 }}>
-          Updated {formatEtTimeShort(new Date(dataFetchedAt))}
+          Updated <LocalTimeShort at={dataFetchedAt} fallback={formatEtTimeShort(new Date(dataFetchedAt))} />
         </p>
       )}
 
