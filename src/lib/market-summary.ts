@@ -4,7 +4,6 @@
  * - Weekly recap:  24-hour cache (period = 'weekly')
  */
 
-import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generateMarketSummaryText, generateWeeklySummaryText, generateTrendingQueriesText } from "@/lib/gemini-summary";
 
@@ -14,8 +13,13 @@ export interface MarketSummaryResult {
 }
 
 async function fetchCached(period: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
+  // Admin client — bypasses RLS and session. market_summaries is shared
+  // public data, so every user must see the same cached row the admin
+  // writer just upserted. Using the per-user client here meant alt
+  // accounts could get an empty read and render "temporarily unavailable"
+  // even when the row existed.
+  const admin = createAdminClient();
+  const { data } = await admin
     .from("market_summaries")
     .select("summary, generated_at")
     .eq("period", period)
