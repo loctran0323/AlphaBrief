@@ -247,7 +247,10 @@ export function AppNav({
 
           {/* Text navigation links — hidden on mobile */}
           {signedIn ? (
-            <nav className="ab-nav-links flex items-center gap-5">
+            <nav className="ab-nav-links flex items-center gap-5" style={{
+              fontFamily: SERIF, fontSize: 16, fontStyle: "italic",
+              fontWeight: 400, letterSpacing: "-.005em",
+            }}>
               {[
                 { href: "/home",               label: "Market"   },
                 { href: "/dashboard",          label: "Briefing" },
@@ -257,7 +260,7 @@ export function AppNav({
                 <Link
                   key={href}
                   href={href}
-                  style={{ color: "var(--ab-muted)", fontWeight: 500, transition: "color .15s" }}
+                  style={{ color: "var(--ab-muted)", transition: "color .15s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
                 >
@@ -268,7 +271,7 @@ export function AppNav({
               {tier === "pro" ? (
                 <Link
                   href="/dashboard/archive"
-                  style={{ color: "var(--ab-muted)", fontWeight: 500, transition: "color .15s" }}
+                  style={{ color: "var(--ab-muted)", transition: "color .15s" }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
                 >
@@ -278,15 +281,17 @@ export function AppNav({
                 <Link
                   href="/dashboard/upgrade"
                   className="flex items-center gap-1"
-                  style={{ color: "var(--ab-faint)", fontWeight: 500 }}
+                  style={{ color: "var(--ab-faint)" }}
                 >
                   Archive
                   <span
                     style={{
+                      fontFamily: SANS,
                       fontSize: 9,
                       fontWeight: 700,
                       letterSpacing: ".1em",
                       textTransform: "uppercase",
+                      fontStyle: "normal",
                       color: "#6C5CE7",
                       border: "1px solid #6C5CE7",
                       padding: "1px 5px",
