@@ -108,6 +108,7 @@ type NewsBrief = {
 };
 
 const FEEDS: SourceFeed[] = [
+  // General business news
   { source: "NYT", url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml" },
   { source: "Reuters", url: "https://feeds.reuters.com/reuters/businessNews" },
   { source: "Bloomberg", url: "https://feeds.bloomberg.com/markets/news.rss" },
@@ -116,7 +117,17 @@ const FEEDS: SourceFeed[] = [
   { source: "BBC Business", url: "https://feeds.bbci.co.uk/news/business/rss.xml" },
   { source: "CNN Business", url: "http://rss.cnn.com/rss/money_latest.rss" },
   { source: "Nasdaq", url: "https://www.nasdaq.com/feed/rssoutbound?category=Stocks" },
+  { source: "WSJ Markets", url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml" },
+  { source: "Seeking Alpha", url: "https://seekingalpha.com/market_currents.xml" },
+  // Primary sources — official macro / monetary
+  { source: "Federal Reserve", url: "https://www.federalreserve.gov/feeds/press_all.xml" },
+  { source: "Treasury", url: "https://home.treasury.gov/news/press-releases/feed" },
+  { source: "BLS", url: "https://www.bls.gov/feed/bls_latest.rss" },
+  { source: "BEA", url: "https://apps.bea.gov/rss/rss.xml" },
 ];
+
+/** Per-feed item cap applied before merging so a high-volume feed can't drown out lower-volume ones. */
+const PER_FEED_CAP = 40;
 
 /** Newest N rows from the merged feed always qualify (general market discovery, not just watchlist/macro). */
 const TOP_MERGED_FEED_SLOTS = 50;
@@ -134,12 +145,21 @@ const DISCOVERY_TICKERS = [
 const MACRO_KEYWORDS = [
   "inflation",
   "cpi",
+  "ppi",
+  "pce",
   "fed",
   "federal reserve",
+  "fomc",
   "rates",
   "treasury",
   "jobs report",
+  "employment situation",
+  "nonfarm payroll",
   "gdp",
+  "personal income",
+  "personal consumption",
+  "retail sales",
+  "industrial production",
   "housing",
   "home sales",
   "mortgage",
@@ -615,7 +635,10 @@ async function loadFeedItems(maxAgeMs: number = NEWS_RSS_FETCH_MAX_AGE_MS): Prom
         const res = await fetch(feed.url, { cache: "no-store" });
         if (!res.ok) return [];
         const xml = await res.text();
-        return parseRssXml(xml, feed.source);
+        const items = parseRssXml(xml, feed.source);
+        return items
+          .sort((a, b) => toTime(b.pubDate) - toTime(a.pubDate))
+          .slice(0, PER_FEED_CAP);
       } catch {
         return [];
       }

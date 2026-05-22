@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: ["/", "/login", "/signup"],
-        disallow: ["/dashboard/", "/home/", "/explore/", "/api/"],
+        disallow: ["/dashboard/", "/home/", "/api/"],
       },
     ],
     sitemap: "https://alphabrief.net/sitemap.xml",
