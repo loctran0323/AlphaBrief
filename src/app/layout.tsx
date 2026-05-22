@@ -98,11 +98,6 @@ function structuredDataJsonLd(): string {
           "AlphaBrief delivers AI-written market summaries, a watchlist, catalyst calendar, sector map, and AI-tagged financial news.",
         publisher: { "@id": `${base}/#organization` },
         inLanguage: "en",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${base}/explore?q={search_term_string}`,
-          "query-input": "required name=search_term_string",
-        },
       },
       {
         "@type": "Organization",
