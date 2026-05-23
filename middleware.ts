@@ -9,6 +9,10 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/dashboard/home") {
     return NextResponse.redirect(new URL("/home", request.url));
   }
+  // /privacy was an older, thinner duplicate of /legal — consolidate permanently.
+  if (pathname === "/privacy") {
+    return NextResponse.redirect(new URL("/legal", request.url), 308);
+  }
 
   if (!getSupabaseUrl() || !getSupabaseAnonKey()) {
     return NextResponse.next();
@@ -18,9 +22,9 @@ export async function middleware(request: NextRequest) {
   const isPublic =
     pathname === "/" ||
     pathname === "/home" ||
+    pathname === "/legal" ||
     publicPaths.includes(pathname) ||
     pathname.startsWith("/auth/") ||
-    pathname.startsWith("/explore") ||
     pathname.startsWith("/api/news/") ||
     pathname.startsWith("/api/quotes");
 

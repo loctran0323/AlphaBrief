@@ -210,9 +210,15 @@ export default function LegalPage() {
 
             <Section title="12. Contact">
               <p>
-                For privacy questions or requests, contact us through the support or contact options
-                we make available in the Service or on our website. If none are listed, you may
-                reach us at the operator contact on your account billing or signup correspondence.
+                For privacy questions or requests, email us at{" "}
+                <a
+                  href="mailto:locmarkets@gmail.com"
+                  className="text-[#6C5CE7] underline decoration-[#6C5CE7]/30 underline-offset-2 hover:decoration-[#6C5CE7]"
+                >
+                  locmarkets@gmail.com
+                </a>
+                . You can also reach us through the support or contact options we make available in
+                the Service.
               </p>
             </Section>
           </article>
@@ -387,8 +393,14 @@ export default function LegalPage() {
 
             <Section title="16. Contact">
               <p>
-                For questions about these Terms, use the contact or support options we provide in
-                the Service or on our website.
+                For questions about these Terms, email us at{" "}
+                <a
+                  href="mailto:locmarkets@gmail.com"
+                  className="text-[#6C5CE7] underline decoration-[#6C5CE7]/30 underline-offset-2 hover:decoration-[#6C5CE7]"
+                >
+                  locmarkets@gmail.com
+                </a>
+                , or use the support options we provide in the Service.
               </p>
             </Section>
           </article>

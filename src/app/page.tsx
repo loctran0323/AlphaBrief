@@ -845,7 +845,7 @@ export default async function SplashPage() {
         </div>
         <div style={{ fontSize: 12, color: "var(--ab-muted)", display: "flex", gap: 16 }}>
           <Link href="#pricing" style={{ color: "var(--ab-muted)" }}>Pricing</Link>
-          <Link href="/privacy" style={{ color: "var(--ab-muted)" }}>Privacy &amp; terms</Link>
+          <Link href="/legal" style={{ color: "var(--ab-muted)" }}>Privacy &amp; terms</Link>
         </div>
       </div>
     </div>
