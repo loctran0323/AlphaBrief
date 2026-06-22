@@ -19,18 +19,21 @@ export async function middleware(request: NextRequest) {
   }
 
   const isCron = pathname.startsWith("/api/cron");
-  // Read-only views are public — anyone can browse the market, research a
-  // ticker, or explore the map without an account. Personal pages (the
-  // briefing, settings, archive, account) stay behind login. API routes that
-  // mutate per-user data still enforce auth inside their own handlers.
+  // Read-only views are public — anyone can browse the market, briefing,
+  // research, map, and archive without an account (signed-in visitors see
+  // their watchlist threaded in). Only account pages (settings, account,
+  // contact) stay behind login. API routes that mutate per-user data still
+  // enforce auth inside their own handlers.
   const isPublic =
     pathname === "/" ||
     pathname === "/home" ||
     pathname === "/legal" ||
+    pathname === "/dashboard" ||
     publicPaths.includes(pathname) ||
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/dashboard/research") ||
     pathname.startsWith("/dashboard/map") ||
+    pathname.startsWith("/dashboard/archive") ||
     pathname.startsWith("/api/news/") ||
     pathname.startsWith("/api/quotes") ||
     pathname.startsWith("/api/research/") ||

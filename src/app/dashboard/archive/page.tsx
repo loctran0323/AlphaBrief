@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArchiveDateToolbar } from "@/components/archive-date-toolbar";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
@@ -16,6 +15,7 @@ import { fetchReadMoreUrlsWithConcurrency } from "@/lib/release-web-context";
 import { getArchivedNewsBriefing } from "@/lib/news";
 import { createClient } from "@/lib/supabase/server";
 import { WeeklyMarketSummarySection } from "@/components/weekly-market-summary-section";
+import type { WatchlistItem } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -28,33 +28,31 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   const bounds = parseArchiveSearchParams(sp);
   const supabase = await createClient();
 
-  // The archive is built from your watchlist — require an account.
+  // The archive is public to browse. Signed-in visitors get their watchlist
+  // threaded in; guests see the general archive.
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/dashboard/archive");
 
-  const { data: watchlists, error: wErr } = await supabase
-    .from("watchlists").select("id, name")
-    .order("created_at", { ascending: true }).limit(1);
+  let items: WatchlistItem[] = [];
+  if (user) {
+    const { data: watchlists, error: wErr } = await supabase
+      .from("watchlists").select("id, name")
+      .order("created_at", { ascending: true }).limit(1);
 
-  if (wErr) return <DashboardQueryError context="Loading watchlists" err={wErr} />;
+    if (wErr) return <DashboardQueryError context="Loading watchlists" err={wErr} />;
 
-  const watchlist = watchlists?.[0];
-  if (!watchlist) {
-    return (
-      <p style={{ color: "var(--ab-muted)" }}>
-        No watchlist found. Try signing out and back in, or run the database migration.
-      </p>
-    );
+    const watchlist = watchlists?.[0];
+    if (watchlist) {
+      const { data: wItems, error: iErr } = await supabase
+        .from("watchlist_items").select("*")
+        .eq("watchlist_id", watchlist.id)
+        .order("created_at", { ascending: true });
+
+      if (iErr) return <DashboardQueryError context="Loading watchlist tickers" err={iErr} />;
+      items = (wItems ?? []) as WatchlistItem[];
+    }
   }
 
-  const { data: items, error: iErr } = await supabase
-    .from("watchlist_items").select("*")
-    .eq("watchlist_id", watchlist.id)
-    .order("created_at", { ascending: true });
-
-  if (iErr) return <DashboardQueryError context="Loading watchlist tickers" err={iErr} />;
-
-  const tickers = (items ?? []).map((i) => i.ticker);
+  const tickers = items.map((i) => i.ticker);
 
   let pastEventsAll;
   try {
@@ -97,6 +95,18 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
           </Link>
         }
       />
+
+      {!user && (
+        <p style={{
+          fontFamily: "'Source Serif Pro', Georgia, serif", fontStyle: "italic",
+          fontSize: 15, color: "var(--ab-muted)",
+          border: "1px solid var(--ab-border)", padding: "12px 16px", margin: "0 0 20px",
+        }}>
+          You&apos;re viewing the general archive.{" "}
+          <Link href="/login?next=/dashboard/archive" style={{ color: "#6C5CE7", fontStyle: "normal" }}>Log in</Link>{" "}
+          to scope past events and headlines to your watchlist.
+        </p>
+      )}
 
       {/* ── Date ranges ── */}
       <LedgerRuleLabel>Date ranges</LedgerRuleLabel>
