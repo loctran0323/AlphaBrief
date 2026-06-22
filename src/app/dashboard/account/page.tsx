@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { updatePassword } from "./actions";
 
@@ -30,6 +31,7 @@ export default async function AccountPage({
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/dashboard/account");
 
   return (
     <div style={{ maxWidth: 680, fontFamily: SANS_L }}>

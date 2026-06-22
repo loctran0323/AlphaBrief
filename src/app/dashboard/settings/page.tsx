@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { sendTestDigest, updateDigest } from "@/app/dashboard/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { DigestFrequency } from "@/types/database";
@@ -29,6 +30,7 @@ export default async function SettingsPage({
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/dashboard/settings");
 
   let frequency: DigestFrequency = "none";
   if (user) {

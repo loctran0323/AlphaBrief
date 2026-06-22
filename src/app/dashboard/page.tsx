@@ -10,11 +10,16 @@ import { fetchMergedDashboardEvents } from "@/lib/events";
 import { getNewsBriefing } from "@/lib/news";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateHeading } from "@/lib/date-utils";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+
+  // The briefing is personal (your watchlist) — require an account.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/dashboard");
 
   const { data: watchlists, error: wErr } = await supabase
     .from("watchlists").select("id, name")

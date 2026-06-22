@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArchiveDateToolbar } from "@/components/archive-date-toolbar";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { DashboardQueryError } from "@/components/dashboard-query-error";
@@ -26,6 +27,10 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   const sp = await searchParams;
   const bounds = parseArchiveSearchParams(sp);
   const supabase = await createClient();
+
+  // The archive is built from your watchlist — require an account.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?next=/dashboard/archive");
 
   const { data: watchlists, error: wErr } = await supabase
     .from("watchlists").select("id, name")
