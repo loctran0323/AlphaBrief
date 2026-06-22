@@ -275,15 +275,12 @@ export default function LegalPage() {
               </p>
             </Section>
 
-            <Section title="4. Pro subscription">
+            <Section title="4. Pricing">
               <p>
-                AlphaBrief offers an optional paid Pro plan. Subscription fees are processed
-                securely by Stripe. By subscribing, you authorize recurring charges to your payment
-                method at the stated price until you cancel. You may cancel at any time from your
-                account settings; cancellation takes effect at the end of the current billing
-                period and no partial refunds are issued unless required by applicable law. We
-                reserve the right to change Pro pricing with reasonable advance notice to
-                subscribers.
+                AlphaBrief is free and open source. Every feature is available at no cost, and we do
+                not process payments or collect payment information. An account is required only for
+                features tied to your profile — such as saved tickers, price alerts, and the email
+                digest. We may change the Service or its features at any time.
               </p>
             </Section>
 

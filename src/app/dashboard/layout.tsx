@@ -3,8 +3,6 @@ import { DashboardSetupError } from "@/components/dashboard-setup-error";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserProfileAndWatchlist } from "@/lib/supabase/ensure-user";
-import { getUserTier } from "@/lib/subscription";
-import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
@@ -29,29 +27,26 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const [setup, tier] = await Promise.all([
-    ensureUserProfileAndWatchlist(supabase, user.id),
-    getUserTier(supabase, user.id, user.email),
-  ]);
-
-  if (!setup.ok) {
-    return (
-      <div className="min-h-screen">
-        <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-        <div style={{ maxWidth: 1040, margin: "0 auto", padding: "36px 40px 60px" }}>
-          <DashboardSetupError message={setup.message} />
+  // The dashboard shell is public: read-only views (Map, Research) render for
+  // everyone. Personal pages (Briefing, Settings, Archive, Account) guard
+  // themselves and redirect anonymous visitors to /login.
+  if (user) {
+    const setup = await ensureUserProfileAndWatchlist(supabase, user.id);
+    if (!setup.ok) {
+      return (
+        <div className="min-h-screen">
+          <AppNav email={user.email ?? undefined} signedIn />
+          <div style={{ maxWidth: 1040, margin: "0 auto", padding: "36px 40px 60px" }}>
+            <DashboardSetupError message={setup.message} />
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   return (
     <div className="min-h-screen">
-      <AppNav email={user.email ?? undefined} signedIn tier={tier} />
+      <AppNav email={user?.email ?? undefined} signedIn={Boolean(user)} />
       <div className="px-4 sm:px-10" style={{ maxWidth: 1040, margin: "0 auto", paddingTop: 36, paddingBottom: 60 }}>{children}</div>
     </div>
   );

@@ -3,8 +3,6 @@ import { DashboardSetupError } from "@/components/dashboard-setup-error";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { ensureUserProfileAndWatchlist } from "@/lib/supabase/ensure-user";
-import { getUserTier } from "@/lib/subscription";
-import { redirect } from "next/navigation";
 
 export default async function HomeLayout({ children }: { children: React.ReactNode }) {
   if (!isSupabaseConfigured()) {
@@ -21,30 +19,25 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Require sign-in — unauthenticated visitors go to the landing page
-  if (!user) {
-    redirect("/");
-  }
-
-  const [setup, tier] = await Promise.all([
-    ensureUserProfileAndWatchlist(supabase, user.id),
-    getUserTier(supabase, user.id, user.email),
-  ]);
-
-  if (!setup.ok) {
-    return (
-      <div className="min-h-screen">
-        <AppNav email={user.email ?? undefined} signedIn tier={tier} />
-        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>
-          <DashboardSetupError message={setup.message} />
+  // The market view is public — anyone can read it. Signed-in visitors also
+  // get their saved watchlist set up; anonymous visitors just browse.
+  if (user) {
+    const setup = await ensureUserProfileAndWatchlist(supabase, user.id);
+    if (!setup.ok) {
+      return (
+        <div className="min-h-screen">
+          <AppNav email={user.email ?? undefined} signedIn />
+          <div style={{ maxWidth: 1120, margin: "0 auto", padding: "36px 40px 60px" }}>
+            <DashboardSetupError message={setup.message} />
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   return (
     <div className="min-h-screen">
-      <AppNav email={user.email ?? undefined} signedIn tier={tier} />
+      <AppNav email={user?.email ?? undefined} signedIn={Boolean(user)} />
       <div className="px-4 sm:px-10" style={{ maxWidth: 1120, margin: "0 auto", paddingTop: 36, paddingBottom: 60 }}>{children}</div>
     </div>
   );

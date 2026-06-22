@@ -9,7 +9,6 @@ import { isSupabaseConfigured } from "@/lib/env";
 import { fetchMarketHomeData } from "@/lib/market-home-data";
 import { fetchYahooChartSnapshot } from "@/lib/market-map-data";
 import { createClient } from "@/lib/supabase/server";
-import { getUserTier } from "@/lib/subscription";
 import type { WatchlistItem } from "@/types/database";
 import type { MarketMover } from "@/lib/market-home-data";
 
@@ -45,7 +44,6 @@ export default async function HomePage() {
 
   let isAuthenticated = false;
   let userEmail: string | null = null;
-  let userIsPro = false;
   let watchlistId: string | null = null;
   let savedItems: WatchlistItem[] = [];
 
@@ -55,8 +53,6 @@ export default async function HomePage() {
     if (user) {
       isAuthenticated = true;
       userEmail = user.email ?? null;
-      const tier = await getUserTier(supabase, user.id, user.email);
-      userIsPro = tier === "pro";
       const { data: watchlists } = await supabase
         .from("watchlists").select("id")
         .order("created_at", { ascending: true }).limit(1);
@@ -142,7 +138,7 @@ export default async function HomePage() {
       </div>
 
       {/* ── Watchlist ── */}
-      {isAuthenticated && watchlistId && (
+      {isAuthenticated && watchlistId ? (
         <>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
             <LedgerRuleLabel>Your watchlist</LedgerRuleLabel>
@@ -153,6 +149,14 @@ export default async function HomePage() {
             savedItems={savedItems}
             savedQuotes={savedQuotes}
           />
+        </>
+      ) : (
+        <>
+          <LedgerRuleLabel>Your watchlist</LedgerRuleLabel>
+          <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 15, color: "var(--ab-muted)", margin: "0 0 8px" }}>
+            <Link href="/login?next=/home" style={{ color: ACCENT, fontStyle: "normal" }}>Log in</Link>{" "}
+            to save tickers and track them here. Everything else is free to browse.
+          </p>
         </>
       )}
 
@@ -192,7 +196,7 @@ export default async function HomePage() {
       </div>
 
       {/* ── Community chat — floating sidebar ── */}
-      <ChatRoom email={userEmail} isPro={userIsPro} />
+      <ChatRoom email={userEmail} />
     </div>
   );
 }

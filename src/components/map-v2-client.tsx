@@ -10,7 +10,6 @@ import type { MarketMapRoot, MarketMapSector } from "@/lib/market-map-data";
 import { treemapIndustryLabel } from "@/lib/market-map-data";
 import type { NewsArticle } from "@/types/news";
 import { AutoRefresh } from "@/components/auto-refresh";
-import { checkAndRecordLookup } from "@/app/dashboard/map/actions";
 import { LedgerMasthead, LedgerByline, LedgerRuleLabel } from "@/components/ledger-ui";
 
 const SERIF_MP = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
@@ -731,16 +730,10 @@ function MP_Tabs({
 // ── Main export ───────────────────────────────────────────────────────────
 export function MapV2Client({
   tree,
-  isPro = false,
-  lookupsUsed = 0,
-  maxLookups = 3,
   marketStatus,
   kicker,
 }: {
   tree: MarketMapRoot;
-  isPro?: boolean;
-  lookupsUsed?: number;
-  maxLookups?: number;
   marketStatus: MarketStatusInfo;
   kicker: { driver: KickerItem; green: KickerItem; drag: KickerItem; breadth: KickerItem };
 }) {
@@ -861,11 +854,6 @@ export function MapV2Client({
   const [aiSummary, setAiSummary] = useState<{ summary: string; sentiment: string } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  const [lookupsLeft, setLookupsLeft] = useState<number>(
-    isPro ? Infinity : Math.max(0, maxLookups - lookupsUsed),
-  );
-  const [limitHit, setLimitHit] = useState(!isPro && lookupsUsed >= maxLookups);
-
   const loadNews = useCallback(async (symbol: string) => {
     setNewsLoading(true); setNewsError(null); setNews([]);
     try {
@@ -893,16 +881,10 @@ export function MapV2Client({
   const onTileClick = useCallback(async (symbol: string) => {
     const meta = metaMap.get(symbol.toUpperCase());
     if (!meta) return;
-    if (!isPro) {
-      if (lookupsLeft <= 0) { setLimitHit(true); return; }
-      const result = await checkAndRecordLookup(symbol);
-      if (!result.allowed) { setLimitHit(true); return; }
-      setLookupsLeft(n => Math.max(0, isFinite(n) ? n - 1 : n));
-    }
     setSelected({ ...meta, symbol });
     void loadNews(symbol);
     void loadAiSummary(symbol, meta.changePct, meta.price);
-  }, [metaMap, isPro, lookupsLeft, loadNews, loadAiSummary]);
+  }, [metaMap, loadNews, loadAiSummary]);
 
   const title = view === "map" ? "The map, in one glance." : "Gainers and losers, at a glance.";
   const dek = view === "map"
@@ -911,9 +893,6 @@ export function MapV2Client({
   const bylineLeft = view === "map"
     ? `Treemap · ${stocks.length} tickers · live data · updated every 15 min`
     : `Ranked table · ${stocks.length} tickers`;
-  const lookupsLabel = isPro
-    ? "Unlimited"
-    : `${isFinite(lookupsLeft) ? Math.max(0, lookupsLeft) : maxLookups} of ${maxLookups} lookups today`;
 
   return (
     <div style={{ paddingBottom: 64 }}>
@@ -922,15 +901,7 @@ export function MapV2Client({
 
       <LedgerMasthead eyebrow={`Cartography · ${timeStr}`} title={title} dek={dek} />
 
-      <LedgerByline
-        left={bylineLeft}
-        right={
-          <span style={{
-            fontFamily: SANS_MP, fontSize: 11,
-            color: "var(--ab-faint)", fontVariantNumeric: "tabular-nums",
-          }}>{lookupsLabel}</span>
-        }
-      />
+      <LedgerByline left={bylineLeft} />
 
       {/* Legend + market status */}
       <div style={{
@@ -975,31 +946,6 @@ export function MapV2Client({
           <span style={{ whiteSpace: "nowrap" }}>· {marketStatus.reason}</span>
         </div>
       </div>
-
-      {/* Limit banner */}
-      {limitHit && (
-        <div style={{
-          border: `2px solid ${ACCENT}`, background: "var(--ab-surface-hi)",
-          padding: "24px 32px", textAlign: "center", marginBottom: 20,
-        }}>
-          <p style={{ fontFamily: SERIF_MP, fontSize: 18, fontWeight: 600, color: "var(--ab-fg)", margin: 0 }}>
-            Daily limit reached
-          </p>
-          <p style={{
-            fontFamily: SERIF_MP, fontStyle: "italic", fontSize: 14,
-            color: "var(--ab-muted)", marginTop: 6,
-          }}>
-            Free members get {maxLookups} market map lookups per day.
-            Upgrade to Pro for unlimited access.
-          </p>
-          <a href="/dashboard/upgrade" style={{
-            display: "inline-block", marginTop: 14, padding: "8px 20px",
-            background: ACCENT, color: "#fff",
-            fontFamily: SANS_MP, fontSize: 11, fontWeight: 600,
-            letterSpacing: ".1em", textTransform: "uppercase", textDecoration: "none",
-          }}>Upgrade to Pro</a>
-        </div>
-      )}
 
       {/* Headlines panel */}
       {!selected ? (

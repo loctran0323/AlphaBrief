@@ -133,17 +133,6 @@ function FeatureGlyph({ name }: { name: FeatureGlyph }) {
   }
 }
 
-const planRows: { label: string; free: boolean | string; pro: boolean | string }[] = [
-  { label: "Home market view",          free: true,         pro: true },
-  { label: "Dashboard & news briefing", free: true,         pro: true },
-  { label: "Market map lookups",        free: "3 / day",    pro: "Unlimited" },
-  { label: "Research news per ticker",  free: "3 articles", pro: "Full feed" },
-  { label: "Price alerts via email",    free: false,        pro: true },
-  { label: "Email digest",              free: false,        pro: true },
-  { label: "Archive (past timeline)",   free: false,        pro: true },
-  { label: "Community chat",            free: true,         pro: true },
-];
-
 export const dynamic = "force-dynamic";
 
 // ── Live splash tape ────────────────────────────────────────────────
@@ -282,7 +271,7 @@ export default async function SplashPage() {
           {/* Text links — hidden on mobile */}
           {configured && !signedIn && (
             <nav className="ab-splash-links flex items-center gap-5">
-              <Link href="#pricing" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Pricing</Link>
+              <Link href="/home" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Markets</Link>
               <Link href="/login" style={{ color: "var(--ab-muted)", fontWeight: 500 }}>Log in</Link>
             </nav>
           )}
@@ -342,16 +331,16 @@ export default async function SplashPage() {
                 }}>Open dashboard →</Link>
               ) : (
                 <>
-                  <Link href="/signup" style={{
+                  <Link href="/home" style={{
                     padding: "12px 22px", background: "var(--ab-fg)", color: "var(--ab-bg)",
                     fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
                     whiteSpace: "nowrap",
-                  }}>Start for free →</Link>
-                  <Link href="#pricing" style={{
+                  }}>Browse the market →</Link>
+                  <Link href="/signup" style={{
                     padding: "12px 22px", border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
                     fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
                     background: "transparent", whiteSpace: "nowrap",
-                  }}>Compare plans</Link>
+                  }}>Create account</Link>
                 </>
               )
             ) : null}
@@ -360,7 +349,7 @@ export default async function SplashPage() {
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13,
             color: "var(--ab-faint)", marginTop: 14,
           }}>
-            No credit card · 1-minute setup · cancel anytime
+            Free &amp; open source · no credit card · sign up only to save tickers
           </div>
           </div>
           <div className="ab-hero-mark">
@@ -674,134 +663,35 @@ export default async function SplashPage() {
         </div>
       </div>
 
-      {/* ── Pricing ── */}
+      {/* ── Open source ── */}
       {configured && !signedIn && (
-        <div id="pricing" className="ab-section-pad" style={{ maxWidth: 1000, margin: "0 auto", padding: "72px 40px" }}>
+        <div id="open-source" className="ab-section-pad" style={{ maxWidth: 760, margin: "0 auto", padding: "72px 40px", textAlign: "center" }}>
           <div style={{
             fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase",
-            color: ACCENT, fontWeight: 700, marginBottom: 10, textAlign: "center",
-          }}>Beta pricing</div>
+            color: ACCENT, fontWeight: 700, marginBottom: 10,
+          }}>Free &amp; open source</div>
           <h2 className="text-2xl sm:text-5xl" style={{
             fontFamily: SERIF_L, fontWeight: 600,
-            letterSpacing: "-.02em", textAlign: "center", margin: 0,
-          }}>Compare our plans</h2>
-          <p className="hidden sm:block" style={{
+            letterSpacing: "-.02em", margin: 0,
+          }}>Every feature, free for everyone.</h2>
+          <p style={{
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
-            color: "var(--ab-muted)", marginTop: 8, textAlign: "center",
+            color: "var(--ab-muted)", marginTop: 12,
           }}>
-            Start free. Upgrade when you want more. Beta prices are locked in for early supporters.
+            The market view, research pages, and map are open to browse with no account.
+            Sign up only when you want to save tickers, set price alerts, or get an email digest.
+            AlphaBrief is open source.
           </p>
-          {/* ── Mobile: comparison table ── */}
-          <div className="sm:hidden" style={{ marginTop: 20 }}>
-            {/* Plan headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderBottom: `2px solid var(--ab-fg)` }}>
-              <div />
-              <div style={{ textAlign: "center", padding: "10px 4px", borderRight: "1px solid var(--ab-border)" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "var(--ab-faint)", letterSpacing: ".16em", textTransform: "uppercase" }}>FREE</div>
-                <div style={{ fontFamily: SERIF_L, fontSize: 34, fontWeight: 600, lineHeight: 1, marginTop: 4 }}>$0</div>
-                <div style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 11, color: "var(--ab-muted)" }}>/mo</div>
-              </div>
-              <div style={{ textAlign: "center", padding: "10px 4px", background: "var(--ab-surface-hi)" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT, letterSpacing: ".16em", textTransform: "uppercase" }}>PRO</div>
-                <div style={{ fontFamily: SERIF_L, fontSize: 34, fontWeight: 600, lineHeight: 1, marginTop: 4, color: "var(--ab-fg)" }}>$9</div>
-                <div style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 11, color: "var(--ab-muted)" }}>/mo</div>
-              </div>
-            </div>
-            {/* Feature rows */}
-            {planRows.map((row, i) => (
-              <div key={row.label} style={{
-                display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-                borderBottom: "1px solid var(--ab-border)",
-              }}>
-                <div style={{ fontFamily: SERIF_L, fontSize: 11, padding: "7px 6px 7px 0", color: "var(--ab-muted)", lineHeight: 1.3 }}>{row.label}</div>
-                <div style={{ textAlign: "center", padding: "7px 4px", borderRight: "1px solid var(--ab-border)", fontSize: 12, fontWeight: 700,
-                  color: row.free === false ? "var(--ab-faint)" : ACCENT }}>
-                  {row.free === false ? "—" : typeof row.free === "string" ? <span style={{ fontSize: 10 }}>{row.free}</span> : "✓"}
-                </div>
-                <div style={{ textAlign: "center", padding: "7px 4px", fontSize: 12, fontWeight: 700,
-                  color: ACCENT, background: "rgba(108,92,231,.04)" }}>
-                  {typeof row.pro === "string" ? <span style={{ fontSize: 10 }}>{row.pro}</span> : "✓"}
-                </div>
-              </div>
-            ))}
-            {/* CTAs */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 16 }}>
-              <Link href="/signup" style={{
-                display: "block", padding: "11px 6px", textAlign: "center",
-                border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
-                background: "transparent", fontSize: 11, fontWeight: 600,
-                letterSpacing: ".06em", textTransform: "uppercase",
-              }}>Get started</Link>
-              <Link href="/signup?next=/dashboard/upgrade" style={{
-                display: "block", padding: "11px 6px", textAlign: "center",
-                background: ACCENT, color: "#fff",
-                fontSize: 11, fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase",
-              }}>Start with Pro</Link>
-            </div>
-          </div>
-
-          {/* ── Desktop: side-by-side cards ── */}
-          <div className="hidden sm:grid" style={{ gridTemplateColumns: "1fr 1fr", gap: 24, marginTop: 32 }}>
-            {/* Free */}
-            <div style={{ border: "1px solid var(--ab-border)", padding: "28px 30px", background: "var(--ab-card)", position: "relative" }}>
-              <div style={{ fontSize: 11, letterSpacing: ".22em", fontWeight: 700, color: "var(--ab-faint)", textTransform: "uppercase" }}>FREE</div>
-              <div className="flex items-baseline gap-2" style={{ marginTop: 10 }}>
-                <span style={{ fontFamily: SERIF_L, fontSize: 64, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, color: "var(--ab-fg)" }}>$0</span>
-                <span style={{ fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-muted)", fontSize: 15 }}>/ month</span>
-              </div>
-              <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", marginTop: 4 }}>No credit card. No expiry.</p>
-              <ul style={{ marginTop: 18, listStyle: "none", padding: 0 }}>
-                {planRows.map((row, i) => (
-                  <li key={row.label} className="flex items-center gap-2" style={{
-                    padding: "6px 0", fontFamily: SERIF_L, fontSize: 14,
-                    color: row.free === false ? "var(--ab-faint)" : "var(--ab-fg)",
-                    borderBottom: i < planRows.length - 1 ? "1px solid var(--ab-border)" : "none",
-                  }}>
-                    <span style={{ color: row.free === false ? "var(--ab-faint)" : ACCENT, fontWeight: 700, width: 14, flexShrink: 0 }}>
-                      {row.free === false ? "—" : "✓"}
-                    </span>
-                    <span>{row.label}{typeof row.free === "string" && <span style={{ color: "var(--ab-muted)", marginLeft: 4 }}>({row.free})</span>}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/signup" style={{
-                display: "block", marginTop: 22, padding: "12px", textAlign: "center",
-                border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
-                background: "transparent", fontSize: 12, fontWeight: 600,
-                letterSpacing: ".1em", textTransform: "uppercase",
-              }}>Get started free</Link>
-            </div>
-            {/* Pro */}
-            <div style={{ border: `2px solid ${ACCENT}`, padding: "28px 30px", background: "var(--ab-surface-hi)", position: "relative" }}>
-              <span style={{
-                position: "absolute", top: 18, right: 18,
-                fontSize: 10, background: ACCENT, color: "#fff",
-                padding: "2px 8px", letterSpacing: ".12em", fontWeight: 700,
-              }}>Beta price</span>
-              <div style={{ fontSize: 11, letterSpacing: ".22em", fontWeight: 700, color: ACCENT, textTransform: "uppercase" }}>PRO</div>
-              <div className="flex items-baseline gap-2" style={{ marginTop: 10 }}>
-                <span style={{ fontFamily: SERIF_L, fontSize: 64, fontWeight: 600, letterSpacing: "-.03em", lineHeight: 1, color: "var(--ab-fg)" }}>$9</span>
-                <span style={{ fontFamily: SERIF_L, fontStyle: "italic", color: "var(--ab-muted)", fontSize: 15 }}>/ month</span>
-              </div>
-              <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 13, color: "var(--ab-muted)", marginTop: 4 }}>Locked in for early supporters.</p>
-              <ul style={{ marginTop: 18, listStyle: "none", padding: 0 }}>
-                {planRows.map((row, i) => (
-                  <li key={row.label} className="flex items-center gap-2" style={{
-                    padding: "6px 0", fontFamily: SERIF_L, fontSize: 14,
-                    color: "var(--ab-fg)",
-                    borderBottom: i < planRows.length - 1 ? "1px solid var(--ab-border)" : "none",
-                  }}>
-                    <span style={{ color: ACCENT, fontWeight: 700, width: 14, flexShrink: 0 }}>✓</span>
-                    <span>{row.label}{typeof row.pro === "string" && <span style={{ color: "var(--ab-muted)", marginLeft: 4 }}>({row.pro})</span>}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/signup?next=/dashboard/upgrade" style={{
-                display: "block", marginTop: 22, padding: "12px", textAlign: "center",
-                background: ACCENT, color: "#fff",
-                fontSize: 12, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase",
-              }}>Start with Pro</Link>
-            </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3" style={{ marginTop: 26 }}>
+            <Link href="/home" style={{
+              padding: "12px 22px", background: "var(--ab-fg)", color: "var(--ab-bg)",
+              fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+            }}>Browse the market →</Link>
+            <a href="https://github.com/loctran0323/Alpha-Brief" target="_blank" rel="noopener noreferrer" style={{
+              padding: "12px 22px", border: "1px solid var(--ab-fg)", color: "var(--ab-fg)",
+              fontSize: 13, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
+              background: "transparent",
+            }}>View source</a>
           </div>
         </div>
       )}
@@ -821,7 +711,7 @@ export default async function SplashPage() {
             fontFamily: SERIF_L, fontStyle: "italic", fontSize: 17,
             color: "var(--ab-muted)", marginTop: 10,
           }}>
-            Join AlphaBrief. Free to start, no credit card required.
+            Browse it all for free. Create an account to save tickers and get a digest.
           </p>
           <Link href="/signup" style={{
             display: "inline-block", marginTop: 22, padding: "14px 26px",
@@ -844,7 +734,7 @@ export default async function SplashPage() {
           </span>
         </div>
         <div style={{ fontSize: 12, color: "var(--ab-muted)", display: "flex", gap: 16 }}>
-          <Link href="#pricing" style={{ color: "var(--ab-muted)" }}>Pricing</Link>
+          <a href="https://github.com/loctran0323/Alpha-Brief" target="_blank" rel="noopener noreferrer" style={{ color: "var(--ab-muted)" }}>Source</a>
           <Link href="/legal" style={{ color: "var(--ab-muted)" }}>Privacy &amp; terms</Link>
         </div>
       </div>

@@ -2,19 +2,25 @@
 
 A Next.js market intelligence dashboard for retail investors. Signal first, noise last.
 
+**Free and open source — every feature, free for everyone.** The market view, research
+pages, and map are open to browse with no account. An account is only needed for features
+tied to your profile: saved tickers, price alerts, and the email digest.
+
 **Live app:** [alphabrief.net](https://alphabrief.net)
 
 ## Features
 
-- **Watchlist** — Track tickers; drives ticker-tagged headlines and company timeline rows
+- **Market view** — Benchmarks, top movers, and your watchlist in one editorial view (public)
+- **Research** — Look up any ticker: price, chart, valuation, and the full news feed (public)
+- **Market map** — Treemap sector view with Yahoo-backed quotes and AI stock move summaries (public)
+- **Watchlist** — Track tickers; drives ticker-tagged headlines and company timeline rows (account)
 - **Timeline** — Upcoming macro events, earnings calendar (via Finnhub), and ticker-specific catalysts
-- **News briefing** — Multi-source aggregation (Finnhub, Alpha Vantage, RSS); bullish/bearish/neutral sentiment; All / Tickers / category tabs; 3-day rolling window with Archive for Pro users
-- **Market map** — Treemap sector view with Yahoo-backed quotes and AI stock move summaries
-- **Archive** — Historical timeline events and news briefings (Pro)
+- **News briefing** — Multi-source aggregation (Finnhub, Alpha Vantage, RSS); bullish/bearish/neutral sentiment; All / Tickers / category tabs
+- **Archive** — Historical timeline events and news briefings
+- **Price alerts** — Get emailed when a ticker hits your target (account)
 - **Community chat** — Live real-time chat between users via Supabase Realtime
 - **Account settings** — Password change, digest preferences
-- **Pro plan** — $4/month via Stripe; funds better APIs, infrastructure, and new features
-- **Email digests** — Optional daily/weekly digest via Resend
+- **Email digests** — Optional daily/weekly digest via Resend (account)
 - **Auto-refresh** — Dashboard polls for fresh data while the tab is open
 
 ## Tech stack
@@ -22,7 +28,6 @@ A Next.js market intelligence dashboard for retail investors. Signal first, nois
 - [Next.js](https://nextjs.org/) 15 (App Router, Turbopack) · React 19 · TypeScript
 - [Tailwind CSS](https://tailwindcss.com/) v4
 - [Supabase](https://supabase.com/) — Postgres, Auth, Realtime
-- [Stripe](https://stripe.com/) — Pro subscriptions
 - [Resend](https://resend.com/) — Email digests
 - [Finnhub](https://finnhub.io/) — Market news, company news, earnings calendar
 - [Alpha Vantage](https://www.alphavantage.co/) — News sentiment
@@ -75,13 +80,9 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SITE_URL` | Production | Canonical URL for auth redirects |
 | `FINNHUB_API_KEY` | Yes | News, company news, earnings calendar |
 | `ALPHA_VANTAGE_API_KEY` | Yes | News sentiment |
-| `STRIPE_SECRET_KEY` | Pro plan | Stripe secret key |
-| `STRIPE_PRO_PRICE_ID` | Pro plan | Stripe price ID |
-| `STRIPE_WEBHOOK_SECRET` | Pro plan | Stripe webhook verification |
 | `RESEND_API_KEY` | Optional | Email digests |
 | `RESEND_FROM_EMAIL` | Optional | From address |
 | `OPENAI_API_KEY` | Optional | AI headline summaries |
-| `ADMIN_EMAILS` | Optional | Comma-separated emails always treated as Pro |
 
 Never commit `.env.local` or service role keys.
 
@@ -97,7 +98,7 @@ Never commit `.env.local` or service role keys.
 ```
 src/app/           # App Router pages (landing, auth, home, dashboard, map, archive, legal)
 src/components/    # UI components (news briefing, market map, chat room, timeline, etc.)
-src/lib/           # News aggregation, earnings, events, market data, subscription, email
+src/lib/           # News aggregation, earnings, events, market data, email
 supabase/migrations/
 ```
 

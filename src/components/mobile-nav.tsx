@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 
 const SERIF = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS  = `-apple-system, 'Inter', system-ui, sans-serif`;
-const ACCENT = "#6C5CE7";
 
 type NavItem = {
   href: string;
@@ -76,11 +75,9 @@ function SidebarSectionLabel({ children }: { children: React.ReactNode }) {
 
 export function MobileNav({
   signedIn,
-  tier,
   email,
 }: {
   signedIn: boolean;
-  tier: "free" | "pro";
   email?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -185,18 +182,6 @@ export function MobileNav({
               }}>{email}</div>
             )}
           </div>
-          {tier === "pro" && (
-            <span style={{
-              fontFamily: SANS,
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: ".12em",
-              textTransform: "uppercase",
-              color: ACCENT,
-              border: `1px solid ${ACCENT}`,
-              padding: "2px 6px",
-            }}>Pro</span>
-          )}
         </div>
 
         {/* Main nav */}
@@ -207,45 +192,12 @@ export function MobileNav({
             <SidebarLink href="/dashboard"          label="Briefing"  onClick={close} />
             <SidebarLink href="/dashboard/map"      label="Map"       onClick={close} />
             <SidebarLink href="/dashboard/research" label="Research"  onClick={close} />
-
-            {tier === "pro" ? (
-              <SidebarLink href="/dashboard/archive" label="Archive" onClick={close} />
-            ) : (
-              <Link
-                href="/dashboard/upgrade"
-                onClick={close}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "13px 24px",
-                  fontFamily: SERIF,
-                  fontSize: 17,
-                  fontWeight: 500,
-                  color: "var(--ab-faint)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--ab-border)",
-                }}
-              >
-                Archive
-                <span style={{
-                  fontFamily: SANS,
-                  fontSize: 9,
-                  fontWeight: 700,
-                  letterSpacing: ".1em",
-                  textTransform: "uppercase",
-                  color: ACCENT,
-                  border: `1px solid ${ACCENT}`,
-                  padding: "1px 5px",
-                }}>Pro</span>
-              </Link>
-            )}
+            <SidebarLink href="/dashboard/archive"  label="Archive"   onClick={close} />
 
             <SidebarSectionLabel>Account</SidebarSectionLabel>
-            <SidebarLink href="/dashboard/settings"      label="Digest"       onClick={close} />
-            <SidebarLink href="/dashboard/subscription"  label="Subscription" onClick={close} />
-            <SidebarLink href="/dashboard/account"       label="Account"      onClick={close} />
-            <SidebarLink href="/dashboard/contact"       label="Contact"      onClick={close} />
+            <SidebarLink href="/dashboard/settings" label="Digest"   onClick={close} />
+            <SidebarLink href="/dashboard/account"  label="Account"  onClick={close} />
+            <SidebarLink href="/dashboard/contact"  label="Contact"  onClick={close} />
 
             {/* Sign out */}
             <div style={{ padding: "16px 24px", borderTop: "1px solid var(--ab-border)", marginTop: 8 }}>
@@ -267,31 +219,6 @@ export function MobileNav({
                 </button>
               </form>
             </div>
-
-            {/* Upgrade CTA for free users */}
-            {tier === "free" && (
-              <div style={{ padding: "0 24px 24px" }}>
-                <Link
-                  href="/dashboard/upgrade"
-                  onClick={close}
-                  style={{
-                    display: "block",
-                    textAlign: "center",
-                    padding: "10px",
-                    background: ACCENT,
-                    color: "#fff",
-                    fontFamily: SANS,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    letterSpacing: ".1em",
-                    textTransform: "uppercase",
-                    textDecoration: "none",
-                  }}
-                >
-                  Upgrade to Pro · $9/mo
-                </Link>
-              </div>
-            )}
           </>
         ) : (
           <>

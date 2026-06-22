@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { sendTestDigest, updateDigest } from "@/app/dashboard/actions";
 import { createClient } from "@/lib/supabase/server";
-import { getUserTier } from "@/lib/subscription";
 import type { DigestFrequency } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +29,6 @@ export default async function SettingsPage({
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const tier = user ? await getUserTier(supabase, user.id, user.email) : "free";
-  const isPro = tier === "pro";
 
   let frequency: DigestFrequency = "none";
   if (user) {
@@ -81,30 +78,8 @@ export default async function SettingsPage({
         </div>
       )}
 
-      {/* Pro gate */}
-      {!isPro && (
-        <div style={{ border: `1px solid ${ACCENT}`, padding: "24px 28px", marginBottom: 32 }}>
-          <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, color: "var(--ab-fg)", marginBottom: 8 }}>
-            Email digest is a Pro feature
-          </div>
-          <p style={{ fontFamily: SERIF_L, fontSize: 15, color: "var(--ab-muted)", lineHeight: 1.6, marginBottom: 16 }}>
-            Upgrade to Pro to receive daily or weekly briefings: headlines, upcoming earnings, and price alerts, straight to your inbox.
-          </p>
-          <Link href="/dashboard/upgrade" style={{
-            display: "inline-block",
-            fontFamily: SANS_L, fontSize: 11, fontWeight: 600,
-            letterSpacing: ".08em", textTransform: "uppercase",
-            color: "#fff", background: ACCENT, padding: "8px 18px", textDecoration: "none",
-          }}>
-            Upgrade to Pro · $9/month
-          </Link>
-        </div>
-      )}
-
-      {isPro && (
-        <>
-          {/* Frequency */}
-          <div style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 24, marginBottom: 32 }}>
+      {/* Frequency */}
+      <div style={{ borderTop: "1px solid var(--ab-border)", paddingTop: 24, marginBottom: 32 }}>
             <div style={{ fontFamily: SERIF_L, fontSize: 20, fontWeight: 600, marginBottom: 6, color: "var(--ab-fg)" }}>
               Digest frequency
             </div>
@@ -155,8 +130,6 @@ export default async function SettingsPage({
               </button>
             </form>
           </div>
-        </>
-      )}
 
       <Link href="/dashboard" style={{ fontFamily: SANS_L, fontSize: 11, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--ab-muted)", textDecoration: "none" }}>
         ← Back to Dashboard

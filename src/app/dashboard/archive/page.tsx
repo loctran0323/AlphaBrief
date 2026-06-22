@@ -14,12 +14,9 @@ import { fetchMergedPastDashboardEvents } from "@/lib/events";
 import { fetchReadMoreUrlsWithConcurrency } from "@/lib/release-web-context";
 import { getArchivedNewsBriefing } from "@/lib/news";
 import { createClient } from "@/lib/supabase/server";
-import { getUserTier } from "@/lib/subscription";
 import { WeeklyMarketSummarySection } from "@/components/weekly-market-summary-section";
 
 export const dynamic = "force-dynamic";
-
-const ACCENT = "#6C5CE7";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -29,43 +26,6 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
   const sp = await searchParams;
   const bounds = parseArchiveSearchParams(sp);
   const supabase = await createClient();
-
-  // Pro-only gate
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    const tier = await getUserTier(supabase, user.id, user.email);
-    if (tier !== "pro") {
-      return (
-        <div style={{ maxWidth: 640, margin: "0 auto", paddingBottom: 64 }}>
-          <LedgerMasthead
-            eyebrow="The Archive · back issues"
-            title="Archive"
-            dek="Full access to past events and headlines requires a Pro subscription."
-          />
-          <div style={{
-            border: `2px solid ${ACCENT}`, background: "var(--ab-surface-hi)",
-            padding: "32px 40px", textAlign: "center",
-          }}>
-            <p style={{ fontSize: 22, fontWeight: 700, color: "var(--ab-fg)", marginBottom: 8 }}>Upgrade to Pro</p>
-            <p style={{ fontSize: 14, color: "var(--ab-muted)", marginBottom: 24 }}>
-              Unlock the full archive, unlimited market map lookups, and priority access to new features.
-            </p>
-            <Link
-              href="/dashboard/upgrade"
-              style={{
-                display: "inline-block", padding: "10px 24px",
-                background: ACCENT, color: "#fff",
-                fontSize: 12, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase",
-                textDecoration: "none",
-              }}
-            >
-              See Pro plan
-            </Link>
-          </div>
-        </div>
-      );
-    }
-  }
 
   const { data: watchlists, error: wErr } = await supabase
     .from("watchlists").select("id, name")
@@ -144,7 +104,7 @@ export default async function DashboardArchivePage({ searchParams }: Props) {
       />
 
       {/* ── Weekly AI Recap ── */}
-      <LedgerRuleLabel right="updated periodically">Weekly market recap · Pro</LedgerRuleLabel>
+      <LedgerRuleLabel right="updated periodically">Weekly market recap</LedgerRuleLabel>
       <WeeklyMarketSummarySection />
 
       {/* ── Past timeline ── */}

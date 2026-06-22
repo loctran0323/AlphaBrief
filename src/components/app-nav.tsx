@@ -7,12 +7,10 @@ import { MobileNav } from "./mobile-nav";
 
 const SERIF = `'Source Serif Pro', 'Iowan Old Style', 'Georgia', serif`;
 const SANS  = `-apple-system, 'Inter', system-ui, sans-serif`;
-const ACCENT_NAV = "#6C5CE7";
 
 const MENU_ITEMS = [
-  { href: "/dashboard/settings",     label: "Digest" },
-  { href: "/dashboard/subscription", label: "Subscription" },
-  { href: "/dashboard/contact",      label: "Contact" },
+  { href: "/dashboard/settings", label: "Digest" },
+  { href: "/dashboard/contact",  label: "Contact" },
 ] as const;
 
 function menuItemStyle(hover = false): React.CSSProperties {
@@ -62,7 +60,7 @@ function MenuButton({ label, onClick }: { label: string; onClick?: () => void })
   );
 }
 
-function UserMenu({ email, tier }: { email?: string; tier: "free" | "pro" }) {
+function UserMenu({ email }: { email?: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -101,7 +99,7 @@ function UserMenu({ email, tier }: { email?: string; tier: "free" | "pro" }) {
           background: "var(--ab-card)",
           border: "1px solid var(--ab-border)",
         }}>
-          {/* Email + tier */}
+          {/* Email */}
           {email && (
             <div style={{
               padding: "10px 20px 8px",
@@ -112,20 +110,6 @@ function UserMenu({ email, tier }: { email?: string; tier: "free" | "pro" }) {
                 color: "var(--ab-fg)", overflow: "hidden",
                 textOverflow: "ellipsis", whiteSpace: "nowrap", margin: 0,
               }}>{email}</p>
-              {tier === "pro" ? (
-                <span style={{
-                  display: "inline-block", marginTop: 4,
-                  fontFamily: SANS, fontSize: 9, fontWeight: 700,
-                  letterSpacing: ".12em", textTransform: "uppercase",
-                  color: ACCENT_NAV, background: "rgba(108,92,231,.12)",
-                  padding: "2px 6px",
-                }}>Pro</span>
-              ) : (
-                <span style={{
-                  display: "inline-block", marginTop: 4,
-                  fontFamily: SANS, fontSize: 10, color: "var(--ab-faint)",
-                }}>Free plan</span>
-              )}
             </div>
           )}
 
@@ -182,11 +166,9 @@ function EditionTagline() {
 export function AppNav({
   email,
   signedIn = Boolean(email),
-  tier = "free",
 }: {
   email?: string;
   signedIn?: boolean;
-  tier?: "free" | "pro";
 }) {
   return (
     <header
@@ -213,7 +195,7 @@ export function AppNav({
         {/* Left: Hamburger (mobile) + Logo + edition tagline */}
         <div className="flex items-center gap-4 shrink-0">
           {/* Mobile hamburger — MobileNav renders both the button and the panel */}
-          <MobileNav signedIn={signedIn} tier={tier} email={email} />
+          <MobileNav signedIn={signedIn} email={email} />
           <Link href="/home" className="flex items-center gap-2 shrink-0">
             <div
               style={{
@@ -268,58 +250,14 @@ export function AppNav({
                 </Link>
               ))}
 
-              {tier === "pro" ? (
-                <Link
-                  href="/dashboard/archive"
-                  style={{ color: "var(--ab-muted)", transition: "color .15s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
-                >
-                  Archive
-                </Link>
-              ) : (
-                <Link
-                  href="/dashboard/upgrade"
-                  className="flex items-center gap-1"
-                  style={{ color: "var(--ab-faint)" }}
-                >
-                  Archive
-                  <span
-                    style={{
-                      fontFamily: SANS,
-                      fontSize: 9,
-                      fontWeight: 700,
-                      letterSpacing: ".1em",
-                      textTransform: "uppercase",
-                      fontStyle: "normal",
-                      color: "#6C5CE7",
-                      border: "1px solid #6C5CE7",
-                      padding: "1px 5px",
-                    }}
-                  >
-                    Pro
-                  </span>
-                </Link>
-              )}
-
-              <span style={{ width: 1, height: 16, background: "var(--ab-border)", display: "inline-block" }} />
-
-              {tier === "free" && (
-                <Link
-                  href="/dashboard/upgrade"
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    letterSpacing: ".08em",
-                    textTransform: "uppercase",
-                    color: "#6C5CE7",
-                    border: "1px solid #6C5CE7",
-                    padding: "4px 10px",
-                  }}
-                >
-                  Upgrade
-                </Link>
-              )}
+              <Link
+                href="/dashboard/archive"
+                style={{ color: "var(--ab-muted)", transition: "color .15s" }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
+              >
+                Archive
+              </Link>
             </nav>
           ) : (
             <nav className="ab-nav-links flex items-center gap-4">
@@ -352,7 +290,7 @@ export function AppNav({
           <ThemeToggle />
           {signedIn && (
             <div className="hidden sm:block">
-              <UserMenu email={email} tier={tier} />
+              <UserMenu email={email} />
             </div>
           )}
         </div>

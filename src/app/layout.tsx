@@ -119,22 +119,12 @@ function structuredDataJsonLd(): string {
         operatingSystem: "Web",
         description:
           "AI-written daily market summaries, watchlist tracking, upcoming earnings and catalyst calendar, interactive sector map, and AI-tagged financial news briefings.",
-        offers: [
-          {
-            "@type": "Offer",
-            name: "Free",
-            price: "0",
-            priceCurrency: "USD",
-            description: "Free tier with core market briefing features.",
-          },
-          {
-            "@type": "Offer",
-            name: "Pro",
-            price: "9",
-            priceCurrency: "USD",
-            description: "Pro tier with full archive, weekly AI recap, and priority features.",
-          },
-        ],
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+          description: "Free and open source. Every feature available at no cost.",
+        },
       },
     ],
   };

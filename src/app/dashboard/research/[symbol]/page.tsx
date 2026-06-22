@@ -10,7 +10,6 @@ import {
   formatNum,
 } from "@/lib/stock-research";
 import { createClient } from "@/lib/supabase/server";
-import { getUserTier } from "@/lib/subscription";
 import { LedgerMasthead, LedgerRuleLabel } from "@/components/ledger-ui";
 import { StockChart } from "./stock-chart";
 import { TickerSearch } from "../ticker-search";
@@ -44,16 +43,12 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d ago`;
 }
 
-const FREE_NEWS_LIMIT = 3;
-
 export default async function ResearchSymbolPage({ params }: Props) {
   const { symbol: rawSymbol } = await params;
   const symbol = rawSymbol.toUpperCase();
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const tier = user ? await getUserTier(supabase, user.id, user.email) : "free";
-  const isPro = tier === "pro";
 
   const [quote, chartData, news] = await Promise.all([
     fetchStockDetail(symbol),
@@ -69,9 +64,6 @@ export default async function ResearchSymbolPage({ params }: Props) {
   const price = quote.price != null
     ? `$${quote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     : "—";
-
-  const visibleNews = isPro ? news : news.slice(0, FREE_NEWS_LIMIT);
-  const hiddenCount = news.length - visibleNews.length;
 
   return (
     <div style={{ paddingBottom: 64, fontFamily: SANS_L }}>
@@ -144,13 +136,13 @@ export default async function ResearchSymbolPage({ params }: Props) {
 
       {/* ── Price alert ── */}
       <LedgerRuleLabel>Notify me</LedgerRuleLabel>
-      {isPro ? (
+      {user ? (
         <PriceAlertForm symbol={symbol} currentPrice={quote.price} />
       ) : (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)" }}>
-            Price alerts are a Pro feature.{" "}
-            <Link href="/dashboard/upgrade" style={{ color: ACCENT }}>Upgrade to Pro →</Link>
+            <Link href={`/login?next=/dashboard/research/${symbol}`} style={{ color: ACCENT }}>Log in</Link>{" "}
+            to get emailed when {symbol} hits your target price.
           </div>
         </div>
       )}
@@ -162,7 +154,7 @@ export default async function ResearchSymbolPage({ params }: Props) {
         <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)" }}>No recent news found.</p>
       ) : (
         <>
-          {visibleNews.map((item, i) => (
+          {news.map((item, i) => (
             <div key={i} style={{ padding: "18px 0", borderBottom: "1px solid var(--ab-border)" }}>
               <div style={{
                 display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap",
@@ -189,22 +181,6 @@ export default async function ResearchSymbolPage({ params }: Props) {
               </a>
             </div>
           ))}
-
-          {!isPro && hiddenCount > 0 && (
-            <div style={{ marginTop: 16, padding: "24px 32px", border: `2px solid ${ACCENT}`, background: "var(--ab-surface-hi)", textAlign: "center" }}>
-              <p style={{ fontFamily: SERIF_L, fontSize: 18, fontWeight: 600, color: "var(--ab-fg)", margin: 0 }}>
-                +{hiddenCount} more article{hiddenCount > 1 ? "s" : ""}
-              </p>
-              <p style={{ fontFamily: SERIF_L, fontStyle: "italic", fontSize: 14, color: "var(--ab-muted)", marginTop: 6 }}>
-                Pro members get the full news feed for every ticker.
-              </p>
-              <Link href="/dashboard/upgrade" style={{
-                display: "inline-block", marginTop: 14, padding: "8px 20px",
-                background: ACCENT, color: "#fff",
-                fontSize: 11, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", textDecoration: "none",
-              }}>Upgrade to Pro</Link>
-            </div>
-          )}
         </>
       )}
     </div>

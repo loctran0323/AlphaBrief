@@ -11,7 +11,6 @@ type Message = {
   id: string;
   user: string;
   email: string;
-  isPro: boolean;
   text: string;
   ts: number;
 };
@@ -45,10 +44,8 @@ const CHANNEL = "alphabrief-global-chat-v1";
 
 export function ChatRoom({
   email,
-  isPro = false,
 }: {
   email: string | null;
-  isPro?: boolean;
 }) {
   const [open, setOpen]           = useState(false);
   const [messages, setMessages]   = useState<Message[]>([]);
@@ -93,11 +90,11 @@ export function ChatRoom({
     const msg: Message = {
       id: `${Date.now()}-${Math.random()}`,
       user: email.split("@")[0]!,
-      email, isPro, text,
+      email, text,
       ts: Date.now(),
     };
     await channelRef.current.send({ type: "broadcast", event: "msg", payload: msg });
-  }, [input, email, isPro]);
+  }, [input, email]);
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
@@ -234,14 +231,6 @@ export function ChatRoom({
                     <span style={{ fontFamily: SANS_L, fontSize: 11, fontWeight: 700, color: "var(--ab-fg)" }}>
                       {m.user}
                     </span>
-                    {m.isPro && (
-                      <span style={{
-                        fontFamily: SANS_L, fontSize: 9, fontWeight: 700,
-                        letterSpacing: ".1em", textTransform: "uppercase",
-                        color: ACCENT, background: "rgba(108,92,231,.12)",
-                        padding: "1px 5px",
-                      }}>Pro</span>
-                    )}
                     <span style={{ fontFamily: SANS_L, fontSize: 10, color: "var(--ab-faint)" }}>
                       {new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>

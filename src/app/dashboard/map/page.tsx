@@ -1,8 +1,6 @@
 import { MapV2Client } from "@/components/map-v2-client";
 import { fetchMarketMapTree } from "@/lib/market-map-data";
 import { getMarketStatus } from "@/lib/market-hours";
-import { createClient } from "@/lib/supabase/server";
-import { getUserTier, getMapLookupsToday, FREE_MAP_LOOKUPS_PER_DAY } from "@/lib/subscription";
 import type { MarketMapSector } from "@/lib/market-map-data";
 
 export const dynamic = "force-dynamic";
@@ -55,19 +53,7 @@ function deriveMapKicker(
 }
 
 export default async function MarketMapPage() {
-  const [tree, supabase] = await Promise.all([fetchMarketMapTree(), createClient()]);
-  const { data: { user } } = await supabase.auth.getUser();
-
-  let isPro = false;
-  let lookupsUsed = 0;
-  if (user) {
-    const [tier, used] = await Promise.all([
-      getUserTier(supabase, user.id, user.email),
-      getMapLookupsToday(supabase, user.id),
-    ]);
-    isPro = tier === "pro";
-    lookupsUsed = used;
-  }
+  const tree = await fetchMarketMapTree();
 
   const now = new Date();
   const marketStatus = getMarketStatus(now);
@@ -76,9 +62,6 @@ export default async function MarketMapPage() {
   return (
     <MapV2Client
       tree={tree}
-      isPro={isPro}
-      lookupsUsed={lookupsUsed}
-      maxLookups={FREE_MAP_LOOKUPS_PER_DAY}
       marketStatus={marketStatus}
       kicker={kicker}
     />
