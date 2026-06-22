@@ -184,16 +184,16 @@ export function MobileNav({
           </div>
         </div>
 
-        {/* Main nav */}
+        {/* Main nav — tabs are public, shown to everyone */}
+        <SidebarSectionLabel>Navigate</SidebarSectionLabel>
+        <SidebarLink href="/home"               label="Market"    onClick={close} />
+        <SidebarLink href="/dashboard"          label="Briefing"  onClick={close} />
+        <SidebarLink href="/dashboard/map"      label="Map"       onClick={close} />
+        <SidebarLink href="/dashboard/research" label="Research"  onClick={close} />
+        <SidebarLink href="/dashboard/archive"  label="Archive"   onClick={close} />
+
         {signedIn ? (
           <>
-            <SidebarSectionLabel>Navigate</SidebarSectionLabel>
-            <SidebarLink href="/home"               label="Market"    onClick={close} />
-            <SidebarLink href="/dashboard"          label="Briefing"  onClick={close} />
-            <SidebarLink href="/dashboard/map"      label="Map"       onClick={close} />
-            <SidebarLink href="/dashboard/research" label="Research"  onClick={close} />
-            <SidebarLink href="/dashboard/archive"  label="Archive"   onClick={close} />
-
             <SidebarSectionLabel>Account</SidebarSectionLabel>
             <SidebarLink href="/dashboard/settings" label="Digest"   onClick={close} />
             <SidebarLink href="/dashboard/account"  label="Account"  onClick={close} />

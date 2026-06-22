@@ -227,39 +227,32 @@ export function AppNav({
         {/* Right: nav links + controls */}
         <div className="flex items-center gap-5" style={{ fontSize: 13, color: "var(--ab-muted)" }}>
 
-          {/* Text navigation links — hidden on mobile */}
-          {signedIn ? (
-            <nav className="ab-nav-links flex items-center gap-5" style={{
-              fontFamily: SERIF, fontSize: 16, fontStyle: "italic",
-              fontWeight: 400, letterSpacing: "-.005em",
-            }}>
-              {[
-                { href: "/home",               label: "Market"   },
-                { href: "/dashboard",          label: "Briefing" },
-                { href: "/dashboard/map",      label: "Map"      },
-                { href: "/dashboard/research", label: "Research" },
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{ color: "var(--ab-muted)", transition: "color .15s" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
-                >
-                  {label}
-                </Link>
-              ))}
-
+          {/* Text navigation links — public; hidden on mobile (hamburger handles it) */}
+          <nav className="ab-nav-links flex items-center gap-5" style={{
+            fontFamily: SERIF, fontSize: 16, fontStyle: "italic",
+            fontWeight: 400, letterSpacing: "-.005em",
+          }}>
+            {[
+              { href: "/home",               label: "Market"   },
+              { href: "/dashboard",          label: "Briefing" },
+              { href: "/dashboard/map",      label: "Map"      },
+              { href: "/dashboard/research", label: "Research" },
+              { href: "/dashboard/archive",  label: "Archive"  },
+            ].map(({ href, label }) => (
               <Link
-                href="/dashboard/archive"
+                key={href}
+                href={href}
                 style={{ color: "var(--ab-muted)", transition: "color .15s" }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-fg)"; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "var(--ab-muted)"; }}
               >
-                Archive
+                {label}
               </Link>
-            </nav>
-          ) : (
+            ))}
+          </nav>
+
+          {/* Auth actions — sign-in/up for guests, hidden on mobile */}
+          {!signedIn && (
             <nav className="ab-nav-links flex items-center gap-4">
               <Link
                 href="/login?next=/home"
@@ -279,6 +272,7 @@ export function AppNav({
                   background: "var(--ab-fg)",
                   color: "var(--ab-bg)",
                   padding: "7px 14px",
+                  whiteSpace: "nowrap",
                 }}
               >
                 Sign up free
